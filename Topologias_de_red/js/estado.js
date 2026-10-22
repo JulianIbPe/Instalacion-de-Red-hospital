@@ -1,8 +1,11 @@
 // ===== estado.js: estado global y utilidades. Topologías de red: editor sobre SVG. Todas las coordenadas del modelo están en METROS. =====
 const $ = s => document.querySelector(s), svg = $('#svg');
-let S = { edificio: { w: 20, h: 12 }, unidad: 'm', objs: [] };   // S = todo lo que se guarda
+function estadoInicial(unidad = 'm') {    // estado de un archivo nuevo: edificio vacío con 1 planta y 1 capa "Base"
+  return { edificio: { w: 20, h: 12 }, unidad, plantas: [{ id: 'p1', nombre: 'Planta 1', ca: 'c1', capas: [{ id: 'c1', nombre: 'Base', visible: true, bloqueada: false }] }], plantaAct: 'p1', capaAct: 'c1', pn: 1, cn: 1, objs: [] };
+}
+let S = estadoInicial();   // S = todo lo que se guarda
 let V = { ox: 40, oy: 40, z: 50 };                               // V = vista (desplazamiento y px por metro)
-let multi = [], cajaSel = null;                                  // selección múltiple y rectángulo de selección
+let multi = [], cajaSel = null, avisoMsg = '';                                  // selección múltiple y rectángulo de selección
 let tool = null, sel = null, tmp = null, drag = null, nid = 1, curP = { x: 0, y: 0 }, lastDown = { t: 0, x: 0, y: 0 };
 
 // ---------- Utilidades ----------

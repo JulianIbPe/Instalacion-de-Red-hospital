@@ -1,13 +1,13 @@
 // ---------- Interacción ----------
 const col = () => $('#col').value, fil = () => $('#fill').value;
-const add = o => (push(), o.id = nid++, S.objs.push(o), o);
+const add = o => (push(), o.id = nid++, o.pl = S.plantaAct, o.cp = S.capaAct, S.objs.push(o), o);
 function finishLine() {
   if (!tmp || tmp.k != 'line') return; const q = tmp.pts, a = q[q.length - 1], b = q[q.length - 2];
   if (b && Math.hypot(a.x - b.x, a.y - b.y) < .05 && !a.ref) q.pop();
   if (q.length > 1) { delete tmp.cur; add(tmp); } tmp = null; render();
 }
 svg.addEventListener('pointerdown', e => {
-  svg.setPointerCapture(e.pointerId); const p = toW(e);
+  svg.setPointerCapture(e.pointerId); const p = toW(e); avisoMsg = '';
   if (e.button == 2) { finishLine(); if (tmp && tmp.k == 'medida') { tmp = null; render(); } return; }
   if (e.button == 1) { drag = { m: 'pan', sx: e.clientX, sy: e.clientY, ox: V.ox, oy: V.oy }; return; }
   // Doble clic detectado a mano: la página se redibuja en cada clic y el evento 'dblclick' nativo se pierde.
@@ -27,6 +27,7 @@ svg.addEventListener('pointerdown', e => {
     else { sel = null; multi = []; drag = { m: 'pan', sx: e.clientX, sy: e.clientY, ox: V.ox, oy: V.oy }; }
     render(); return;
   }
+  if (!capaEditable()) { avisoMsg = '⚠ La capa «' + capaActual().nombre + '» está oculta o bloqueada: elige otra capa para dibujar'; render(); return; }
   if (tool.k == 'item') add({ k: 'item', n: tool.n, ic: tool.ic, w: tool.w, h: tool.h, x: p.x, y: p.y, label: '' });
   else if (tool.k == 'shape') add({ k: 'shape', n: tool.n, x: p.x, y: p.y, w: 1.2, h: 1.2, c: col(), f: fil(), label: '' });
   else if (tool.k == 'texto') { const t = prompt('Texto:'); if (t) add({ k: 'texto', x: p.x, y: p.y, label: t }); }

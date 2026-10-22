@@ -2,7 +2,7 @@
 let snapPt = null;                      // punto al que está pegado el cursor (se dibuja como un círculo ámbar)
 function puntosIman() {
   const E = S.edificio, c = [{ x: 0, y: 0 }, { x: E.w, y: 0 }, { x: 0, y: E.h }, { x: E.w, y: E.h }];
-  S.objs.forEach(o => {
+  S.objs.filter(esVisible).forEach(o => {
     if (o.k == 'item' || o.k == 'shape' || o.k == 'texto') c.push({ x: o.x, y: o.y });          // centro
     else if (o.k == 'line') o.pts.forEach(q => c.push(pt(q)));                                    // puntas y vértices
     else if (o.k == 'zona') c.push({ x: o.x, y: o.y }, { x: o.x + o.w, y: o.y }, { x: o.x, y: o.y + o.h }, { x: o.x + o.w, y: o.y + o.h }, { x: o.x + o.w / 2, y: o.y + o.h / 2 });

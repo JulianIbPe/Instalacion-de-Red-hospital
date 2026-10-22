@@ -1,6 +1,6 @@
 // ===== seleccion.js: selección múltiple (Mayús+clic) y selección por rectángulo (Mayús + clic izquierdo y arrastrar) =====
 // Un solo objeto seleccionado -> `sel` (con asas de edición). Varios -> `multi` (lista de ids) y sel = null.
-function seleccionados() { return (multi.length ? multi.map(byId) : [byId(sel)]).filter(Boolean); }
+function seleccionados() { return (multi.length ? multi.map(byId) : [byId(sel)]).filter(o => o && esEditable(o)); }
 function fijarSeleccion(ids) { sel = ids.length == 1 ? ids[0] : null; multi = ids.length > 1 ? ids : []; }
 function alternar(id) {                         // Mayús+clic: añade o quita un objeto de la selección
   const s = seleccionados().map(o => o.id), i = s.indexOf(id); if (i < 0) s.push(id); else s.splice(i, 1); fijarSeleccion(s);
@@ -25,5 +25,5 @@ function cajaHtml() {                           // rectángulo azul mientras se 
 }
 function dentroDeCaja() {                       // ids de los objetos que están COMPLETAMENTE dentro del rectángulo
   const x0 = Math.min(cajaSel.x0, cajaSel.x1), x1 = Math.max(cajaSel.x0, cajaSel.x1), y0 = Math.min(cajaSel.y0, cajaSel.y1), y1 = Math.max(cajaSel.y0, cajaSel.y1);
-  return S.objs.filter(o => { const b = bboxDe(o); return b.x0 >= x0 && b.x1 <= x1 && b.y0 >= y0 && b.y1 <= y1; }).map(o => o.id);
+  return S.objs.filter(o => { if (!esEditable(o)) return false; const b = bboxDe(o); return b.x0 >= x0 && b.x1 <= x1 && b.y0 >= y0 && b.y1 <= y1; }).map(o => o.id);
 }

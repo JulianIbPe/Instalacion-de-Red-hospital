@@ -33,6 +33,6 @@ $('#items').onclick = e => {
   const b = e.target.closest('[data-i]'); if (!b) return;
   setTool(CAT[tab][b.dataset.i]);
 };
-function setTool(d) { tool = d; tmp = null; sel = null; multi = []; snapPt = null; if (d && d.k == 'line') $('#col').value = d.c; menu(); render(); }
+function setTool(d) { tool = d; tmp = null; sel = null; multi = []; avisoMsg = ''; snapPt = null; if (d && d.k == 'line') $('#col').value = d.c; menu(); render(); }
 $('#bsel').onclick = () => setTool(null);
 $('#bmed').onclick = () => setTool({ k: 'medida' });

@@ -6,7 +6,7 @@ $('#save').onclick = guardarJson;
 // ---------- Archivo nuevo ----------
 function nuevoArchivo() {                       // vacía todo y deja la página como al abrirla (la unidad de medición se conserva)
   hist.length = 0; fut.length = 0;
-  S = { edificio: { w: 20, h: 12 }, unidad: S.unidad, objs: [] }; nid = 1; V = { ox: 40, oy: 40, z: 50 };
+  S = estadoInicial(S.unidad); nid = 1; panel(); V = { ox: 40, oy: 40, z: 50 };
   $('#bw').value = 20; $('#bh').value = 12; setTool(null);   // setTool también limpia la selección y vuelve a dibujar
 }
 const dlg = $('#dlg'), cerrarDlg = () => { dlg.hidden = true; };
@@ -19,7 +19,7 @@ $('#load').onclick = () => $('#file').click();
 $('#file').onchange = e => {
   const f = e.target.files[0]; if (!f) return;
   f.text().then(t => {
-    try { const d = JSON.parse(t); push(); S = { edificio: d.edificio, unidad: d.unidad || 'm', objs: d.objs }; nid = Math.max(0, ...S.objs.map(o => o.id)) + 1; }
+    try { const d = JSON.parse(t); push(); S = { ...estadoInicial(d.unidad || 'm'), ...d, unidad: d.unidad || 'm' }; delete S.version; normalizar(); panel(); nid = Math.max(0, ...S.objs.map(o => o.id)) + 1; }
     catch { alert('El archivo no es una topología válida.'); return; }
     $('#bw').value = S.edificio.w; $('#bh').value = S.edificio.h; $('#unit').textContent = 'Medir en: ' + S.unidad; sel = tmp = null; multi = []; render();
   }); e.target.value = '';

@@ -31,15 +31,15 @@ function draw(o) {
 }
 const ORD = { zona: 0, shape: 1, line: 2, item: 3, texto: 4, medida: 5 };
 function render() {
-  const E = S.edificio, all = [...S.objs].sort((a, b) => ORD[a.k] - ORD[b.k]); if (tmp) all.push(tmp);
+  const E = S.edificio, all = [...S.objs].filter(esVisible).sort((a, b) => ORD[a.k] - ORD[b.k]); if (tmp) all.push(tmp);
   const pats = all.filter(o => o.f == 'hat').map(o => `<pattern id="h${o.id}" width=".25" height=".25" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2=".25" stroke="${o.c}" stroke-width=".07"/></pattern>`).join('');
   const edif = `<rect x="0" y="0" width="${E.w}" height="${E.h}" fill="none" stroke="#17262c" stroke-width=".08" stroke-dasharray=".4 .2"/>` + T(E.w / 2, -.25, E.w + ' m', .4) + `<text x="-.3" y="${E.h / 2}" font-size=".4" text-anchor="middle" transform="rotate(-90 -.3 ${E.h / 2})" fill="#17262c" font-family="Segoe UI,Arial,sans-serif">${E.h} m</text>`;
   svg.innerHTML = `<defs><pattern id="g" width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0H0V1" fill="none" stroke="#d3dadf" stroke-width=".02"/></pattern></defs>
-  <g transform="translate(${V.ox} ${V.oy}) scale(${V.z})"><rect x="-100" y="-100" width="400" height="400" fill="url(#g)"/><g id="c"><defs>${pats}</defs>${edif}${all.map(o => draw(o) + resaltar(o)).join('')}</g>${cajaHtml()}${snapPt ? `<circle cx="${snapPt.x}" cy="${snapPt.y}" r=".17" fill="#e0a03044" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : ''}</g>`;
+  <g transform="translate(${V.ox} ${V.oy}) scale(${V.z})"><rect x="-100" y="-100" width="400" height="400" fill="url(#g)"/><g id="c"><defs>${pats}</defs>${edif}${all.map(o => { const g = draw(o) + resaltar(o); return esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}</g>${cajaHtml()}${snapPt ? `<circle cx="${snapPt.x}" cy="${snapPt.y}" r=".17" fill="#e0a03044" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : ''}</g>`;
   $('#bundo').disabled = !hist.length; $('#bredo').disabled = !fut.length; $('#bdel').disabled = !seleccionados().length;
   rulers(); status(); if (tab) menu();
 }
 function status(msg) {
   const h = !tool ? 'Clic: seleccionar · Mayús+clic: varios · Mayús+arrastrar: seleccionar con rectángulo · arrastrar: mover · fondo vacío: desplazar · rueda: zoom' : tool.k == 'line' ? 'Clic para añadir puntos (clic sobre un dispositivo para conectar) · doble clic o Enter para terminar · Esc cancela' : tool.k == 'zona' ? 'Arrastra para marcar la zona' : tool.k == 'medida' ? 'Clic en el punto inicial, luego en el final y por último clic donde quieras colocar la cota (clic derecho cancela)' : 'Clic en el área de trabajo para colocar · Esc para salir';
-  $('#status').textContent = `x ${curP.x.toFixed(1)} m · y ${curP.y.toFixed(1)} m · escala ${V.z.toFixed(0)} px/m  |  ${msg || h}`;
+  $('#status').textContent = `x ${curP.x.toFixed(1)} m · y ${curP.y.toFixed(1)} m · escala ${V.z.toFixed(0)} px/m · ${plantaActual().nombre} › ${capaActual().nombre}  |  ${msg || avisoMsg || h}`;
 }

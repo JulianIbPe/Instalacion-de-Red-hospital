@@ -4,7 +4,8 @@ function push() {                       // llamar ANTES de modificar S
   hist.push(JSON.stringify(S)); if (hist.length > 100) hist.shift(); fut.length = 0;
 }
 function restaurar(json) {
-  const u = S.unidad; S = JSON.parse(json); S.unidad = u;   // la unidad de medición no se deshace
+  const u = S.unidad, pa = S.plantaAct, ca = S.capaAct; S = JSON.parse(json); S.unidad = u; S.plantaAct = pa; S.capaAct = ca;   // la unidad y la planta/capa en uso no se deshacen
+  normalizar(); panel();
   sel = tmp = drag = null; multi = []; $('#bw').value = S.edificio.w; $('#bh').value = S.edificio.h; render();
 }
 function deshacer() { if (!hist.length) return; fut.push(JSON.stringify(S)); restaurar(hist.pop()); }
