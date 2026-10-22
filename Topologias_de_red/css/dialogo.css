@@ -1,0 +1,13 @@
+/* dialogo.css: aviso al empezar un archivo nuevo */
+.velo{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:rgba(20,35,43,.55)}
+.velo[hidden]{display:none}
+.caja{width:min(440px,92vw);padding:22px;border-radius:12px;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.caja h3{margin:0 0 8px;font-size:18px}
+.caja p{margin:0 0 18px;color:#44575e}
+.acc{display:flex;flex-direction:column;gap:8px}
+.acc button{padding:10px 12px;border:1px solid var(--borde);border-radius:8px;background:#fff;color:var(--texto)}
+.acc button:hover{background:#eef2f4}
+.acc .prim{background:#2e86de;border-color:#2e86de;color:#fff;font-weight:600}
+.acc .prim:hover{background:#3a93ee}
+.acc .peligro{border-color:#d9534f;color:#b52b27}
+.acc .peligro:hover{background:#fdeceb}

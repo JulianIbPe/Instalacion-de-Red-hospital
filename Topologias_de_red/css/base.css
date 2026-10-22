@@ -1,0 +1,9 @@
+/* base.css: reglas generales y botones */
+*{box-sizing:border-box}
+:root{--tinta:#14232b;--papel:#f2f4f5;--borde:#d3dadd;--ambar:#e0a030;--texto:#1d2a2f}
+html,body{margin:0;height:100%;font:14px/1.35 "Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--texto);background:var(--papel)}
+body{display:flex;flex-direction:column;overflow:hidden}
+button,select,input{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--ambar);outline-offset:2px}
+#main{flex:1;display:flex;min-height:0}
