@@ -3,4 +3,4 @@
 #corner{position:absolute;left:0;top:0;width:24px;height:24px;z-index:1;background:#e8edef;color:#5d7078;font-size:10px;display:grid;place-items:center;border-right:1px solid #aab8be;border-bottom:1px solid #aab8be}
 #rt{position:absolute;left:24px;top:0;height:24px;border-bottom:1px solid #aab8be}
 #rl{position:absolute;left:0;top:24px;width:24px;border-right:1px solid #aab8be}
-#svg{position:absolute;left:24px;top:24px;right:0;bottom:0;width:calc(100% - 24px);height:calc(100% - 24px);touch-action:none;cursor:crosshair}
+#svg{position:absolute;left:24px;top:24px;right:0;bottom:0;width:calc(100% - 24px);height:calc(100% - 24px);touch-action:none;cursor:crosshair;user-select:none}

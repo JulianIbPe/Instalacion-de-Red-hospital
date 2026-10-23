@@ -1,5 +1,5 @@
 // ---------- Interacción ----------
-const col = () => $('#col').value, fil = () => $('#fill').value;
+const col = () => $('#col').value, fil = () => $('#fill').value, lin = () => $('#lstyle').value;
 const add = o => (push(), o.id = nid++, o.pl = S.plantaAct, o.cp = S.capaAct, S.objs.push(o), o);
 function finishLine() {
   if (!tmp || tmp.k != 'line') return; const q = tmp.pts, a = q[q.length - 1], b = q[q.length - 2];
@@ -19,22 +19,24 @@ svg.addEventListener('pointerdown', e => {
     if (!tool && o && o.k != 'medida') { const v = prompt('Etiqueta:', o.label || ''); if (v !== null && v !== (o.label || '')) { push(); o.label = v; drag = null; render(); } return; }
   }
   if (!tool) {
-    const hh = e.target.closest('[data-h]'), t = e.target.closest('[data-id]');
+    if (e.target.closest('[data-rot]')) { iniciarRot(); render(); return; }   // asa de rotación
+    const hh = e.target.closest('[data-h]'), t = e.target.closest('[data-id]'), ed = e.target.closest('[data-e]'), prevEdge = selEdge; selEdge = null;
     // Mayús + clic izquierdo: si no se arrastra, añade/quita el objeto de la selección; si se arrastra, dibuja un rectángulo de selección
     if (e.shiftKey) { const r = rawW(e); drag = { m: 'box', id: t ? +t.dataset.id : null, sx: e.clientX, sy: e.clientY, x0: r.x, y0: r.y, moved: false }; return; }
-    if (hh && byId(sel)) drag = { m: 'h', o: byId(sel), h: hh.dataset.h, p0: p };
+    if (hh && byId(sel)) { selEdge = prevEdge; drag = { m: 'h', o: byId(sel), h: hh.dataset.h, p0: p }; }
+    else if (t && ed && +t.dataset.id === sel && !multi.length) { selEdge = { id: sel, i: +ed.dataset.e }; drag = { m: 'lado', o: byId(sel), i: selEdge.i, last: p }; }   // clic en un lado de la forma ya seleccionada
     else if (t) { const id = +t.dataset.id; if (!multi.includes(id)) { sel = id; multi = []; } drag = { m: 'mv', os: seleccionados(), last: p, p0: p }; }
     else { sel = null; multi = []; drag = { m: 'pan', sx: e.clientX, sy: e.clientY, ox: V.ox, oy: V.oy }; }
     render(); return;
   }
   if (!capaEditable()) { avisoMsg = '⚠ La capa «' + capaActual().nombre + '» está oculta o bloqueada: elige otra capa para dibujar'; render(); return; }
   if (tool.k == 'item') add({ k: 'item', n: tool.n, ic: tool.ic, w: tool.w, h: tool.h, x: p.x, y: p.y, label: '' });
-  else if (tool.k == 'shape') add({ k: 'shape', n: tool.n, x: p.x, y: p.y, w: 1.2, h: 1.2, c: col(), f: fil(), label: '' });
+  else if (tool.k == 'shape') add({ k: 'shape', n: tool.n, x: p.x, y: p.y, w: 1.2, h: 1.2, c: col(), f: fil(), ls: lin(), label: '' });
   else if (tool.k == 'texto') { const t = prompt('Texto:'); if (t) add({ k: 'texto', x: p.x, y: p.y, label: t }); }
-  else if (tool.k == 'zona') { tmp = { k: 'zona', s: tool.s, x: p.x, y: p.y, w: 0, h: 0, c: col(), f: fil(), label: '' }; drag = { m: 'zona', x0: p.x, y0: p.y }; }
+  else if (tool.k == 'zona') { tmp = { k: 'zona', s: tool.s, x: p.x, y: p.y, w: 0, h: 0, c: col(), f: fil(), ls: lin(), label: '' }; drag = { m: 'zona', x0: p.x, y0: p.y }; }
   else if (tool.k == 'medida') {
     const q = snapPt || p;                                  // 3 clics: punto a, punto b y posición de la cota
-    if (!tmp) tmp = { k: 'medida', a: q, b: q, off: 0, st: 1 };
+    if (!tmp) tmp = { k: 'medida', a: q, b: q, off: 0, st: 1, u: S.unidad };   // la medición queda en la unidad elegida al crearla
     else if (tmp.st == 1) { if (Math.hypot(q.x - tmp.a.x, q.y - tmp.a.y) > .05) { tmp.b = q; tmp.st = 2; } }
     else { tmp.off = offDe(tmp, p); delete tmp.st; add(tmp); tmp = null; }
   }
@@ -53,6 +55,8 @@ svg.addEventListener('pointermove', e => {
   if (drag) {
     const d = drag;
     if (d.m == 'pan') { V.ox = d.ox + e.clientX - d.sx; V.oy = d.oy + e.clientY - d.sy; }
+    else if (d.m == 'rot') moverRot(e);
+    else if (d.m == 'lado') { const dx = p.x - d.last.x, dy = p.y - d.last.y; d.last = p; if (dx || dy) { if (!d.pu) { push(); d.pu = 1; } moverLado(d.o, d.i, dx, dy); } }
     else if (d.m == 'box') {
       if (!d.moved && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) > 4) { d.moved = true; cajaSel = { x0: d.x0, y0: d.y0, x1: d.x0, y1: d.y0 }; }
       if (d.moved) { const r = rawW(e); cajaSel.x1 = r.x; cajaSel.y1 = r.y; }
@@ -68,7 +72,8 @@ svg.addEventListener('pointermove', e => {
       });
     } else if (d.m == 'h') {
       const o = d.o; if (!d.pu && (p.x != d.p0.x || p.y != d.p0.y)) { push(); d.pu = 1; }
-      if (o.k == 'zona') { o.w = Math.max(.2, p.x - o.x); o.h = Math.max(.2, p.y - o.y); }
+      if (o.k == 'zona') redimZona(o, p);
+      else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), p); else redimensionarRot(o, d.h, p); }
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
       else { const it = itemAt(e); o.pts[d.h] = it ? { x: it.x, y: it.y, ref: it.id } : p; }
     }

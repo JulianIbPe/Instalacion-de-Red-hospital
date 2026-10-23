@@ -31,8 +31,9 @@ function menu() {
 $('#tabs').onclick = e => { const t = e.target.closest('[data-t]'); if (t) { tab = t.dataset.t; menu(); } };
 $('#items').onclick = e => {
   const b = e.target.closest('[data-i]'); if (!b) return;
-  setTool(CAT[tab][b.dataset.i]);
+  const d = CAT[tab][b.dataset.i];
+  setTool(tool === d ? null : d);                 // volver a pulsar el objeto ya elegido lo suelta y activa Seleccionar
 };
-function setTool(d) { tool = d; tmp = null; sel = null; multi = []; avisoMsg = ''; snapPt = null; if (d && d.k == 'line') $('#col').value = d.c; menu(); render(); }
+function setTool(d) { tool = d; tmp = null; sel = null; multi = []; selEdge = null; avisoMsg = ''; snapPt = null; if (d && d.k == 'line') $('#col').value = d.c; menu(); render(); }
 $('#bsel').onclick = () => setTool(null);
-$('#bmed').onclick = () => setTool({ k: 'medida' });
+$('#bmed').onclick = () => setTool(tool && tool.k == 'medida' ? null : { k: 'medida' });   // igual: un segundo clic vuelve a Seleccionar

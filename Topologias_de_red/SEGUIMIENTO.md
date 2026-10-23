@@ -15,10 +15,13 @@ Para usarla: abrir `index.html` en el navegador (no requiere servidor).
 | `js/catalogo.js` | Catálogo de dispositivos, cables, formas, eléctrico, edificio y marcado; construcción del menú |
 | `js/dibujo.js` | Dibujo de cada objeto en SVG y barra de estado |
 | `js/reglas.js` | Reglas superior e izquierda en metros |
+| `js/rejilla.js` | Grilla activable (tecla G): se adapta al zoom y los objetos se ajustan a ella |
 | `js/plantas.js` | Plantas y capas: modelo, panel inferior derecho, ocultar/bloquear/añadir/quitar, compatibilidad con archivos antiguos |
 | `js/historial.js` | Deshacer, rehacer (hasta 100 pasos) y borrar objetos |
 | `js/iman.js` | Imán al medir: el cursor se pega a puntas de paredes/cables, centros de dispositivos y esquinas |
-| `js/medidas.js` | Cotas estilo AutoCAD: dibujo de la medición con líneas de extensión y flechas, y cálculo de la distancia a la que se estira |
+| `js/medidas.js` | Cotas estilo AutoCAD (líneas de extensión, flechas, distancia a la que se estira) y medida lateral de las paredes al dibujarlas |
+| `js/formas.js` | Formas escalables (8 asas), sus medidas (ancho, alto y radio), tipos de línea y edición de lados (seleccionar, mover, modificar puntas y borrar) |
+| `js/rotacion.js` | Rotar la selección (asa ↻ o tecla R): giro de objetos sueltos o de varios a la vez |
 | `js/seleccion.js` | Selección múltiple (Mayús+clic) y selección por rectángulo (Mayús + clic izquierdo y arrastrar) |
 | `js/interaccion.js` | Ratón: colocar, mover, dibujar cables y zonas, medir, zoom y desplazamiento |
 | `js/controles.js` | Teclado, color, relleno, tamaño del edificio y unidad de medición |

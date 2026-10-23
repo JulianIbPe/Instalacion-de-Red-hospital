@@ -1,8 +1,9 @@
 // ===== seleccion.js: selección múltiple (Mayús+clic) y selección por rectángulo (Mayús + clic izquierdo y arrastrar) =====
 // Un solo objeto seleccionado -> `sel` (con asas de edición). Varios -> `multi` (lista de ids) y sel = null.
 function seleccionados() { return (multi.length ? multi.map(byId) : [byId(sel)]).filter(o => o && esEditable(o)); }
-function fijarSeleccion(ids) { sel = ids.length == 1 ? ids[0] : null; multi = ids.length > 1 ? ids : []; }
+function fijarSeleccion(ids) { selEdge = null; sel = ids.length == 1 ? ids[0] : null; multi = ids.length > 1 ? ids : []; }
 function alternar(id) {                         // Mayús+clic: añade o quita un objeto de la selección
+  selEdge = null;
   const s = seleccionados().map(o => o.id), i = s.indexOf(id); if (i < 0) s.push(id); else s.splice(i, 1); fijarSeleccion(s);
 }
 function rawW(e) { const r = svg.getBoundingClientRect(); return { x: (e.clientX - r.left - V.ox) / V.z, y: (e.clientY - r.top - V.oy) / V.z }; }
@@ -10,9 +11,10 @@ function bboxDe(o) {                            // rectángulo que ocupa un obje
   let xs, ys;
   if (o.k == 'line') { const P = o.pts.map(pt), m = o.w / 2; xs = P.map(q => q.x); ys = P.map(q => q.y); xs.push(Math.min(...xs) - m, Math.max(...xs) + m); ys.push(Math.min(...ys) - m, Math.max(...ys) + m); }
   else if (o.k == 'medida') { const n = normalMed(o), f = o.off || 0; xs = [o.a.x, o.b.x, o.a.x + n.nx * f, o.b.x + n.nx * f]; ys = [o.a.y, o.b.y, o.a.y + n.ny * f, o.b.y + n.ny * f]; }
-  else if (o.k == 'zona') { xs = [o.x, o.x + o.w]; ys = [o.y, o.y + o.h]; }
-  else if (o.k == 'texto') { xs = [o.x, o.x + (o.label || ' ').length * .27]; ys = [o.y - .45, o.y]; }
-  else { xs = [o.x - o.w / 2, o.x + o.w / 2]; ys = [o.y - o.h / 2, o.y + o.h / 2]; }
+  else if (o.k == 'zona') ({ xs, ys } = esqRot([[o.x, o.y], [o.x + o.w, o.y], [o.x + o.w, o.y + o.h], [o.x, o.y + o.h]], { x: o.x + o.w / 2, y: o.y + o.h / 2 }, o.rot));
+  else if (o.k == 'texto') { const a = o.x + (o.label || ' ').length * .27; ({ xs, ys } = esqRot([[o.x, o.y - .45], [a, o.y - .45], [a, o.y], [o.x, o.y]], { x: o.x, y: o.y }, o.rot)); }
+  else if (o.n == 'Círculo' && o.rot) { const t = o.rot * Math.PI / 180, a = o.w / 2, b = o.h / 2, hx = Math.hypot(a * Math.cos(t), b * Math.sin(t)), hy = Math.hypot(a * Math.sin(t), b * Math.cos(t)); xs = [o.x - hx, o.x + hx]; ys = [o.y - hy, o.y + hy]; }
+  else ({ xs, ys } = esqRot([[o.x - o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y + o.h / 2], [o.x - o.w / 2, o.y + o.h / 2]], { x: o.x, y: o.y }, o.rot));
   return { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
 }
 function resaltar(o) {                          // marco ámbar alrededor de cada objeto de una selección múltiple
