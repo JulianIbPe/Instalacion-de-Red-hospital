@@ -7,6 +7,8 @@ document.addEventListener('keydown', e => {
   else if (mod && (k == 'y' || (k == 'z' && e.shiftKey))) { e.preventDefault(); rehacer(); }
   else if (e.key == 'Escape') setTool(null);
   else if (k == 'g') alternarGrilla();
+  else if (k == 'f' && !mod) voltearPuerta('lado');
+  else if (k == 'h' && !mod) voltearPuerta('bis');
   else if (k == 'm' && !mod) alternarMedio();
   else if (e.key == 'Enter') finishLine();
   else if (k == 'r' && !mod) rotarSeleccion(e.shiftKey ? -90 : 90);

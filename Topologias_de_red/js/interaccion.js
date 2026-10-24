@@ -22,6 +22,8 @@ svg.addEventListener('pointerdown', e => {
     if (e.target.closest('[data-rot]')) { iniciarRot(); render(); return; }   // asa de rotación
     const hh = e.target.closest('[data-h]'), t = e.target.closest('[data-id]'), ed = e.target.closest('[data-e]'), prevEdge = selEdge; selEdge = null;
     // Mayús + clic izquierdo: si no se arrastra, añade/quita el objeto de la selección; si se arrastra, dibuja un rectángulo de selección
+    const gr = e.target.closest('[data-grab]');   // hoja de una puerta: se agarra directamente para girarla
+    if (gr && t && !e.shiftKey) { const dd = byId(+t.dataset.id); if (dd && dd.k == 'puerta') { sel = dd.id; multi = []; drag = { m: 'h', o: dd, h: 'gi', p0: p }; render(); return; } }
     if (e.shiftKey) { const r = rawW(e); drag = { m: 'box', id: t ? +t.dataset.id : null, sx: e.clientX, sy: e.clientY, x0: r.x, y0: r.y, moved: false }; return; }
     if (hh && byId(sel)) { selEdge = prevEdge; drag = { m: 'h', o: byId(sel), h: hh.dataset.h, p0: p }; }
     else if (t && ed && +t.dataset.id === sel && !multi.length) { selEdge = { id: sel, i: +ed.dataset.e }; drag = { m: 'lado', o: byId(sel), i: selEdge.i, last: p }; }   // clic en un lado de la forma ya seleccionada
@@ -29,6 +31,7 @@ svg.addEventListener('pointerdown', e => {
     else { sel = null; multi = []; drag = { m: 'pan', sx: e.clientX, sy: e.clientY, ox: V.ox, oy: V.oy }; }
     render(); return;
   }
+  if (tool.k == 'puerta') { colocarPuerta(e); return; }   // las puertas validan la capa de su pared
   if (!capaEditable()) { avisoMsg = '⚠ La capa «' + capaActual().nombre + '» está oculta o bloqueada: elige otra capa para dibujar'; render(); return; }
   if (medioOn && tool.k != 'medida' && tool.k != 'line') { snapPt = null; snapMedio = false; imanMedio(rawW(e)); if (snapMedio) p = { x: snapPt.x, y: snapPt.y }; }   // colocar justo en el punto medio
   if (tool.k == 'item') add({ k: 'item', n: tool.n, ic: tool.ic, w: tool.w, h: tool.h, x: p.x, y: p.y, label: '' });
@@ -52,6 +55,7 @@ svg.addEventListener('pointermove', e => {
   const p = curP = toW(e);
   const eligiendoCota = tmp && tmp.k == 'medida' && tmp.st == 2;
   snapPt = (tool && tool.k == 'medida' && !eligiendoCota) || (drag && drag.m == 'h' && drag.o.k == 'medida' && drag.h != 'o') ? cercano(rawW(e)) : null;
+  prevPuerta = tool && tool.k == 'puerta' ? puertaHover(rawW(e)) : null;
   snapMedio = false; snapNodo = null; if (!snapPt) imanNodos(rawW(e));
   if (!snapPt && !eligiendoCota) imanMedio(rawW(e));
   const q = snapPt || p;   // el cursor se pega al imán más cercano (puntos, nodos o puntos medios)
@@ -71,12 +75,14 @@ svg.addEventListener('pointermove', e => {
       if ((dx || dy) && !d.pu) { push(); d.pu = 1; }
       d.os.forEach(o => {               // mueve todos los objetos seleccionados a la vez
         if (o.k == 'line') o.pts.forEach(q => { if (!q.ref && !q.rl) { q.x += dx; q.y += dy; } });
+        else if (o.k == 'puerta') { if (!d.os.some(x => x.id == o.pared)) moverPuerta(o, rawW(e)); }   // se desliza por la pared
         else if (o.k == 'medida') { o.a = { x: o.a.x + dx, y: o.a.y + dy }; o.b = { x: o.b.x + dx, y: o.b.y + dy }; }
         else { o.x = sn(o.x + dx); o.y = sn(o.y + dy); }
       });
     } else if (d.m == 'h') {
-      const o = d.o; if (!d.pu && (p.x != d.p0.x || p.y != d.p0.y)) { push(); d.pu = 1; }
+      const o = d.o; if (!d.pu && (p.x != d.p0.x || p.y != d.p0.y || o.k == 'puerta')) { push(); d.pu = 1; }
       if (o.k == 'zona') redimZona(o, p);
+      else if (o.k == 'puerta') redimPuerta(o, d.h, rawW(e));
       else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else redimensionarRot(o, d.h, p); }
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
       else { const it = itemAt(e); o.pts[d.h] = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p; }
@@ -89,7 +95,7 @@ svg.addEventListener('pointerup', () => {
   if (drag && drag.m == 'zona') { if (tmp.w > .2 && tmp.h > .2) add(tmp); tmp = null; }
   drag = null; render();
 });
-svg.addEventListener('pointerleave', () => { snapPt = null; render(); });
+svg.addEventListener('pointerleave', () => { prevPuerta = null; snapPt = null; render(); });
 svg.addEventListener('contextmenu', e => e.preventDefault());
 svg.addEventListener('wheel', e => {
   e.preventDefault(); const r = svg.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;

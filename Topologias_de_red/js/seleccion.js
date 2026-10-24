@@ -10,6 +10,7 @@ function rawW(e) { const r = svg.getBoundingClientRect(); return { x: (e.clientX
 function bboxDe(o) {                            // rectángulo que ocupa un objeto: {x0,y0,x1,y1} en metros
   let xs, ys;
   if (o.k == 'line') { const P = o.pts.map(pt), m = o.w / 2; xs = P.map(q => q.x); ys = P.map(q => q.y); xs.push(Math.min(...xs) - m, Math.max(...xs) + m); ys.push(Math.min(...ys) - m, Math.max(...ys) + m); }
+  else if (o.k == 'puerta') ({ xs, ys } = bboxPuerta(o));
   else if (o.k == 'medida') { const n = normalMed(o), f = o.off || 0; xs = [o.a.x, o.b.x, o.a.x + n.nx * f, o.b.x + n.nx * f]; ys = [o.a.y, o.b.y, o.a.y + n.ny * f, o.b.y + n.ny * f]; }
   else if (o.k == 'zona') ({ xs, ys } = esqRot([[o.x, o.y], [o.x + o.w, o.y], [o.x + o.w, o.y + o.h], [o.x, o.y + o.h]], { x: o.x + o.w / 2, y: o.y + o.h / 2 }, o.rot));
   else if (o.k == 'texto') { const a = o.x + (o.label || ' ').length * .27; ({ xs, ys } = esqRot([[o.x, o.y - .45], [a, o.y - .45], [a, o.y], [o.x, o.y]], { x: o.x, y: o.y }, o.rot)); }

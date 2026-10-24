@@ -18,6 +18,7 @@ function geoSel() {                      // centro y borde superior de lo selecc
   return { c: { x: (x0 + x1) / 2, y: (y0 + y1) / 2 }, top: y0 };
 }
 function rotarDesde(o, g, ang, c) {      // deja en o el resultado de girar la copia original g un ángulo ang alrededor de c
+  if (o.k == 'puerta') return;           // las puertas giran con su pared
   const rp = q => { const r = rotP(q, c, ang); return { x: r3(r.x), y: r3(r.y) }; };
   if (o.k == 'line') o.pts = g.pts.map(q => q.ref || q.rl ? { ...q } : rp(q));
   else if (o.k == 'medida') { o.a = rp(g.a); o.b = rp(g.b); }
@@ -44,7 +45,7 @@ function moverRot(e) {                   // el ángulo sale de la posición del 
   d.delta = a; d.lista.forEach(({ o, g }) => rotarDesde(o, g, a, d.c));
 }
 function rotHtml() {                     // asa de rotación sobre la selección
-  if (tool || tmp || ladoSel() !== null) return ''; const g = geoSel(); if (!g) return '';
+  if (tool || tmp || ladoSel() !== null) return ''; const g = geoSel(); if (!g || seleccionados().every(o => o.k == 'puerta')) return '';
   const rot = drag && drag.m == 'rot', c = rot ? drag.c : g.c, h0 = rot ? rotP(drag.h0, drag.c, drag.delta) : { x: g.c.x, y: g.top - .8 };
   return `<g data-rot="1" style="cursor:grab"><line x1="${c.x}" y1="${c.y}" x2="${h0.x}" y2="${h0.y}" stroke="#2e86de" stroke-width=".03" stroke-dasharray=".1 .08" pointer-events="none"/><circle cx="${c.x}" cy="${c.y}" r=".06" fill="#2e86de" pointer-events="none"/><circle cx="${h0.x}" cy="${h0.y}" r=".2" fill="#2e86de" stroke="#fff" stroke-width=".04"/><text x="${h0.x}" y="${h0.y}" font-size=".28" fill="#fff" text-anchor="middle" dominant-baseline="central" pointer-events="none">↻</text></g>`
     + (rot ? T(h0.x, h0.y - .4, drag.delta + '°', .3) : '');

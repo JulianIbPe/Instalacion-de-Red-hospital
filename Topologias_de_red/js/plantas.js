@@ -16,6 +16,7 @@ function normalizar() {                  // deja S coherente: sirve también par
   S.cn = Math.max(S.cn || 0, ...S.plantas.flatMap(p => p.capas.map(c => num(c.id))));
   if (!S.plantas.some(p => p.id == S.plantaAct)) S.plantaAct = S.plantas[0].id;
   const p = plantaActual(); if (!p.capas.some(c => c.id == S.capaAct)) S.capaAct = (p.capas.find(c => c.id == p.ca) || p.capas[0]).id;
+  S.objs = S.objs.filter(o => o.k != 'puerta' || S.objs.some(w => w.id == o.pared));   // puertas sin pared: se quitan
   S.objs.forEach(o => { if (o.k == 'medida' && !o.u) o.u = S.unidad; });   // mediciones antiguas: se quedan en la unidad que tenía el archivo
   S.objs.forEach(o => {                  // todo objeto debe pertenecer a una planta y una capa que existan
     const q = S.plantas.find(q => q.id == o.pl) || S.plantas[0]; o.pl = q.id;

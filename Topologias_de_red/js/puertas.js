@@ -11,20 +11,26 @@ function geoPuerta(d) {                  // geometría actual de la puerta (sigu
   const c = { x: a.x + u.x * s, y: a.y + u.y * s };
   return { si: d.si, o, a, b, L, u, n, w, s, c, lado: d.lado, hojas: d.hojas, bis: d.bis, p0: { x: c.x - u.x * w / 2, y: c.y - u.y * w / 2 }, p1: { x: c.x + u.x * w / 2, y: c.y + u.y * w / 2 } };
 }
-function simboloPuerta(g) {              // hojas abiertas 90° + sector del suelo que recorre cada una al abrirse
+function simboloPuerta(g, agarrable = false) {              // hojas abiertas 90° + sector del suelo que recorre cada una al abrirse
   const nl = { x: g.n.x * g.lado, y: g.n.y * g.lado };
   const hoja = (H, T, r) => {            // H = bisagra, T = extremo de la hoja cerrada, r = largo de la hoja
     const O = { x: H.x + nl.x * r, y: H.y + nl.y * r }, f = nl.x * (T.y - H.y) - nl.y * (T.x - H.x) > 0 ? 1 : 0;
     return `<path d="M${H.x} ${H.y}L${O.x} ${O.y}A${r} ${r} 0 0 ${f} ${T.x} ${T.y}Z" fill="#2e86de26" stroke="#2e86de" stroke-width=".03" stroke-dasharray=".12 .08" pointer-events="all"/>`
-      + `<line x1="${H.x}" y1="${H.y}" x2="${O.x}" y2="${O.y}" stroke="#34495e" stroke-width=".07" stroke-linecap="round" pointer-events="none"/>`;
+      + `<line x1="${H.x}" y1="${H.y}" x2="${O.x}" y2="${O.y}" stroke="#34495e" stroke-width=".07" stroke-linecap="round" pointer-events="none"/>`
+      + (agarrable ? `<line data-grab="1" style="cursor:grab" x1="${H.x}" y1="${H.y}" x2="${O.x}" y2="${O.y}" stroke="transparent" stroke-width=".3" stroke-linecap="round" pointer-events="stroke"/>` : '');   // la hoja se puede agarrar para girarla al otro lado
   };
   if (g.hojas == 2) return hoja(g.p0, g.c, g.w / 2) + hoja(g.p1, g.c, g.w / 2);          // espejo: una gira a cada lado del hueco
   return g.bis == 'der' ? hoja(g.p1, g.p0, g.w) : hoja(g.p0, g.p1, g.w);
 }
 function dibujarPuerta(d, id, on, hd) {
   const g = geoPuerta(d); if (!g) return '';
-  let h = `<g ${id}>${simboloPuerta(g)}</g>`;
-  if (on) { h += hd(g.p0.x, g.p0.y, 'da') + hd(g.p1.x, g.p1.y, 'db'); h += cota({ a: g.p0, b: g.p1, off: -g.lado * .6 }, '', false, null); }   // asas en los costados + ancho del hueco
+  let h = `<g ${id}>${simboloPuerta(g, true)}</g>`;
+  if (on) {
+    h += hd(g.p0.x, g.p0.y, 'da') + hd(g.p1.x, g.p1.y, 'db');                    // asas de los costados: estirar el hueco
+    const nl = { x: g.n.x * g.lado, y: g.n.y * g.lado }, ps = g.hojas == 2 ? [[g.p0, g.w / 2], [g.p1, g.w / 2]] : [[g.bis == 'der' ? g.p1 : g.p0, g.w]];
+    ps.forEach(([H, r]) => hd(H.x + nl.x * r, H.y + nl.y * r, 'gi', '#2e86de'));   // asas azules en la punta de cada hoja abierta: arrastrarlas gira la puerta
+    h += cota({ a: g.p0, b: g.p1, off: -g.lado * .6 }, '', false, null);          // ancho del hueco
+  }
   return h;
 }
 function puertasDe(wallId) { return S.objs.filter(d => d.k == 'puerta' && d.pared == wallId); }
@@ -62,20 +68,30 @@ function segmentoCercano(r, dmax = .5) { // tramo de pared más cercano al punto
   });
   return best;
 }
+function anchoNuevo(L) {                 // ancho de una puerta nueva: 0,9 m, o el múltiplo de la grilla más parecido si la grilla está activa
+  const p = pasoGrilla(); return Math.min(rejilla ? Math.max(p, Math.round(PUERTA_W / p) * p) : PUERTA_W, L);
+}
+function sPuerta(sg, w) {                // posición del centro de la puerta en el tramo: punto medio de la pared > grilla > libre (cada 5 cm)
+  const lim = v => Math.min(Math.max(v, w / 2), sg.L - w / 2);
+  if (medioOn && Math.abs(sg.t - sg.L / 2) * V.z < 18) return { s: lim(sg.L / 2), medio: true };
+  if (rejilla) { const p = pasoGrilla(); return { s: lim(Math.round((sg.t - w / 2) / p) * p + w / 2) }; }   // el borde izquierdo del hueco cae en una línea de la grilla
+  return { s: lim(Math.round(sg.t * 20) / 20) };
+}
 function puertaHover(r) {
   const sg = segmentoCercano(r); if (!sg) return null;
   const otras = puertasDe(sg.o.id).filter(d => d.si == sg.si).map(d => ({ d, g: geoPuerta(d) })).filter(x => x.g);
   const ex = otras.find(x => Math.abs(sg.t - x.g.s) <= x.g.w / 2);
   if (ex) return ex.d.hojas >= 2 ? { msg: 'Esta división ya tiene dos puertas (máximo)', d: ex.d } : { d: { ...ex.d, hojas: 2 }, ex: ex.d };   // sobre una puerta: se añade la 2.ª hoja
-  const w = Math.min(PUERTA_W, sg.L), s = Math.min(Math.max(Math.round(sg.t * 20) / 20, w / 2), sg.L - w / 2);
+  const w = anchoNuevo(sg.L), { s, medio } = sPuerta(sg, w);
   if (otras.some(x => Math.abs(s - x.g.s) < (w + x.g.w) / 2)) return { msg: 'No cabe: se solaparía con otra puerta' };
   const n = { x: -sg.u.y, y: sg.u.x }, lado = (r.x - sg.a.x) * n.x + (r.y - sg.a.y) * n.y >= 0 ? 1 : -1;   // abre hacia el lado de la pared donde está el cursor
-  return { d: { k: 'puerta', pared: sg.o.id, si: sg.si, s, w, lado, hojas: 1, bis: 'izq' } };
+  return { d: { k: 'puerta', pared: sg.o.id, si: sg.si, s, w, lado, hojas: 1, bis: 'izq' }, medio };
 }
 function puertaPrevia() {                // la pared se "abre" y se ve la puerta con su recorrido, aún sin colocar
   if (!prevPuerta || prevPuerta.msg || !(tool && tool.k == 'puerta')) return '';
   const g = geoPuerta(prevPuerta.d); if (!g) return '';
-  return `<line x1="${g.p0.x}" y1="${g.p0.y}" x2="${g.p1.x}" y2="${g.p1.y}" stroke="#fff" stroke-width="${g.o.w + .03}" pointer-events="none"/><g opacity=".8" pointer-events="none">${simboloPuerta(g)}</g>`;
+  const m = prevPuerta.medio ? `<path d="M${g.c.x} ${g.c.y - .24}L${g.c.x + .24} ${g.c.y}L${g.c.x} ${g.c.y + .24}L${g.c.x - .24} ${g.c.y}Z" fill="none" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : '';   // rombo: se centró en el punto medio de la pared
+  return `<line x1="${g.p0.x}" y1="${g.p0.y}" x2="${g.p1.x}" y2="${g.p1.y}" stroke="#fff" stroke-width="${g.o.w + .03}" pointer-events="none"/><g opacity=".8" pointer-events="none">${simboloPuerta(g)}</g>` + m;
 }
 function colocarPuerta(e) {              // clic con la herramienta Puerta
   const pv = puertaHover(rawW(e));
@@ -91,15 +107,22 @@ function colocarPuerta(e) {              // clic con la herramienta Puerta
 }
 
 // ---------- Editar una puerta ya colocada ----------
-function redimPuerta(d, h, r) {          // estirar por un costado: el otro extremo del hueco queda fijo
+function girarPuerta(d, r) {             // la puerta sigue al cursor: abre hacia el lado de la pared donde lo sueltes y, con una hoja, con la bisagra del lado hacia el que la lleves
   const g = geoPuerta(d); if (!g) return;
-  const t = Math.min(Math.max(Math.round(((r.x - g.a.x) * g.u.x + (r.y - g.a.y) * g.u.y) * 20) / 20, 0), g.L), izq = g.s - g.w / 2, der = g.s + g.w / 2;
-  const L = h == 'da' ? Math.min(t, der - PUERTA_MIN) : izq, R = h == 'db' ? Math.max(t, izq + PUERTA_MIN) : der;
+  d.lado = (r.x - g.c.x) * g.n.x + (r.y - g.c.y) * g.n.y >= 0 ? 1 : -1;
+  if (g.hojas == 1) d.bis = (r.x - g.c.x) * g.u.x + (r.y - g.c.y) * g.u.y < 0 ? 'izq' : 'der';
+}
+function redimPuerta(d, h, r) {          // estirar por un costado: el otro extremo del hueco queda fijo
+  if (h == 'gi') return girarPuerta(d, r);
+  const g = geoPuerta(d); if (!g) return;
+  const p = rejilla ? pasoGrilla() : .05, min = rejilla ? Math.ceil(PUERTA_MIN / p) * p : PUERTA_MIN;   // con grilla, los bordes del hueco caen en sus líneas
+  const t = Math.min(Math.max(Math.round(((r.x - g.a.x) * g.u.x + (r.y - g.a.y) * g.u.y) / p) * p, 0), g.L), izq = g.s - g.w / 2, der = g.s + g.w / 2;
+  const L = h == 'da' ? Math.min(t, der - min) : izq, R = h == 'db' ? Math.max(t, izq + min) : der;
   d.w = +(R - L).toFixed(3); d.s = +((L + R) / 2).toFixed(3);
 }
 function moverPuerta(d, r) {             // arrastrar la puerta: se desliza por la pared (o salta a otra pared cercana)
   const sg = segmentoCercano(r, .6); if (!sg) return;
-  const g = geoPuerta(d), w = Math.min(d.w, sg.L), s = Math.min(Math.max(Math.round(sg.t * 20) / 20, w / 2), sg.L - w / 2);
+  const g = geoPuerta(d), w = Math.min(d.w, sg.L), { s } = sPuerta(sg, w);
   const choca = S.objs.some(x => x.k == 'puerta' && x !== d && x.pared == sg.o.id && x.si == sg.si && geoPuerta(x) && Math.abs(geoPuerta(x).s - s) < (w + geoPuerta(x).w) / 2);
   if (choca) return; d.pared = sg.o.id; d.si = sg.si; d.s = s; if (g && sg.o.pl !== undefined) { d.pl = sg.o.pl; d.cp = sg.o.cp; }
 }
