@@ -7,7 +7,7 @@ function finishLine() {
   if (q.length > 1) { delete tmp.cur; add(tmp); } tmp = null; render();
 }
 svg.addEventListener('pointerdown', e => {
-  svg.setPointerCapture(e.pointerId); const p = toW(e); avisoMsg = '';
+  svg.setPointerCapture(e.pointerId); let p = toW(e); avisoMsg = '';
   if (e.button == 2) { finishLine(); if (tmp && tmp.k == 'medida') { tmp = null; render(); } return; }
   if (e.button == 1) { drag = { m: 'pan', sx: e.clientX, sy: e.clientY, ox: V.ox, oy: V.oy }; return; }
   // Doble clic detectado a mano: la página se redibuja en cada clic y el evento 'dblclick' nativo se pierde.
@@ -30,6 +30,7 @@ svg.addEventListener('pointerdown', e => {
     render(); return;
   }
   if (!capaEditable()) { avisoMsg = '⚠ La capa «' + capaActual().nombre + '» está oculta o bloqueada: elige otra capa para dibujar'; render(); return; }
+  if (medioOn && tool.k != 'medida' && tool.k != 'line') { snapPt = null; snapMedio = false; imanMedio(rawW(e)); if (snapMedio) p = { x: snapPt.x, y: snapPt.y }; }   // colocar justo en el punto medio
   if (tool.k == 'item') add({ k: 'item', n: tool.n, ic: tool.ic, w: tool.w, h: tool.h, x: p.x, y: p.y, label: '' });
   else if (tool.k == 'shape') add({ k: 'shape', n: tool.n, x: p.x, y: p.y, w: 1.2, h: 1.2, c: col(), f: fil(), ls: lin(), label: '' });
   else if (tool.k == 'texto') { const t = prompt('Texto:'); if (t) add({ k: 'texto', x: p.x, y: p.y, label: t }); }
@@ -41,7 +42,8 @@ svg.addEventListener('pointerdown', e => {
     else { tmp.off = offDe(tmp, p); delete tmp.st; add(tmp); tmp = null; }
   }
   else if (tool.k == 'line') {
-    const it = itemAt(e), q = it ? { x: it.x, y: it.y, ref: it.id } : p;
+    snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e));   // los imanes miden la distancia con el cursor real, no con el punto ya ajustado a la grilla
+    const it = itemAt(e), q = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p;   // nodo del mismo tipo > dispositivo > punto libre
     if (!tmp) tmp = { k: 'line', n: tool.n, c: col(), w: tool.w, d: tool.d, pts: [q], label: '' }; else tmp.pts.push(q);
   }
   render();
@@ -49,9 +51,11 @@ svg.addEventListener('pointerdown', e => {
 svg.addEventListener('pointermove', e => {
   const p = curP = toW(e);
   const eligiendoCota = tmp && tmp.k == 'medida' && tmp.st == 2;
-  snapPt = (tool && tool.k == 'medida' && !eligiendoCota) || (drag && drag.m == 'h' && drag.o.k == 'medida' && drag.h != 'o') ? cercano(p) : null;
-  const q = snapPt || p;   // al medir, el cursor se pega al punto de imán más cercano
-  if (tmp && tmp.k == 'line') tmp.cur = p; else if (eligiendoCota) tmp.off = offDe(tmp, p); else if (tmp && tmp.k == 'medida') tmp.b = q;
+  snapPt = (tool && tool.k == 'medida' && !eligiendoCota) || (drag && drag.m == 'h' && drag.o.k == 'medida' && drag.h != 'o') ? cercano(rawW(e)) : null;
+  snapMedio = false; snapNodo = null; if (!snapPt) imanNodos(rawW(e));
+  if (!snapPt && !eligiendoCota) imanMedio(rawW(e));
+  const q = snapPt || p;   // el cursor se pega al imán más cercano (puntos, nodos o puntos medios)
+  if (tmp && tmp.k == 'line') tmp.cur = snapPt || p; else if (eligiendoCota) tmp.off = offDe(tmp, p); else if (tmp && tmp.k == 'medida') tmp.b = q;
   if (drag) {
     const d = drag;
     if (d.m == 'pan') { V.ox = d.ox + e.clientX - d.sx; V.oy = d.oy + e.clientY - d.sy; }
@@ -66,16 +70,16 @@ svg.addEventListener('pointermove', e => {
       const dx = p.x - d.last.x, dy = p.y - d.last.y; d.last = p;
       if ((dx || dy) && !d.pu) { push(); d.pu = 1; }
       d.os.forEach(o => {               // mueve todos los objetos seleccionados a la vez
-        if (o.k == 'line') o.pts.forEach(q => { if (!q.ref) { q.x += dx; q.y += dy; } });
+        if (o.k == 'line') o.pts.forEach(q => { if (!q.ref && !q.rl) { q.x += dx; q.y += dy; } });
         else if (o.k == 'medida') { o.a = { x: o.a.x + dx, y: o.a.y + dy }; o.b = { x: o.b.x + dx, y: o.b.y + dy }; }
         else { o.x = sn(o.x + dx); o.y = sn(o.y + dy); }
       });
     } else if (d.m == 'h') {
       const o = d.o; if (!d.pu && (p.x != d.p0.x || p.y != d.p0.y)) { push(); d.pu = 1; }
       if (o.k == 'zona') redimZona(o, p);
-      else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), p); else redimensionarRot(o, d.h, p); }
+      else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else redimensionarRot(o, d.h, p); }
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
-      else { const it = itemAt(e); o.pts[d.h] = it ? { x: it.x, y: it.y, ref: it.id } : p; }
+      else { const it = itemAt(e); o.pts[d.h] = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p; }
     }
   }
   render();

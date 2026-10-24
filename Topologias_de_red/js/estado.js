@@ -11,7 +11,11 @@ let tool = null, sel = null, tmp = null, drag = null, nid = 1, curP = { x: 0, y:
 // ---------- Utilidades ----------
 const sn = v => { const p = pasoActual(); return +(Math.round(v / p) * p).toFixed(3); }, byId = id => S.objs.find(o => o.id == id);
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const pt = q => { const o = q.ref && byId(q.ref); return o ? { x: o.x, y: o.y } : q; };
+function pt(q, n = 0) {                  // posición real de un punto de línea: puede estar unido a un dispositivo (ref) o al nodo de otra línea (rl/ri)
+  if (q.ref) { const o = byId(q.ref); if (o) return { x: o.x, y: o.y }; }
+  if (q.rl && n < 10) { const L = byId(q.rl); if (L && L.pts[q.ri]) return pt(L.pts[q.ri], n + 1); }
+  return q;
+}
 const fmt = (d, u = S.unidad) => u == 'm' ? d.toFixed(2) + ' m' : Math.round(d * 100) + ' cm';   // u = unidad: cada medición guarda la suya
 function toW(e) { const r = svg.getBoundingClientRect(); return { x: sn((e.clientX - r.left - V.ox) / V.z), y: sn((e.clientY - r.top - V.oy) / V.z) }; }
 function itemAt(e) { for (const el of document.elementsFromPoint(e.clientX, e.clientY)) { const t = el.closest && el.closest('[data-id]'), o = t && byId(t.dataset.id); if (o && o.k == 'item') return o; } }

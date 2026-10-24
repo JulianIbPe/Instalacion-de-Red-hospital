@@ -1,6 +1,6 @@
 // ---------- Dibujo ----------
 function draw(o) {
-  const id = `data-id="${o.id}"`, on = o.id == sel, hd = (x, y, h) => `<circle ${id} data-h="${h}" cx="${x}" cy="${y}" r=".13" fill="#e0a030" stroke="#fff" stroke-width=".03"/>`;
+  const id = `data-id="${o.id}"`, on = o.id == sel, hd = (x, y, h) => { asasOut.push(`<circle ${id} data-h="${h}" cx="${x}" cy="${y}" r=".13" fill="#e0a030" stroke="#fff" stroke-width=".03"/>`); return ''; };   // las asas se dibujan al final para quedar siempre por encima
   let h = '';
   if (o.k == 'zona') {
     const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
@@ -31,18 +31,20 @@ function draw(o) {
   return h;
 }
 const ORD = { zona: 0, shape: 1, line: 2, item: 3, texto: 4, medida: 5 };
+let asasOut = [];                         // asas de edición de lo seleccionado (se agregan después de todos los objetos)
 function render() {
+  asasOut = [];
   const gr = rejillaSvg();
   const E = S.edificio, all = [...S.objs].filter(esVisible).sort((a, b) => ORD[a.k] - ORD[b.k]); if (tmp) all.push(tmp);
   const pats = all.filter(o => o.f == 'hat').map(o => `<pattern id="h${o.id}" width=".25" height=".25" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2=".25" stroke="${o.c}" stroke-width=".07"/></pattern>`).join('');
   const edif = `<rect x="0" y="0" width="${E.w}" height="${E.h}" fill="none" stroke="#17262c" stroke-width=".08" stroke-dasharray=".4 .2"/>` + T(E.w / 2, -.25, E.w + ' m', .4) + `<text x="-.3" y="${E.h / 2}" font-size=".4" text-anchor="middle" transform="rotate(-90 -.3 ${E.h / 2})" fill="#17262c" font-family="Segoe UI,Arial,sans-serif">${E.h} m</text>`;
   svg.innerHTML = `<defs>${gr.defs}</defs>
-  <g transform="translate(${V.ox} ${V.oy}) scale(${V.z})">${gr.rects}<g id="c"><defs>${pats}</defs>${edif}${all.map(o => { const g = draw(o) + resaltar(o); return esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}</g>${cajaHtml()}${rotHtml()}${snapPt ? `<circle cx="${snapPt.x}" cy="${snapPt.y}" r=".17" fill="#e0a03044" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : ''}</g>`;
+  <g transform="translate(${V.ox} ${V.oy}) scale(${V.z})">${gr.rects}<g id="c"><defs>${pats}</defs>${edif}${all.map(o => { const g = draw(o) + resaltar(o); return esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}${asasOut.join('')}</g>${cajaHtml()}${nodosHtml()}${rotHtml()}${rombo()}${snapPt ? `<circle cx="${snapPt.x}" cy="${snapPt.y}" r=".17" fill="#e0a03044" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : ''}</g>`;
   $('#bundo').disabled = !hist.length; $('#bredo').disabled = !fut.length; $('#bdel').disabled = !seleccionados().length;
   sincronizarOpciones();
   rulers(); status(); if (tab) menu();
 }
 function status(msg) {
-  const h = !tool ? 'Clic: seleccionar · Mayús+clic: varios · Mayús+arrastrar: rectángulo · ↻ o tecla R: rotar · arrastrar: mover · fondo vacío: desplazar · rueda: zoom' : tool.k == 'line' ? 'Clic para añadir puntos (clic sobre un dispositivo para conectar) · doble clic o Enter para terminar · Esc cancela' : tool.k == 'zona' ? 'Arrastra para marcar la zona' : tool.k == 'medida' ? 'Clic en el punto inicial, luego en el final y por último clic donde quieras colocar la cota (clic derecho cancela)' : 'Clic en el área de trabajo para colocar · Esc para salir';
+  const h = !tool ? 'Clic: seleccionar · Mayús+clic: varios · Mayús+arrastrar: rectángulo · ↻ o tecla R: rotar · arrastrar: mover · fondo vacío: desplazar · rueda: zoom' : tool.k == 'line' ? 'Clic para añadir puntos (sobre un dispositivo o un nodo ○ del mismo tipo para unirlo) · doble clic o Enter para terminar · Esc cancela' : tool.k == 'zona' ? 'Arrastra para marcar la zona' : tool.k == 'medida' ? 'Clic en el punto inicial, luego en el final y por último clic donde quieras colocar la cota (clic derecho cancela)' : 'Clic en el área de trabajo para colocar · Esc para salir';
   $('#status').textContent = `x ${curP.x.toFixed(1)} m · y ${curP.y.toFixed(1)} m · escala ${V.z.toFixed(0)} px/m · grilla ${rejilla ? +pasoGrilla().toFixed(2) + ' m' : 'off'} · ${plantaActual().nombre} › ${capaActual().nombre}  |  ${msg || avisoMsg || (ladoSel() !== null ? 'Lado seleccionado: arrastra el lado o sus puntas para modificarlo · Supr lo borra · clic fuera para soltarlo' : h)}`;
 }

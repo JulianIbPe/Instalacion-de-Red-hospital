@@ -15,7 +15,7 @@
 <header id="top">
   <b class="logo" title="Topologías de red">🌐 Redes</b>
   <div class="grp"><label>Edificio <input id="bw" type="number" value="20" min="1" step="0.5"> × <input id="bh" type="number" value="12" min="1" step="0.5"> m</label><button id="bset">Aplicar</button></div>
-  <div class="grp"><button id="bsel" title="Seleccionar y mover objetos (Esc)">🖱️ Seleccionar</button><button id="bmed" title="Medir de un punto a otro">📏 Medir</button><button id="bgrid" class="on" title="Mostrar u ocultar la grilla y ajustar los objetos a ella (G)">▦ Grilla</button><button id="unit" title="Unidad de las PRÓXIMAS mediciones (las ya hechas no cambian)">Medir en: m</button></div>
+  <div class="grp"><button id="bsel" title="Seleccionar y mover objetos (Esc)">🖱️ Seleccionar</button><button id="bmed" title="Medir de un punto a otro">📏 Medir</button><button id="bgrid" class="on" title="Mostrar u ocultar la grilla y ajustar los objetos a ella (G)">▦ Grilla</button><button id="bmid" title="Imán al punto medio: el cursor se pega a la mitad de líneas, paredes y lados de formas (tecla M)">◇ Medio</button><button id="unit" title="Unidad de las PRÓXIMAS mediciones (las ya hechas no cambian)">Medir en: m</button></div>
   <div class="grp"><button id="bundo" title="Deshacer (Ctrl+Z)">↶</button><button id="bredo" title="Rehacer (Ctrl+Y)">↷</button><button id="bdel" title="Borrar el objeto seleccionado (Supr)">🗑️ Borrar</button></div>
   <span class="sp"></span>
   <div class="grp last"><button id="bnew" title="Empezar un archivo nuevo">📄 Nuevo</button><button id="save" class="prim" title="Descargar la topología como archivo .json">💾 Guardar</button><button id="load" title="Abrir un archivo .json guardado">📂 Abrir</button><button id="png" title="Exportar la topología como imagen PNG">🖼️ PNG</button></div>
@@ -64,6 +64,7 @@
 <script src="js/plantas.js"></script>
 <script src="js/historial.js"></script>
 <script src="js/iman.js"></script>
+<script src="js/nodos.js"></script>
 <script src="js/medidas.js"></script>
 <script src="js/formas.js"></script>
 <script src="js/rotacion.js"></script>

@@ -19,7 +19,7 @@ function geoSel() {                      // centro y borde superior de lo selecc
 }
 function rotarDesde(o, g, ang, c) {      // deja en o el resultado de girar la copia original g un ángulo ang alrededor de c
   const rp = q => { const r = rotP(q, c, ang); return { x: r3(r.x), y: r3(r.y) }; };
-  if (o.k == 'line') o.pts = g.pts.map(q => q.ref ? { ...q } : rp(q));
+  if (o.k == 'line') o.pts = g.pts.map(q => q.ref || q.rl ? { ...q } : rp(q));
   else if (o.k == 'medida') { o.a = rp(g.a); o.b = rp(g.b); }
   else if (o.k == 'shape' && o.n != 'Círculo') fijarVerts(o, vertsAbs(g).map(rp));
   else {
