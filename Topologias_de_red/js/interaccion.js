@@ -83,6 +83,7 @@ svg.addEventListener('pointermove', e => {
       const o = d.o; if (!d.pu && (p.x != d.p0.x || p.y != d.p0.y || o.k == 'puerta')) { push(); d.pu = 1; }
       if (o.k == 'zona') redimZona(o, p);
       else if (o.k == 'puerta') redimPuerta(o, d.h, rawW(e));
+      else if (o.k == 'item' && o.n == 'Escalera') redimensionarRot(o, d.h, p);
       else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else redimensionarRot(o, d.h, p); }
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
       else { const it = itemAt(e); o.pts[d.h] = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p; }

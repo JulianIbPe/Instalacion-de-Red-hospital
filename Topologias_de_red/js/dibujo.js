@@ -13,9 +13,11 @@ function draw(o) {
   } else if (o.k == 'shape') {
     h = dibujarForma(o, id, on, hd);
   } else if (o.k == 'item') {
+    if (o.n == 'Escalera') h = dibujarEscalera(o, id, on, hd); else {
     h = `<g ${id} transform="translate(${o.x} ${o.y}) rotate(${o.rot || 0})"><rect x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}" rx=".08" fill="#fff" stroke="#34495e" stroke-width=".04"/><text font-size="${Math.min(o.w, o.h) * .65}" text-anchor="middle" dominant-baseline="central">${o.ic}</text></g>`;
     if (o.label) h += T(o.x, bboxDe(o).y1 + .3, o.label);
     if (on) h += `<rect x="${o.x - o.w / 2 - .1}" y="${o.y - o.h / 2 - .1}" width="${o.w + .2}" height="${o.h + .2}" fill="none" stroke="#e0a030" stroke-dasharray=".15 .1" stroke-width=".04" transform="rotate(${o.rot || 0} ${o.x} ${o.y})" pointer-events="none"/>`;
+    }
   } else if (o.k == 'line') {
     const P = o.pts.map(pt); if (o.cur) P.push(o.cur);
     const s = P.map(q => `${q.x},${q.y}`).join(' ');

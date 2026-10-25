@@ -3,7 +3,10 @@ const ASAS = { nw: [-1, -1], n: [0, -1], ne: [1, -1], e: [1, 0], se: [1, 1], s: 
 const r3 = v => +v.toFixed(3);
 function manijasForma(o, hd) {
   const fuera = o.n == 'Círculo' ? 0 : .22;   // en formas con lados, las asas de los costados salen un poco para no tapar el centro de cada lado
-  return Object.entries(ASAS).map(([k, [fx, fy]]) => hd(o.x + fx * o.w / 2 + (fy == 0 ? fx * fuera : 0), o.y + fy * o.h / 2 + (fx == 0 ? fy * fuera : 0), k)).join('');
+  return Object.entries(ASAS).map(([k, [fx, fy]]) => {
+    const q = rotP({ x: o.x + fx * o.w / 2 + (fy == 0 ? fx * fuera : 0), y: o.y + fy * o.h / 2 + (fx == 0 ? fy * fuera : 0) }, { x: o.x, y: o.y }, o.rot || 0);   // las asas giran con la forma
+    return hd(q.x, q.y, k);
+  }).join('');
 }
 function redimensionar(o, h, p) {         // arrastrar un asa mueve ese lado/esquina; el lado opuesto se queda fijo
   let L = o.x - o.w / 2, R = o.x + o.w / 2, U = o.y - o.h / 2, B = o.y + o.h / 2; const min = .2;
