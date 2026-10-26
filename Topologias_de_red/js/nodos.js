@@ -1,7 +1,7 @@
 // ===== nodos.js: al dibujar con un tipo de línea (cable, pared...), se marcan los nodos de las líneas del MISMO tipo y el cursor se pega a ellos =====
 // Una línea nueva puede quedar unida a un nodo de otra: su punto guarda {rl: id de la línea, ri: índice del nodo} y lo sigue si ese nodo se mueve.
 // Paredes: cuentan todos los vértices (cada conexión). Resto de cables: solo los extremos.
-// Al colocar una escalera o una forma (dos puntos) se marcan los extremos de las paredes y el cursor se pega a ellos (sin unir nada).
+// Al colocar una escalera o una forma (dos puntos) se marcan los extremos de las paredes y las esquinas de las escaleras, y el cursor se pega a ellos (sin unir nada).
 let snapNodo = null;                                    // nodo al que está pegado el cursor: {lid, i} (lid null = punto de la línea que se está dibujando)
 function raizNodo(lid, i) {                             // sigue la cadena de enlaces hasta el nodo "original"
   let L = byId(lid), q = L.pts[i], n = 0;
@@ -20,6 +20,11 @@ function nodosDeTipo(tipo, ex) {
   });
   if (tmp && tmp.k == 'line' && tmp.n == tipo)          // puntos ya puestos de la línea en curso (para cerrar un contorno)
     tmp.pts.slice(0, -1).forEach((q, i) => { if (tipo == 'Pared' || i == 0) r.push({ ...pt(q), lid: null, i, c: tmp.c }); });
+  if (tipo == 'Pared')                                   // esquinas de las escaleras: el cursor se pega a ellas (queda un punto libre, no unido a la escalera)
+    S.objs.filter(o => esVisible(o) && o.k == 'item' && o.n == 'Escalera').forEach(o => {
+      const { xs, ys } = esqRot([[o.x - o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y + o.h / 2], [o.x - o.w / 2, o.y + o.h / 2]], { x: o.x, y: o.y }, o.rot || 0);
+      xs.forEach((x, i) => r.push({ x: r3(x), y: r3(ys[i]), lid: null, i: -1, c: o.c || '#444444' }));
+    });
   return r;
 }
 function tipoActivo() { return tool && tool.k == 'line' ? tool.n : usaDosPuntos(tool) ? 'Pared' : (drag && drag.m == 'h' && drag.o.k == 'line' ? drag.o.n : null); }

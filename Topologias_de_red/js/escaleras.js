@@ -27,3 +27,28 @@ function escalerasDeAbajo() {
 function escalerasFantasma() {           // se dibujan debajo de todo lo de la planta actual y sin recibir clics
   return escalerasDeAbajo().map(o => `<g pointer-events="none" opacity=".6">${dibujarEscalera(o, '', false, null, true)}</g>`).join('');
 }
+
+// ---------- No se puede tapar la escalera de la planta de abajo ----------
+// Al colocar una escalera, si su rectángulo (con giro) pisa total o parcialmente a una escalera de la planta inmediatamente inferior, no se coloca y salta un aviso.
+// Si solo se tocan por el borde no cuenta como obstrucción.
+function polyEsc(o) {                    // esquinas reales (con giro) de una escalera
+  const { xs, ys } = esqRot([[o.x - o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y + o.h / 2], [o.x - o.w / 2, o.y + o.h / 2]], { x: o.x, y: o.y }, o.rot || 0);
+  return xs.map((x, i) => ({ x, y: ys[i] }));
+}
+function solapanPoly(A, B) {             // dos rectángulos (eje de separación): true si se pisan
+  for (const P of [A, B]) for (let i = 0; i < P.length; i++) {
+    const a = P[i], b = P[(i + 1) % P.length], nx = -(b.y - a.y), ny = b.x - a.x, pr = Q => Q.map(q => q.x * nx + q.y * ny), pa = pr(A), pb = pr(B);
+    if (Math.max(...pa) <= Math.min(...pb) + 1e-6 || Math.max(...pb) <= Math.min(...pa) + 1e-6) return false;
+  }
+  return true;
+}
+function escaleraObstruida(t) {          // escalera de la planta de abajo que taparía la nueva escalera t (o null)
+  const i = S.plantas.findIndex(p => p.id == S.plantaAct); if (i < 1) return null;
+  const q = S.plantas[i - 1], P = polyEsc(t);
+  const o = S.objs.find(o => o.k == 'item' && o.n == 'Escalera' && o.pl == q.id && solapanPoly(P, polyEsc(o)));
+  return o ? { o, planta: q } : null;
+}
+function avisoEmergente(msg) {           // cartel visible en el centro del área de trabajo durante unos segundos
+  let el = $('#toast'); if (!el) { el = document.createElement('div'); el.id = 'toast'; el.setAttribute('role', 'alert'); el.style.cssText = 'position:absolute;left:50%;top:40px;transform:translateX(-50%);z-index:5;max-width:min(460px,90%);padding:12px 16px;border-radius:10px;background:#b52b27;color:#fff;font-size:14px;box-shadow:0 6px 22px rgba(20,35,43,.35);pointer-events:none'; $('#work').appendChild(el); }
+  el.textContent = '⚠ ' + msg; el.hidden = false; clearTimeout(avisoEmergente.t); avisoEmergente.t = setTimeout(() => { el.hidden = true; }, 4000);
+}

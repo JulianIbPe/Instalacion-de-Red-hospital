@@ -1,6 +1,7 @@
 // ===== colocar.js: la escalera y las formas se colocan con DOS puntos (clic-clic, o pulsar y arrastrar hasta soltar) =====
 // Escalera y formas con lados: los dos puntos son esquinas (extremos) opuestas. La escalera pone sus peldaños a lo largo del lado más largo. Círculo: 1.er punto = centro; la distancia al 2.º punto es el radio.
 // Ambos puntos se pegan a los extremos ○ de las paredes (nodos.js) y, con ◇ Medio (tecla M), a los puntos medios (iman.js).
+// Una escalera que pise la escalera de la planta inferior no se coloca y avisa (escaleras.js).
 // Mientras se elige el 2.º punto, la pieza se ve en vista previa (tmp, con pa = 1.er punto y pb = punto actual).
 const usaDosPuntos = t => !!t && (t.k == 'shape' || (t.k == 'item' && t.n == 'Escalera'));
 const COLOCAR_MIN = .15;                 // distancia mínima entre los dos puntos (m)
@@ -17,6 +18,10 @@ function ajustarColocacion(t, b) {       // recalcula la pieza en vista previa s
 }
 function terminarColocacion() {          // confirma la pieza en vista previa (si los puntos no están casi juntos)
   const t = tmp; if (!t || !t.pa || !t.pb || Math.hypot(t.pb.x - t.pa.x, t.pb.y - t.pa.y) < COLOCAR_MIN) return false;
+  if (t.k == 'item' && t.n == 'Escalera') {   // no se puede tapar la escalera de la planta de abajo
+    const ob = escaleraObstruida(t);
+    if (ob) { const m = 'No se puede colocar la escalera aquí: obstruye la escalera de «' + ob.planta.nombre + '» (planta inferior)'; tmp = null; drag = null; avisoMsg = '⚠ ' + m; avisoEmergente(m); return false; }
+  }
   delete t.pa; delete t.pb; tmp = null; add(t); return true;
 }
 function clicDosPuntos(p, e) {           // clic con la herramienta Escalera o una forma
