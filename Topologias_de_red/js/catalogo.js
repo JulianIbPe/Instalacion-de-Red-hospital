@@ -36,6 +36,6 @@ $('#items').onclick = e => {
   const d = CAT[tab][b.dataset.i];
   setTool(tool === d ? null : d);                 // volver a pulsar el objeto ya elegido lo suelta y activa Seleccionar
 };
-function setTool(d) { tool = d; tmp = null; sel = null; multi = []; selEdge = null; avisoMsg = ''; snapPt = null; if (d && d.k == 'line') $('#col').value = d.c; menu(); render(); }
+function setTool(d) { tool = d; tmp = null; sel = null; multi = []; selEdge = null; avisoMsg = ''; snapPt = null; if (d && d.k == 'line') $('#col').value = d.c; else if (d && d.n == 'Escalera') $('#col').value = '#444444'; menu(); render(); }   // la escalera empieza con el gris de las paredes
 $('#bsel').onclick = () => setTool(null);
 $('#bmed').onclick = () => setTool(tool && tool.k == 'medida' ? null : { k: 'medida' });   // igual: un segundo clic vuelve a Seleccionar

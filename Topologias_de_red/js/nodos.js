@@ -1,6 +1,7 @@
 // ===== nodos.js: al dibujar con un tipo de línea (cable, pared...), se marcan los nodos de las líneas del MISMO tipo y el cursor se pega a ellos =====
 // Una línea nueva puede quedar unida a un nodo de otra: su punto guarda {rl: id de la línea, ri: índice del nodo} y lo sigue si ese nodo se mueve.
 // Paredes: cuentan todos los vértices (cada conexión). Resto de cables: solo los extremos.
+// Al colocar una escalera o una forma (dos puntos) se marcan los extremos de las paredes y el cursor se pega a ellos (sin unir nada).
 let snapNodo = null;                                    // nodo al que está pegado el cursor: {lid, i} (lid null = punto de la línea que se está dibujando)
 function raizNodo(lid, i) {                             // sigue la cadena de enlaces hasta el nodo "original"
   let L = byId(lid), q = L.pts[i], n = 0;
@@ -21,7 +22,7 @@ function nodosDeTipo(tipo, ex) {
     tmp.pts.slice(0, -1).forEach((q, i) => { if (tipo == 'Pared' || i == 0) r.push({ ...pt(q), lid: null, i, c: tmp.c }); });
   return r;
 }
-function tipoActivo() { return tool && tool.k == 'line' ? tool.n : (drag && drag.m == 'h' && drag.o.k == 'line' ? drag.o.n : null); }
+function tipoActivo() { return tool && tool.k == 'line' ? tool.n : usaDosPuntos(tool) ? 'Pared' : (drag && drag.m == 'h' && drag.o.k == 'line' ? drag.o.n : null); }
 function exclusion() { return drag && drag.m == 'h' && drag.o.k == 'line' ? raizNodo(drag.o.id, +drag.h) : null; }
 function imanNodos(p) {                                 // pega el cursor al nodo más cercano (~18 px) del mismo tipo
   const tipo = tipoActivo(); if (!tipo) return;

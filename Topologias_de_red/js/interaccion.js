@@ -8,7 +8,7 @@ function finishLine() {
 }
 svg.addEventListener('pointerdown', e => {
   svg.setPointerCapture(e.pointerId); let p = toW(e); avisoMsg = '';
-  if (e.button == 2) { finishLine(); if (tmp && tmp.k == 'medida') { tmp = null; render(); } return; }
+  if (e.button == 2) { finishLine(); if (tmp && (tmp.k == 'medida' || tmp.pa)) { tmp = null; drag = null; render(); } return; }   // clic derecho cancela la medición o la pieza a medio colocar
   if (e.button == 1) { drag = { m: 'pan', sx: e.clientX, sy: e.clientY, ox: V.ox, oy: V.oy }; return; }
   // Doble clic detectado a mano: la página se redibuja en cada clic y el evento 'dblclick' nativo se pierde.
   const now = Date.now(), dbl = !e.shiftKey && now - lastDown.t < 350 && Math.hypot(e.clientX - lastDown.x, e.clientY - lastDown.y) < 6;
@@ -33,9 +33,10 @@ svg.addEventListener('pointerdown', e => {
   }
   if (tool.k == 'puerta') { colocarPuerta(e); return; }   // las puertas validan la capa de su pared
   if (!capaEditable()) { avisoMsg = '⚠ La capa «' + capaActual().nombre + '» está oculta o bloqueada: elige otra capa para dibujar'; render(); return; }
-  if (medioOn && tool.k != 'medida' && tool.k != 'line') { snapPt = null; snapMedio = false; imanMedio(rawW(e)); if (snapMedio) p = { x: snapPt.x, y: snapPt.y }; }   // colocar justo en el punto medio
-  if (tool.k == 'item') add({ k: 'item', n: tool.n, ic: tool.ic, w: tool.w, h: tool.h, x: p.x, y: p.y, label: '' });
-  else if (tool.k == 'shape') add({ k: 'shape', n: tool.n, x: p.x, y: p.y, w: 1.2, h: 1.2, c: col(), f: fil(), ls: lin(), label: '' });
+  if (usaDosPuntos(tool)) { snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e)); if (snapPt) p = { x: snapPt.x, y: snapPt.y }; }   // escalera y formas: se pegan a los extremos de las paredes o, con ◇ Medio, a los puntos medios
+  else if (medioOn && tool.k != 'medida' && tool.k != 'line') { snapPt = null; snapMedio = false; imanMedio(rawW(e)); if (snapMedio) p = { x: snapPt.x, y: snapPt.y }; }   // colocar justo en el punto medio
+  if (usaDosPuntos(tool)) clicDosPuntos(p, e);               // escalera y formas: dos puntos (ver colocar.js)
+  else if (tool.k == 'item') add({ k: 'item', n: tool.n, ic: tool.ic, w: tool.w, h: tool.h, x: p.x, y: p.y, label: '' });
   else if (tool.k == 'texto') { const t = prompt('Texto:'); if (t) add({ k: 'texto', x: p.x, y: p.y, label: t }); }
   else if (tool.k == 'zona') { tmp = { k: 'zona', s: tool.s, x: p.x, y: p.y, w: 0, h: 0, c: col(), f: fil(), ls: lin(), label: '' }; drag = { m: 'zona', x0: p.x, y0: p.y }; }
   else if (tool.k == 'medida') {
@@ -59,7 +60,7 @@ svg.addEventListener('pointermove', e => {
   snapMedio = false; snapNodo = null; if (!snapPt) imanNodos(rawW(e));
   if (!snapPt && !eligiendoCota) imanMedio(rawW(e));
   const q = snapPt || p;   // el cursor se pega al imán más cercano (puntos, nodos o puntos medios)
-  if (tmp && tmp.k == 'line') tmp.cur = snapPt || p; else if (eligiendoCota) tmp.off = offDe(tmp, p); else if (tmp && tmp.k == 'medida') tmp.b = q;
+  if (tmp && tmp.k == 'line') tmp.cur = snapPt || p; else if (eligiendoCota) tmp.off = offDe(tmp, p); else if (tmp && tmp.k == 'medida') tmp.b = q; else if (tmp && tmp.pa) ajustarColocacion(tmp, q);
   if (drag) {
     const d = drag;
     if (d.m == 'pan') { V.ox = d.ox + e.clientX - d.sx; V.oy = d.oy + e.clientY - d.sy; }
@@ -91,7 +92,8 @@ svg.addEventListener('pointermove', e => {
   }
   render();
 });
-svg.addEventListener('pointerup', () => {
+svg.addEventListener('pointerup', e => {
+  if (drag && drag.m == 'colocar' && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) terminarColocacion();   // pulsar, arrastrar y soltar también coloca
   if (drag && drag.m == 'box') { if (drag.moved) fijarSeleccion(dentroDeCaja()); else if (drag.id != null) alternar(drag.id); cajaSel = null; }
   if (drag && drag.m == 'zona') { if (tmp.w > .2 && tmp.h > .2) add(tmp); tmp = null; }
   drag = null; render();
