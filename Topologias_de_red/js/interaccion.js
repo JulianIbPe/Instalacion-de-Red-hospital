@@ -16,6 +16,11 @@ svg.addEventListener('pointerdown', e => {
   if (dbl) {
     if (tmp && tmp.k == 'line') { finishLine(); return; }
     const t = e.target.closest('[data-id]'), o = t && byId(t.dataset.id);
+    const fl = e.target.closest('[data-flecha]');                       // flecha de una escalera: la negra sube de planta y la azul baja
+    if (!tool && fl) { drag = null; irPlanta(fl.dataset.flecha == 'baja' ? -1 : 1); return; }
+    if (!tool && o && o.n == 'Ascensor' && !e.altKey) {                 // ascensor: sube (o baja si ya es la planta más alta); Alt+doble clic = etiqueta
+      const i = S.plantas.findIndex(p => p.id == S.plantaAct); drag = null; irPlanta(i < S.plantas.length - 1 || i < 1 ? 1 : -1); return;
+    }
     if (!tool && o && o.k != 'medida') { const v = prompt('Etiqueta:', o.label || ''); if (v !== null && v !== (o.label || '')) { push(); o.label = v; drag = null; render(); } return; }
   }
   if (!tool) {

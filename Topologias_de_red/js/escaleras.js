@@ -15,7 +15,9 @@ function punta(x, y, dx, dy, col, k = 1) {   // cabeza de flecha con la punta en
   const L = .24 * k, W = .11 * k, bx = x - dx * L, by = y - dy * L;
   return `<polygon points="${x},${y} ${bx - dy * W},${by + dx * W} ${bx + dy * W},${by - dx * W}" fill="${col}" pointer-events="none"/>`;
 }
-const flecha = (d, col, hx, hy, dx, dy, k) => `<path d="${d}" fill="none" stroke="${col}" stroke-width=".05" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>` + punta(hx, hy, dx, dy, col, k);
+const flecha = (d, col, hx, hy, dx, dy, k) => `<path d="${d}" fill="none" stroke="${col}" stroke-width=".05" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`
+  + `<path data-flecha="${col == COL_BAJA ? 'baja' : 'sube'}" d="${d}" fill="none" stroke="transparent" stroke-width=".3" stroke-linecap="round" pointer-events="stroke" style="cursor:pointer"/>`   // zona de clic de la flecha (doble clic = cambiar de planta, ver interaccion.js)
+  + punta(hx, hy, dx, dy, col, k);
 
 const rotulo = (x, y, fs, t = 'Escalera') => `<text x="${x}" y="${y}" font-size="${fs}" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#1d2a2f" stroke="#fff" stroke-width="${fs * .3}" paint-order="stroke" font-family="Segoe UI,Arial,sans-serif" pointer-events="none">${t}</text>`;
 
@@ -101,7 +103,7 @@ function escalerasDeAbajo() {
   const aca = S.objs.filter(o => esEsc(o) && o.pl == S.plantaAct);
   return escalerasInferiores().filter(o => !aca.some(a => igualEsc(a, o)));
 }
-function escalerasFantasma() {           // se dibujan debajo de todo lo de la planta actual y sin recibir clics
+function escalerasFantasma() {           // se dibujan debajo de todo lo de la planta actual y sin recibir clics (salvo la flecha: doble clic en ella baja a la planta inferior)
   return escalerasDeAbajo().map(o => `<g pointer-events="none" opacity=".6">${dibujarEscalera(o, '', false, null, true)}</g>`).join('');
 }
 
@@ -142,4 +144,11 @@ function escaleraObstruida(t) {          // null si se puede colocar; si no, {o,
 function avisoEmergente(msg) {           // cartel visible en el centro del área de trabajo durante unos segundos
   let el = $('#toast'); if (!el) { el = document.createElement('div'); el.id = 'toast'; el.setAttribute('role', 'alert'); el.style.cssText = 'position:absolute;left:50%;top:40px;transform:translateX(-50%);z-index:5;max-width:min(460px,90%);padding:12px 16px;border-radius:10px;background:#b52b27;color:#fff;font-size:14px;box-shadow:0 6px 22px rgba(20,35,43,.35);pointer-events:none'; $('#work').appendChild(el); }
   el.textContent = '⚠ ' + msg; el.hidden = false; clearTimeout(avisoEmergente.t); avisoEmergente.t = setTimeout(() => { el.hidden = true; }, 4000);
+}
+
+// ---------- Cambiar de planta con doble clic (flecha de una escalera o ascensor; ver interaccion.js) ----------
+function irPlanta(d) {                   // pasa a la planta de arriba (d = 1) o de abajo (d = -1), igual que pulsar su nombre en el panel
+  const i = S.plantas.findIndex(p => p.id == S.plantaAct), q = S.plantas[i + d];
+  if (!q) { avisoEmergente(d > 0 ? 'No hay una planta superior: añade una con «＋ Planta»' : 'No hay una planta inferior'); return; }
+  S.plantaAct = q.id; S.capaAct = (q.capas.find(x => x.id == q.ca) || q.capas[0]).id; limpiarSel(); panel(); render();
 }
