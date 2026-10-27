@@ -104,7 +104,25 @@ function escalerasDeAbajo() {
   return escalerasInferiores().filter(o => !aca.some(a => igualEsc(a, o)));
 }
 function escalerasFantasma() {           // se dibujan debajo de todo lo de la planta actual y sin recibir clics (salvo la flecha: doble clic en ella baja a la planta inferior)
-  return escalerasDeAbajo().map(o => `<g pointer-events="none" opacity=".6">${dibujarEscalera(o, '', false, null, true)}</g>`).join('');
+  return escalerasDeAbajo().map(o => `<g pointer-events="none" opacity=".6">${dibujarEscalera(o, '', false, null, true)}</g>`).join('') + cablesFantasma();
+}
+// Cables que pasan por una escalera de la planta de abajo o de la de arriba: se ven aquí (semitransparentes y sin recibir clics), recortados a la forma de esa escalera.
+function cablesFantasma() {
+  const i = S.plantas.findIndex(p => p.id == S.plantaAct); let h = '';
+  [-1, 1].forEach(d => {
+    const q = S.plantas[i + d]; if (!q) return;
+    const vis = o => o.pl == q.id && (capaDe(o) || {}).visible;                       // solo lo que está en capas visibles de esa planta
+    const cables = S.objs.filter(o => o.k == 'line' && o.n != 'Pared' && vis(o));
+    if (!cables.length) return;
+    S.objs.filter(o => esEsc(o) && vis(o)).forEach(e => {
+      const b = bboxDe(e), cs = cables.filter(c => { const k = bboxDe(c); return k.x0 <= b.x1 && k.x1 >= b.x0 && k.y0 <= b.y1 && k.y1 >= b.y0; });
+      if (!cs.length) return;
+      const cid = 'cf' + e.id;
+      h += `<clipPath id="${cid}"><polygon points="${polyEsc(e).map(v => v.x + ',' + v.y).join(' ')}"/></clipPath><g clip-path="url(#${cid})" opacity=".5" pointer-events="none">`
+        + cs.map(c => `<polyline points="${c.pts.map(v => pt(v)).map(v => v.x + ',' + v.y).join(' ')}" fill="none" stroke="${c.c}" stroke-width="${c.w}" stroke-dasharray="${c.d}" stroke-linecap="round" stroke-linejoin="round"/>`).join('') + '</g>';
+    });
+  });
+  return h;
 }
 
 // ---------- Reglas al colocar sobre la escalera de la planta de abajo ----------
@@ -151,4 +169,23 @@ function irPlanta(d) {                   // pasa a la planta de arriba (d = 1) o
   const i = S.plantas.findIndex(p => p.id == S.plantaAct), q = S.plantas[i + d];
   if (!q) { avisoEmergente(d > 0 ? 'No hay una planta superior: añade una con «＋ Planta»' : 'No hay una planta inferior'); return; }
   S.plantaAct = q.id; S.capaAct = (q.capas.find(x => x.id == q.ca) || q.capas[0]).id; limpiarSel(); panel(); render();
+}
+function flechaEn(e) {                   // 'sube' | 'baja' | null: flecha de escalera bajo el cursor. Se mide contra el dibujo de la flecha (margen ~10 px) y no depende de qué elemento reciba el clic
+  let best = null, bd = 10;
+  document.querySelectorAll('#svg [data-flecha]').forEach(pa => {
+    const m = pa.getScreenCTM(), L = pa.getTotalLength(), n = Math.max(8, Math.ceil(L * V.z / 6));   // un punto cada ~6 px
+    for (let i = 0; i <= n; i++) {
+      const q = pa.getPointAtLength(L * i / n), s = new DOMPoint(q.x, q.y).matrixTransform(m), dd = Math.hypot(s.x - e.clientX, s.y - e.clientY);
+      if (dd < bd) { bd = dd; best = pa.dataset.flecha; }
+    }
+  });
+  return best;
+}
+function cableAOtraPlanta(d, p) {        // se está dibujando un cable y se toca una flecha: el cable termina ahí y sigue en la otra planta, desde el mismo punto
+  const i = S.plantas.findIndex(x => x.id == S.plantaAct);
+  if (!S.plantas[i + d]) { avisoEmergente(d > 0 ? 'No hay una planta superior: añade una con «＋ Planta»' : 'No hay una planta inferior'); return; }
+  const t = tmp, a = t.pts[t.pts.length - 1], seguir = { k: 'line', n: t.n, c: t.c, w: t.w, d: t.d, pts: [{ x: p.x, y: p.y }], label: '' };
+  delete t.cur; if (Math.hypot(p.x - a.x, p.y - a.y) >= .05 || a.ref) t.pts.push({ x: p.x, y: p.y });   // último punto del cable en esta planta: la flecha
+  if (t.pts.length > 1) add(t);          // queda guardado en la planta y capa actuales
+  irPlanta(d); tmp = seguir;             // irPlanta limpia lo que se estaba dibujando: se retoma el cable nuevo en la otra planta
 }

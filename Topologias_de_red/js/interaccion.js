@@ -16,8 +16,8 @@ svg.addEventListener('pointerdown', e => {
   if (dbl) {
     if (tmp && tmp.k == 'line') { finishLine(); return; }
     const t = e.target.closest('[data-id]'), o = t && byId(t.dataset.id);
-    const fl = e.target.closest('[data-flecha]');                       // flecha de una escalera: la negra sube de planta y la azul baja
-    if (!tool && fl) { drag = null; irPlanta(fl.dataset.flecha == 'baja' ? -1 : 1); return; }
+    const fl = !tool && flechaEn(e);                                    // flecha de una escalera: la negra sube de planta y la azul baja
+    if (fl) { drag = null; irPlanta(fl == 'baja' ? -1 : 1); return; }
     if (!tool && o && o.n == 'Ascensor' && !e.altKey) {                 // ascensor: sube (o baja si ya es la planta más alta); Alt+doble clic = etiqueta
       const i = S.plantas.findIndex(p => p.id == S.plantaAct); drag = null; irPlanta(i < S.plantas.length - 1 || i < 1 ? 1 : -1); return;
     }
@@ -38,6 +38,10 @@ svg.addEventListener('pointerdown', e => {
   }
   if (tool.k == 'puerta') { colocarPuerta(e); return; }   // las puertas validan la capa de su pared
   if (!capaEditable()) { avisoMsg = '⚠ La capa «' + capaActual().nombre + '» está oculta o bloqueada: elige otra capa para dibujar'; render(); return; }
+  if (tool.k == 'line' && tmp && tmp.k == 'line') {          // cable a medio dibujar: tocar una flecha de escalera lo lleva a la otra planta y allí sigue
+    const fl = flechaEn(e);                                             // se busca por posición (ver escaleras.js): el propio cable en curso tapa la flecha bajo el cursor
+    if (fl) { cableAOtraPlanta(fl == 'baja' ? -1 : 1, p); render(); return; }
+  }
   if (usaDosPuntos(tool)) { snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e)); if (snapPt) p = { x: snapPt.x, y: snapPt.y }; }   // escalera y formas: se pegan a los extremos de las paredes o, con ◇ Medio, a los puntos medios
   else if (medioOn && tool.k != 'medida' && tool.k != 'line') { snapPt = null; snapMedio = false; imanMedio(rawW(e)); if (snapMedio) p = { x: snapPt.x, y: snapPt.y }; }   // colocar justo en el punto medio
   if (usaDosPuntos(tool)) clicDosPuntos(p, e);               // escalera y formas: dos puntos (ver colocar.js)
