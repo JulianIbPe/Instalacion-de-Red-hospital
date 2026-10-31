@@ -59,7 +59,7 @@ const PUERTA_W = .9, PUERTA_MIN = .4;
 function segmentoCercano(r, dmax = .5) { // tramo de pared más cercano al punto r: {o, si, a, u, L, t, dist}
   let best = null, bd = dmax;
   S.objs.filter(esVisible).forEach(o => {
-    if (o.k != 'line' || o.n != 'Pared') return; const P = o.pts.map(q => pt(q));
+    if (o.k != 'line' || !esPared(o)) return; const P = o.pts.map(q => pt(q));
     for (let i = 0; i < P.length - 1; i++) {
       const a = P[i], b = P[i + 1], L = Math.hypot(b.x - a.x, b.y - a.y); if (L < .4) continue;
       const u = { x: (b.x - a.x) / L, y: (b.y - a.y) / L }, t = Math.min(Math.max((r.x - a.x) * u.x + (r.y - a.y) * u.y, 0), L), dist = Math.hypot(r.x - (a.x + u.x * t), r.y - (a.y + u.y * t));

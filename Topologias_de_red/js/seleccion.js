@@ -14,7 +14,7 @@ function bboxDe(o) {                            // rectángulo que ocupa un obje
   else if (o.k == 'medida') { const n = normalMed(o), f = o.off || 0; xs = [o.a.x, o.b.x, o.a.x + n.nx * f, o.b.x + n.nx * f]; ys = [o.a.y, o.b.y, o.a.y + n.ny * f, o.b.y + n.ny * f]; }
   else if (o.k == 'zona') ({ xs, ys } = esqRot([[o.x, o.y], [o.x + o.w, o.y], [o.x + o.w, o.y + o.h], [o.x, o.y + o.h]], { x: o.x + o.w / 2, y: o.y + o.h / 2 }, o.rot));
   else if (o.k == 'texto') { const a = o.x + (o.label || ' ').length * .27; ({ xs, ys } = esqRot([[o.x, o.y - .45], [a, o.y - .45], [a, o.y], [o.x, o.y]], { x: o.x, y: o.y }, o.rot)); }
-  else if (o.n == 'Círculo' && o.rot) { const t = o.rot * Math.PI / 180, a = o.w / 2, b = o.h / 2, hx = Math.hypot(a * Math.cos(t), b * Math.sin(t)), hy = Math.hypot(a * Math.sin(t), b * Math.cos(t)); xs = [o.x - hx, o.x + hx]; ys = [o.y - hy, o.y + hy]; }
+  else if (esCirculo(o) && o.rot) { const t = o.rot * Math.PI / 180, a = o.w / 2, b = o.h / 2, hx = Math.hypot(a * Math.cos(t), b * Math.sin(t)), hy = Math.hypot(a * Math.sin(t), b * Math.cos(t)); xs = [o.x - hx, o.x + hx]; ys = [o.y - hy, o.y + hy]; }
   else ({ xs, ys } = esqRot([[o.x - o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y + o.h / 2], [o.x - o.w / 2, o.y + o.h / 2]], { x: o.x, y: o.y }, o.rot));
   return { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
 }

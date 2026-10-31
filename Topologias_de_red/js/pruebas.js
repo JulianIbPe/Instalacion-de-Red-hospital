@@ -1,4 +1,4 @@
-// ===== pruebas.js: pruebas de lógica, referencia de dibujo y medición de rendimiento (Fases 0, 1 y 2) =====
+// ===== pruebas.js: pruebas de lógica, referencia de dibujo y medición de rendimiento (Fases 0, 1, 2 y 2B) =====
 // Solo se carga al abrir index.html?pruebas=1. Aparece un panel «Pruebas» abajo a la izquierda.
 // Cada comprobación usa un proyecto de prueba y, al terminar, restaura el proyecto abierto (no toca el historial).
 // Aun así, conviene guardar el trabajo antes de ejecutarlas.
@@ -337,6 +337,63 @@ const TRP = (() => {
     const e = ESQ.leer(v1(fEscaleras().estado)); afirmar(e.ok && e.estado.objs.filter(x => x.tipo == 'escalera').length === 5 && e.estado.objs.filter(x => x.tipo == 'cable').length === 1 && e.estado.objs.filter(x => x.tipo == 'pared').length === 1, 'escaleras (las tres variantes), cable y pared migrados');
   });
 
+  // ---------- Pruebas de la Fase 2B (el tipo estable decide el comportamiento, no el nombre visible) ----------
+  const renombrar = estado => { const e = JSON.parse(JSON.stringify(estado)); e.objs.forEach(completarTipo); e.objs.forEach(o => { if (o.n) o.n = 'Z-' + o.n; }); return e; };   // tipo escrito y nombre visible cambiado
+  function sonda() {                           // resultados de las funciones que antes decidían por nombre, sobre el proyecto abierto
+    const out = {}, rep = o => JSON.parse(JSON.stringify(o));
+    out.bbox = S.objs.map(o => bboxDe(o)); out.medios = puntosMedios(); const sg = segmentoCercano({ x: 5, y: 1.2 }, 2); out.seg = sg && sg.o.id;
+    out.nodos = ['pared', 'utp6', 'fibra'].map(k => nodosDeTipo(k).length); out.uDe = S.objs.filter(o => o.k == 'shape').map(o => uDe(o).length);
+    out.abajo = [escalerasInferiores().length, escalerasDeAbajo().length];
+    out.rot = S.objs.filter(o => o.k == 'shape' || o.k == 'item').map(o => { const c = rep(o); rotarDesde(c, rep(o), 90, { x: 5, y: 5 }); return [c.x, c.y, c.rot, c.u && c.u.length]; });
+    out.act = [null, CAT['Cables'][1], CAT['Edificio'][0], CAT['Formas'][0]].map(t => { tool = t; return tipoActivo(); }); tool = null;
+    if (S.plantas.length > 1) { irA('p2'); out.reglas = [['', 3, 3, 1.2, 2.8], ['descanso', 3, 3, 1.2, 2.8], ['descanso', 6, 3, 1.6, 2.8], ['espiral', 6, 3, 1.6, 2.8], ['', 15, 3, 1, 2]].map(([t, x, y, w, h]) => { const r = escaleraObstruida({ k: 'item', n: 'Escalera', ...(t ? { t } : {}), x, y, w, h, rot: 0 }); return r ? r.msg.slice(0, 40) : null; }); irA('p1'); }
+    return JSON.stringify(out);
+  }
+  prueba('Fase 2B: instalación (catálogo de formas con subtipo y add() asigna el tipo)', () => {
+    afirmar(typeof NOMBRE_FORMA !== 'undefined' && SH.circulo && !SH['Círculo'], 'js/catalogo.js no es el de la Fase 2B (SH debe usar subtipos)');
+    igual(CAT['Formas'].map(d => [d.n, d.tipo, d.sub]), [['Rectángulo', 'forma', 'rectangulo'], ['Círculo', 'forma', 'circulo'], ['Triángulo', 'forma', 'triangulo'], ['Rombo', 'forma', 'rombo'], ['Hexágono', 'forma', 'hexagono']], 'catálogo de formas');
+    conProyecto(fVacio().estado, () => {
+      const f = [add({ k: 'item', n: 'Router', ic: 'x', w: .8, h: .8, x: 1, y: 1, label: '' }), add({ k: 'line', n: 'Fibra óptica', c: '#f39c12', w: .06, d: '', pts: [{ x: 0, y: 0 }, { x: 1, y: 1 }], label: '' }),
+        add({ k: 'line', n: 'Pared', c: '#444444', w: .2, d: '', pts: [{ x: 0, y: 0 }, { x: 1, y: 0 }], label: '' }), add({ k: 'shape', n: 'Círculo', w: 1, h: 1, x: 3, y: 3, c: '#000000', f: 'sol', ls: 'con', label: '' }),
+        add({ k: 'item', n: 'Ascensor', ic: 'x', w: 1.5, h: 1.5, x: 5, y: 5, label: '' }), add({ k: 'item', n: 'Escalera', ic: 'x', w: 1, h: 2, x: 7, y: 7, t: 'espiral' })];
+      igual(f.map(o => o.tipo + (o.sub ? '/' + o.sub : '')), ['dispositivo/router', 'cable/fibra', 'pared', 'forma/circulo', 'ascensor', 'escalera'], 'tipos de los objetos nuevos');
+    });
+  });
+  prueba('Fase 2B: cambiar el nombre visible no cambia el dibujo (6 proyectos de prueba)', () => {
+    fixtures().forEach(fx => igual(huella({ ...fx, estado: renombrar(fx.estado) }), huella(fx), fx.nombre + ': el dibujo cambió al renombrar'));
+  });
+  prueba('Fase 2B: cambiar el nombre visible no cambia el comportamiento (medidas, imanes, nodos, giro, reglas de escaleras)', () => {
+    fixtures().filter(fx => ['dispositivos y cables', 'paredes y puertas', 'formas, zonas y medidas', 'escaleras y plantas'].includes(fx.nombre)).forEach(fx => {
+      const a = conProyecto(fx.estado, sonda), b = conProyecto(renombrar(fx.estado), sonda); ser(b, a, fx.nombre + ': el comportamiento cambió al renombrar');
+    });
+  });
+  prueba('Fase 2B: el tipo decide y no el nombre (un objeto llamado «Escalera» de otro tipo no es escalera)', () => {
+    igual([esEscalera({ k: 'item', n: 'Escalera', tipo: 'dispositivo' }), esEscalera({ k: 'item', n: 'Cosa', tipo: 'escalera' }), esPared({ k: 'line', n: 'Pared', tipo: 'cable', sub: 'utp6' }), esPared({ k: 'line', n: 'Muro', tipo: 'pared' }),
+      esCirculo({ k: 'shape', n: 'Círculo', tipo: 'forma', sub: 'rombo' }), esCirculo({ k: 'shape', n: 'Óvalo', tipo: 'forma', sub: 'circulo' }), esAscensor({ k: 'item', n: 'Ascensor', tipo: 'dispositivo' }), esAscensor({ k: 'item', n: 'Lift', tipo: 'ascensor' })],
+      [false, true, false, true, false, true, false, true], 'predicados');
+    conProyecto(fVacio().estado, () => {      // una línea llamada «Pared» pero de tipo cable no acepta puertas ni agrupa nodos como pared
+      add({ k: 'line', n: 'Pared', tipo: 'cable', sub: 'utp6', c: '#2e86de', w: .06, d: '', pts: [{ x: 0, y: 3 }, { x: 8, y: 3 }], label: '' });
+      afirmar(!segmentoCercano({ x: 4, y: 3 }, 1), 'un cable llamado «Pared» se trató como pared'); ser(nodosDeTipo('pared').length, 0, 'nodos de pared'); ser(nodosDeTipo('utp6').length, 2, 'nodos del cable');
+    });
+  });
+  prueba('Fase 2B: colocar con dos puntos asigna el tipo (forma con subtipo, escalera)', () => {
+    conProyecto(fVacio().estado, () => {
+      const out = [];
+      for (const d of [CAT['Formas'][1], CAT['Edificio'].find(x => x.esc == 'espiral'), CAT['Edificio'].find(x => x.n == 'Escalera')]) {
+        tool = d; tmp = null; drag = null; clicDosPuntos({ x: 2, y: 2 }, { clientX: 0, clientY: 0 }); out.push([tmp.tipo, esCirculo(tmp), esEscalera(tmp)]);
+        ajustarColocacion(tmp, { x: 4, y: 3 }); terminarColocacion();
+      }
+      igual(out, [['forma', true, false], ['escalera', false, true], ['escalera', false, true]], 'piezas en vista previa');
+      igual(S.objs.map(o => o.tipo + '/' + (o.sub || o.t || '')), ['forma/circulo', 'escalera/espiral', 'escalera/'], 'objetos colocados');
+    });
+  });
+  prueba('Fase 2B: guardar y abrir conserva tipo y subtipo aunque el nombre visible haya cambiado', () => {
+    conR(() => {
+      const e = renombrar(fFormas().estado), g = ESQ.serializar(e, R); afirmar(g.ok, g.error); const l = ESQ.leer(g.texto); afirmar(l.ok && !l.avisos.length, 'no reabre limpio');
+      igual(l.estado.objs.filter(o => o.k == 'shape').map(o => o.tipo + '/' + o.sub), ['forma/rectangulo', 'forma/hexagono', 'forma/circulo', 'forma/triangulo'], 'tipos tras guardar y abrir');
+    });
+  });
+
   // ---------- Panel ----------
   const CLAVE_REF = 'topologias_ref_f0', CLAVE_PERF = 'topologias_perf_f0', CLAVE_PERF1 = 'topologias_perf_f1';
   const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
@@ -350,7 +407,7 @@ const TRP = (() => {
     if (document.getElementById('trp')) return;
     const d = document.createElement('div'); d.id = 'trp';
     d.style.cssText = 'position:fixed;left:10px;bottom:36px;z-index:30;width:440px;max-height:60vh;display:flex;flex-direction:column;background:#fff;border:1px solid #14232b;border-radius:10px;box-shadow:0 6px 22px rgba(0,0,0,.3);font:12px/1.4 "Segoe UI",Arial,sans-serif;color:#1d2a2f';
-    d.innerHTML = '<div style="display:flex;gap:4px;flex-wrap:wrap;padding:8px;border-bottom:1px solid #d3dadd;background:#eef2f4;border-radius:10px 10px 0 0"><b style="flex:1">Pruebas (Fases 0 a 2)</b><button data-a="x">✕</button>'
+    d.innerHTML = '<div style="display:flex;gap:4px;flex-wrap:wrap;padding:8px;border-bottom:1px solid #d3dadd;background:#eef2f4;border-radius:10px 10px 0 0"><b style="flex:1">Pruebas (Fases 0 a 2B)</b><button data-a="x">✕</button>'
       + '<button data-a="run">Ejecutar pruebas</button><button data-a="cap">Guardar referencia de dibujo</button><button data-a="cmp">Comparar con la referencia</button><button data-a="perf">Medir rendimiento</button></div>'
       + '<pre id="trp-out" style="margin:0;padding:8px;overflow:auto;white-space:pre-wrap;flex:1"></pre>';
     document.body.appendChild(d);

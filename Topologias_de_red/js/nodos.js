@@ -11,23 +11,23 @@ function raizNodo(lid, i) {                             // sigue la cadena de en
 function nodosDeTipo(tipo, ex) {
   const r = [];
   S.objs.filter(esVisible).forEach(o => {
-    if (o.k != 'line' || o.n != tipo) return;
+    if (o.k != 'line' || claveLinea(o) != tipo) return;
     o.pts.forEach((q, i) => {
-      if (tipo != 'Pared' && i != 0 && i != o.pts.length - 1) return;
+      if (tipo != 'pared' && i != 0 && i != o.pts.length - 1) return;
       if (ex) { const rz = raizNodo(o.id, i); if (rz.lid == ex.lid && rz.i == ex.i) return; }   // no pegarse a sí mismo ni a lo que depende de ello
       r.push({ ...pt(q), lid: o.id, i, c: o.c });
     });
   });
-  if (tmp && tmp.k == 'line' && tmp.n == tipo)          // puntos ya puestos de la línea en curso (para cerrar un contorno)
-    tmp.pts.slice(0, -1).forEach((q, i) => { if (tipo == 'Pared' || i == 0) r.push({ ...pt(q), lid: null, i, c: tmp.c }); });
-  if (tipo == 'Pared')                                   // esquinas de las escaleras: el cursor se pega a ellas (queda un punto libre, no unido a la escalera)
-    S.objs.filter(o => esVisible(o) && o.k == 'item' && o.n == 'Escalera').forEach(o => {
+  if (tmp && tmp.k == 'line' && claveLinea(tmp) == tipo)          // puntos ya puestos de la línea en curso (para cerrar un contorno)
+    tmp.pts.slice(0, -1).forEach((q, i) => { if (tipo == 'pared' || i == 0) r.push({ ...pt(q), lid: null, i, c: tmp.c }); });
+  if (tipo == 'pared')                                   // esquinas de las escaleras: el cursor se pega a ellas (queda un punto libre, no unido a la escalera)
+    S.objs.filter(o => esVisible(o) && o.k == 'item' && esEscalera(o)).forEach(o => {
       const { xs, ys } = esqRot([[o.x - o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y + o.h / 2], [o.x - o.w / 2, o.y + o.h / 2]], { x: o.x, y: o.y }, o.rot || 0);
       xs.forEach((x, i) => r.push({ x: r3(x), y: r3(ys[i]), lid: null, i: -1, c: o.c || '#444444' }));
     });
   return r;
 }
-function tipoActivo() { return tool && tool.k == 'line' ? tool.n : usaDosPuntos(tool) ? 'Pared' : (drag && drag.m == 'h' && drag.o.k == 'line' ? drag.o.n : null); }
+function tipoActivo() { return tool && tool.k == 'line' ? claveLinea(tool) : usaDosPuntos(tool) ? 'pared' : (drag && drag.m == 'h' && drag.o.k == 'line' ? claveLinea(drag.o) : null); }
 function exclusion() { return drag && drag.m == 'h' && drag.o.k == 'line' ? raizNodo(drag.o.id, +drag.h) : null; }
 function imanNodos(p) {                                 // pega el cursor al nodo más cercano (~18 px) del mismo tipo
   const tipo = tipoActivo(); if (!tipo) return;

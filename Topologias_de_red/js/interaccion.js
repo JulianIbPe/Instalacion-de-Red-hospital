@@ -1,6 +1,6 @@
 // ---------- Interacción ----------
 const col = () => $('#col').value, fil = () => $('#fill').value, lin = () => $('#lstyle').value;
-const add = o => (push(), o.id = nid++, o.pl = S.plantaAct, o.cp = S.capaAct, S.objs.push(o), o);
+const add = o => (push(), o.id = nid++, o.pl = S.plantaAct, o.cp = S.capaAct, completarTipo(o), S.objs.push(o), o);
 function finishLine() {
   if (!tmp || tmp.k != 'line') return; const q = tmp.pts, a = q[q.length - 1], b = q[q.length - 2];
   if (b && Math.hypot(a.x - b.x, a.y - b.y) < .05 && !a.ref) q.pop();
@@ -18,7 +18,7 @@ svg.addEventListener('pointerdown', e => {
     const t = e.target.closest('[data-id]'), o = t && byId(t.dataset.id);
     const fl = !tool && flechaEn(e);                                    // flecha de una escalera: la negra sube de planta y la azul baja
     if (fl) { drag = null; irPlanta(fl == 'baja' ? -1 : 1); return; }
-    if (!tool && o && o.n == 'Ascensor' && !e.altKey) {                 // ascensor: sube (o baja si ya es la planta más alta); Alt+doble clic = etiqueta
+    if (!tool && o && esAscensor(o) && !e.altKey) {                 // ascensor: sube (o baja si ya es la planta más alta); Alt+doble clic = etiqueta
       const i = S.plantas.findIndex(p => p.id == S.plantaAct); drag = null; irPlanta(i < S.plantas.length - 1 || i < 1 ? 1 : -1); return;
     }
     if (!tool && o && o.k != 'medida') { const v = prompt('Etiqueta:', o.label || ''); if (v !== null && v !== (o.label || '')) { push(); o.label = v; drag = null; render(); } return; }
@@ -93,7 +93,7 @@ svg.addEventListener('pointermove', e => {
       const o = d.o; if (!d.pu && (p.x != d.p0.x || p.y != d.p0.y || o.k == 'puerta')) { push(); d.pu = 1; }
       if (o.k == 'zona') redimZona(o, p);
       else if (o.k == 'puerta') redimPuerta(o, d.h, rawW(e));
-      else if (o.k == 'item' && o.n == 'Escalera') redimensionarRot(o, d.h, p);
+      else if (o.k == 'item' && esEscalera(o)) redimensionarRot(o, d.h, p);
       else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else redimensionarRot(o, d.h, p); }
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
       else { const it = itemAt(e); o.pts[d.h] = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p; }

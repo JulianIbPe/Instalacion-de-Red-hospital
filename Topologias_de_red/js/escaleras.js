@@ -6,7 +6,7 @@ const BORDE = .2, SEP = .08;              // BORDE = grosor de una pared; SEP = 
 const DV = .11, DW = .16;                 // escalera con descanso: dos líneas gruesas (grosor DW, centradas a ±DV) con una ranura chica entre ellas (ancho 2·DV−DW)
 const COL_SUBE = '#1d2a2f', COL_BAJA = '#2e86de';
 const tipoEsc = o => o.t || 'recta';
-const esEsc = o => o.k == 'item' && o.n == 'Escalera';
+const esEsc = o => o.k == 'item' && esEscalera(o);
 const NOMBRE_ESC = { recta: 'recta', descanso: 'con descanso', espiral: 'espiral' };
 
 // ---------- Flechas de recorrido ----------
@@ -112,7 +112,7 @@ function cablesFantasma() {
   [-1, 1].forEach(d => {
     const q = S.plantas[i + d]; if (!q) return;
     const vis = o => o.pl == q.id && (capaDe(o) || {}).visible;                       // solo lo que está en capas visibles de esa planta
-    const cables = S.objs.filter(o => o.k == 'line' && o.n != 'Pared' && vis(o));
+    const cables = S.objs.filter(o => o.k == 'line' && !esPared(o) && vis(o));
     if (!cables.length) return;
     S.objs.filter(o => esEsc(o) && vis(o)).forEach(e => {
       const b = bboxDe(e), cs = cables.filter(c => { const k = bboxDe(c); return k.x0 <= b.x1 && k.x1 >= b.x0 && k.y0 <= b.y1 && k.y1 >= b.y0; });

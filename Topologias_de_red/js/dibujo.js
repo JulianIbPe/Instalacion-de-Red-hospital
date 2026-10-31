@@ -13,7 +13,7 @@ function draw(o) {
   } else if (o.k == 'shape') {
     h = dibujarForma(o, id, on, hd);
   } else if (o.k == 'item') {
-    if (o.n == 'Escalera') h = dibujarEscalera(o, id, on, hd); else {   // las tres escaleras (recta, con descanso, espiral) son 'Escalera' con distinto o.t
+    if (esEscalera(o)) h = dibujarEscalera(o, id, on, hd); else {   // las tres escaleras (recta, con descanso, espiral) son 'Escalera' con distinto o.t
     h = `<g ${id} transform="translate(${o.x} ${o.y}) rotate(${o.rot || 0})"><rect x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}" rx=".08" fill="#fff" stroke="#34495e" stroke-width=".04"/><text font-size="${Math.min(o.w, o.h) * .65}" text-anchor="middle" dominant-baseline="central">${o.ic}</text></g>`;
     if (o.label) h += T(o.x, bboxDe(o).y1 + .3, o.label);
     if (on) h += `<rect x="${o.x - o.w / 2 - .1}" y="${o.y - o.h / 2 - .1}" width="${o.w + .2}" height="${o.h + .2}" fill="none" stroke="#e0a030" stroke-dasharray=".15 .1" stroke-width=".04" transform="rotate(${o.rot || 0} ${o.x} ${o.y})" pointer-events="none"/>`;
@@ -22,9 +22,9 @@ function draw(o) {
     const P = o.pts.map(pt); if (o.cur) P.push(o.cur);
     const s = P.map(q => `${q.x},${q.y}`).join(' ');
     h = `<polyline points="${s}" fill="none" stroke="${o.c}" stroke-width="${o.w}" stroke-dasharray="${o.d}" stroke-linecap="round" stroke-linejoin="round"/><polyline ${id} points="${s}" fill="none" stroke="transparent" stroke-width="${Math.max(.3, o.w)}" pointer-events="stroke"/>`;
-    const runs = o.n == 'Pared' ? tramosPared(o) : null; if (runs) h = paredConHuecos(o, runs, id);   // paredes con puertas: se dibujan con huecos
+    const runs = esPared(o) ? tramosPared(o) : null; if (runs) h = paredConHuecos(o, runs, id);   // paredes con puertas: se dibujan con huecos
     if (o.label) { const m = P[P.length >> 1]; h += T(m.x, m.y - .2, o.label); }
-    if (o.cur && o.n == 'Pared') h += medidaLado(P[P.length - 2], P[P.length - 1]);   // longitud del tramo que se está dibujando
+    if (o.cur && esPared(o)) h += medidaLado(P[P.length - 2], P[P.length - 1]);   // longitud del tramo que se está dibujando
     if (on) h += P.map((q, i) => hd(q.x, q.y, i)).join('');
   } else if (o.k == 'texto') {
     h = `<text ${id} x="${o.x}" y="${o.y}" transform="rotate(${o.rot || 0} ${o.x} ${o.y})" font-size=".45" font-weight="600" fill="${on ? '#e0a030' : '#1d2a2f'}" font-family="Segoe UI,Arial,sans-serif">${esc(o.label)}</text>`;
@@ -94,6 +94,6 @@ function repintarMovimiento() {           // al mover el ratón: solo lo que pue
   status();                                                                 // coordenadas del cursor (único cambio si no se hace nada más)
 }
 function status(msg) {
-  const h = !tool ? 'Clic: seleccionar · Mayús+clic: varios · Mayús+arrastrar: rectángulo · ↻ o tecla R: rotar · arrastrar: mover · fondo vacío: desplazar · rueda: zoom' : tool.k == 'line' ? 'Clic para añadir puntos (sobre un dispositivo o un nodo ○ del mismo tipo para unirlo) · doble clic o Enter para terminar · Esc cancela' : tool.k == 'zona' ? 'Arrastra para marcar la zona' : tool.k == 'puerta' ? 'Pasa sobre una pared para ver cómo queda · clic para colocar la puerta · clic sobre una puerta puesta añade la 2.ª hoja · Esc cancela' : tool.k == 'medida' ? 'Clic en el punto inicial, luego en el final y por último clic donde quieras colocar la cota (clic derecho cancela)' : usaDosPuntos(tool) ? (tmp && tmp.pa ? 'Clic en el segundo punto para terminar (clic derecho o Esc cancela)' : tool.n == 'Círculo' || tool.esc == 'espiral' ? 'Clic en el centro y luego aléjate: cuanto más lejos, más grande el radio' : tool.n == 'Escalera' || tool.esc ? 'Clic en una esquina de la escalera y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)' : 'Clic en una esquina y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)') : 'Clic en el área de trabajo para colocar · Esc para salir';
+  const h = !tool ? 'Clic: seleccionar · Mayús+clic: varios · Mayús+arrastrar: rectángulo · ↻ o tecla R: rotar · arrastrar: mover · fondo vacío: desplazar · rueda: zoom' : tool.k == 'line' ? 'Clic para añadir puntos (sobre un dispositivo o un nodo ○ del mismo tipo para unirlo) · doble clic o Enter para terminar · Esc cancela' : tool.k == 'zona' ? 'Arrastra para marcar la zona' : tool.k == 'puerta' ? 'Pasa sobre una pared para ver cómo queda · clic para colocar la puerta · clic sobre una puerta puesta añade la 2.ª hoja · Esc cancela' : tool.k == 'medida' ? 'Clic en el punto inicial, luego en el final y por último clic donde quieras colocar la cota (clic derecho cancela)' : usaDosPuntos(tool) ? (tmp && tmp.pa ? 'Clic en el segundo punto para terminar (clic derecho o Esc cancela)' : esCirculo(tool) || tool.esc == 'espiral' ? 'Clic en el centro y luego aléjate: cuanto más lejos, más grande el radio' : esEscalera(tool) ? 'Clic en una esquina de la escalera y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)' : 'Clic en una esquina y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)') : 'Clic en el área de trabajo para colocar · Esc para salir';
   $('#status').textContent = `x ${curP.x.toFixed(1)} m · y ${curP.y.toFixed(1)} m · escala ${V.z.toFixed(0)} px/m · grilla ${rejilla ? +pasoGrilla().toFixed(2) + ' m' : 'off'} · ${plantaActual().nombre} › ${capaActual().nombre}  |  ${msg || avisoMsg || (ladoSel() !== null ? 'Lado seleccionado: arrastra el lado o sus puntas para modificarlo · Supr lo borra · clic fuera para soltarlo' : h)}`;
 }

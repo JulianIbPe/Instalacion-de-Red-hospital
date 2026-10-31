@@ -18,6 +18,6 @@ function pt(q, n = 0) {                  // posición real de un punto de línea
 }
 const fmt = (d, u = S.unidad) => u == 'm' ? d.toFixed(2) + ' m' : Math.round(d * 100) + ' cm';   // u = unidad: cada medición guarda la suya
 function toW(e) { const r = svg.getBoundingClientRect(); return { x: sn((e.clientX - r.left - V.ox) / V.z), y: sn((e.clientY - r.top - V.oy) / V.z) }; }
-function itemAt(e) { for (const el of document.elementsFromPoint(e.clientX, e.clientY)) { const t = el.closest && el.closest('[data-id]'), o = t && byId(t.dataset.id); if (o && o.k == 'item' && o.n != 'Escalera') return o; } }   // las escaleras no sirven como punto de unión: se usan sus esquinas (nodos.js)
+function itemAt(e) { for (const el of document.elementsFromPoint(e.clientX, e.clientY)) { const t = el.closest && el.closest('[data-id]'), o = t && byId(t.dataset.id); if (o && o.k == 'item' && !esEscalera(o)) return o; } }   // las escaleras no sirven como punto de unión: se usan sus esquinas (nodos.js)
 const T = (x, y, t, sz = .28) => `<text x="${x}" y="${y}" font-size="${sz}" text-anchor="middle" fill="#1d2a2f" stroke="#fff" stroke-width=".07" paint-order="stroke" font-family="Segoe UI,Arial,sans-serif">${esc(t)}</text>`;
 const fillOf = o => o.f == 'sol' ? o.c : o.f == 'hat' ? `url(#h${o.id})` : 'none';

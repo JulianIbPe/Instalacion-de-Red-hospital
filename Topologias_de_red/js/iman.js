@@ -22,7 +22,7 @@ function puntosMedios(excl) {                       // mitad de cada tramo de lÃ
   S.objs.filter(esVisible).forEach(o => {
     if (o === excl) return;
     if (o.k == 'line') { const P = o.pts.map(q => pt(q)); for (let i = 0; i < P.length - 1; i++) r.push(mid(P[i], P[i + 1])); }
-    else if (o.k == 'shape' && o.n != 'CÃ­rculo') { const A = vertsAbs(o), hid = o.hid || []; A.forEach((a, i) => { if (!hid.includes(i)) r.push(mid(a, A[(i + 1) % A.length])); }); }
+    else if (o.k == 'shape' && !esCirculo(o)) { const A = vertsAbs(o), hid = o.hid || []; A.forEach((a, i) => { if (!hid.includes(i)) r.push(mid(a, A[(i + 1) % A.length])); }); }
   });
   return r;
 }

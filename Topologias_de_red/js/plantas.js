@@ -23,8 +23,8 @@ function normalizar() {                  // deja S coherente: sirve también par
   const p = plantaActual(); if (!p.capas.some(c => c.id == S.capaAct)) S.capaAct = (p.capas.find(c => c.id == p.ca) || p.capas[0]).id;
   S.objs = S.objs.filter(o => o.k != 'puerta' || S.objs.some(w => w.id == o.pared));   // puertas sin pared: se quitan
   S.objs.forEach(o => { if (o.k == 'medida' && !o.u) o.u = S.unidad; });   // mediciones antiguas: se quedan en la unidad que tenía el archivo
-  S.objs.forEach(o => { if (o.k == 'line') o.pts = o.pts.map(q => { const t = q.ref && byId(q.ref); return t && t.n == 'Escalera' ? { x: t.x, y: t.y } : q; }); });   // paredes antiguas unidas a una escalera: se sueltan
-  S.objs.forEach(o => { if (o.k == 'item' && o.n == 'Escalera' && !o.c) o.c = '#444444'; });   // escaleras antiguas: reciben el color de pared
+  S.objs.forEach(o => { if (o.k == 'line') o.pts = o.pts.map(q => { const t = q.ref && byId(q.ref); return t && esEscalera(t) ? { x: t.x, y: t.y } : q; }); });   // paredes antiguas unidas a una escalera: se sueltan
+  S.objs.forEach(o => { if (o.k == 'item' && esEscalera(o) && !o.c) o.c = '#444444'; });   // escaleras antiguas: reciben el color de pared
   S.objs.forEach(o => {                  // todo objeto debe pertenecer a una planta y una capa que existan
     const q = S.plantas.find(q => q.id == o.pl) || S.plantas[0]; o.pl = q.id;
     if (!q.capas.some(c => c.id == o.cp)) o.cp = q.capas[0].id;

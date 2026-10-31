@@ -22,7 +22,7 @@ function rotarDesde(o, g, ang, c) {      // deja en o el resultado de girar la c
   const rp = q => { const r = rotP(q, c, ang); return { x: r3(r.x), y: r3(r.y) }; };
   if (o.k == 'line') o.pts = g.pts.map(q => q.ref || q.rl ? { ...q } : rp(q));
   else if (o.k == 'medida') { o.a = rp(g.a); o.b = rp(g.b); }
-  else if (o.k == 'shape' && o.n != 'Círculo') fijarVerts(o, vertsAbs(g).map(rp));
+  else if (o.k == 'shape' && !esCirculo(o)) fijarVerts(o, vertsAbs(g).map(rp));
   else {
     const zona = o.k == 'zona', n = rp(zona ? { x: g.x + g.w / 2, y: g.y + g.h / 2 } : { x: g.x, y: g.y });
     if (zona) { o.x = r3(n.x - g.w / 2); o.y = r3(n.y - g.h / 2); } else { o.x = n.x; o.y = n.y; }

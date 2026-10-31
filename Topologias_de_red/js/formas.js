@@ -2,7 +2,7 @@
 const ASAS = { nw: [-1, -1], n: [0, -1], ne: [1, -1], e: [1, 0], se: [1, 1], s: [0, 1], sw: [-1, 1], w: [-1, 0] };   // posición de cada asa respecto al centro (en medios lados)
 const r3 = v => +v.toFixed(3);
 function manijasForma(o, hd) {
-  const fuera = o.n == 'Círculo' ? 0 : .22;   // en formas con lados, las asas de los costados salen un poco para no tapar el centro de cada lado
+  const fuera = esCirculo(o) ? 0 : .22;   // en formas con lados, las asas de los costados salen un poco para no tapar el centro de cada lado
   return Object.entries(ASAS).map(([k, [fx, fy]]) => {
     const q = rotP({ x: o.x + fx * o.w / 2 + (fy == 0 ? fx * fuera : 0), y: o.y + fy * o.h / 2 + (fx == 0 ? fy * fuera : 0) }, { x: o.x, y: o.y }, o.rot || 0);   // las asas giran con la forma
     return hd(q.x, q.y, k);
@@ -21,7 +21,7 @@ function cotasForma(o) {                  // ancho (debajo), alto (a la izquierd
   const ln = (x1, y1, x2, y2, w = .03) => `<line pointer-events="none" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}"/>`;
   let h = ln(L, B + g, R, B + g) + ln(L, B + .1, L, B + g + .12) + ln(R, B + .1, R, B + g + .12) + T(o.x, B + g + .38, 'ancho ' + fmt(o.w), .3);
   h += ln(L - g, U, L - g, B) + ln(L - .1, U, L - g - .12, U) + ln(L - .1, B, L - g - .12, B) + `<g transform="translate(${L - g - .15} ${o.y}) rotate(-90)">${T(0, 0, 'alto ' + fmt(o.h), .3)}</g>`;
-  if (o.n == 'Círculo') {
+  if (esCirculo(o)) {
     const igual = Math.abs(o.w - o.h) < .001;
     h += ln(o.x, o.y, R, o.y, .04) + `<circle pointer-events="none" cx="${o.x}" cy="${o.y}" r=".06" fill="${col}"/>` + T(o.x + o.w / 4, o.y - .12, (igual ? 'r ' : 'rx ') + fmt(o.w / 2), .28);
     if (!igual) h += ln(o.x, o.y, o.x, B, .04) + T(o.x + .1, o.y + o.h / 4, 'ry ' + fmt(o.h / 2), .28);
@@ -37,9 +37,9 @@ function trazo(o) {                       // atributos SVG del contorno según e
 }
 
 // ---------- Lados de las formas (todas menos el círculo) ----------
-// Cada forma guarda sus vértices normalizados en o.u (respecto a su centro y tamaño; si no existe se usa SH[o.n]) y los lados borrados en o.hid.
+// Cada forma guarda sus vértices normalizados en o.u (respecto a su centro y tamaño; si no existe se usa SH[subtipo]) y los lados borrados en o.hid.
 // El lado i va del vértice i al (i+1). Al editar un vértice se recalcula el rectángulo (x, y, w, h) que contiene la forma.
-const uDe = o => o.u || SH[o.n];
+const uDe = o => o.u || SH[subDe(o)] || SH.rectangulo;
 const ladoSel = () => selEdge && selEdge.id == sel ? selEdge.i : null;
 function vertsAbs(o) { return uDe(o).map(q => ({ x: o.x + q[0] * o.w, y: o.y + q[1] * o.h })); }
 function fijarVerts(o, A) {
@@ -58,7 +58,7 @@ function borrarLado() {                   // quita el contorno de ese lado (la f
   render();
 }
 function dibujarForma(o, id, on, hd) {
-  const fill = `fill="${fillOf(o)}" fill-opacity="${o.f == 'sol' ? .35 : 1}"`, circulo = o.n == 'Círculo';
+  const fill = `fill="${fillOf(o)}" fill-opacity="${o.f == 'sol' ? .35 : 1}"`, circulo = esCirculo(o);
   const R = x => circulo && o.rot ? `<g transform="rotate(${o.rot} ${o.x} ${o.y})">${x}</g>` : x;   // el círculo (óvalo) puede estar girado
   let h;
   if (circulo) h = `<g ${id} transform="translate(${o.x} ${o.y})"><ellipse rx="${o.w / 2}" ry="${o.h / 2}" ${fill} ${trazo(o)}/></g>`;
