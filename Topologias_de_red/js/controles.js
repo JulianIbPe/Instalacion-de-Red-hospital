@@ -3,6 +3,7 @@ document.addEventListener('keydown', e => {
   if (!dlg.hidden) { if (e.key == 'Escape') cerrarDlg(); return; }   // con el aviso abierto, solo Esc (cancelar)
   if (e.target.tagName == 'SELECT' || (e.target.tagName == 'INPUT' && !['checkbox', 'color'].includes(e.target.type))) return;
   const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
+  const enBoton = e.target.tagName == 'BUTTON';   // con un botón enfocado, Supr y Retroceso no borran objetos (se evita borrar sin querer)
   if (mod && k == 'z' && !e.shiftKey) { e.preventDefault(); deshacer(); }
   else if (mod && (k == 'y' || (k == 'z' && e.shiftKey))) { e.preventDefault(); rehacer(); }
   else if (e.key == 'Escape') setTool(null);
@@ -12,7 +13,7 @@ document.addEventListener('keydown', e => {
   else if (k == 'm' && !mod) alternarMedio();
   else if (e.key == 'Enter') finishLine();
   else if (k == 'r' && !mod) rotarSeleccion(e.shiftKey ? -90 : 90);
-  else if (e.key == 'Delete' || e.key == 'Backspace') borrar();
+  else if ((e.key == 'Delete' || e.key == 'Backspace') && !enBoton) borrar();
 });
 let colPush = false;   // el selector de color dispara muchos eventos: se guarda un solo paso de historial por gesto
 $('#col').oninput = () => { const os = seleccionados().filter(o => o.c); if (os.length) { if (!colPush) { push(); colPush = true; } os.forEach(o => o.c = col()); render(); } };

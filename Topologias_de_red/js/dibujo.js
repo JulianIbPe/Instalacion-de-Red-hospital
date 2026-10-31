@@ -37,18 +37,61 @@ function draw(o) {
 }
 const ORD = { zona: 0, shape: 1, line: 2, puerta: 2.5, item: 3, texto: 4, medida: 5 };
 let asasOut = [];                         // asas de edición de lo seleccionado (se agregan después de todos los objetos)
-function render() {
+
+// ---------- Renderizado en capas (Fase 1) ----------
+// El SVG tiene una estructura fija que se crea una sola vez (iniciarCapas):
+//   <defs id="defs-fondo">   patrones de la grilla
+//   <g id="vp" transform>    la vista (desplazamiento y zoom): desplazar o hacer zoom solo cambia este atributo
+//     <g id="g-grilla">      líneas de la grilla (solo se rehacen si cambia el zoom o se activa o desactiva la grilla)
+//     <g id="c">             los objetos del proyecto, el contorno del edificio y el reflejo de la planta de abajo
+//     <g id="g-tmp">         lo temporal: objeto en curso, vista previa, guías, imanes, rectángulo de selección y asa de rotación
+// Los objetos NO dependen de la vista (sus medidas están en metros), por eso mover la vista no los reconstruye.
+// render() sigue existiendo y lo redibuja todo de forma síncrona (lo usan casi todas las funciones y la exportación PNG).
+// Los manejadores del ratón usan las funciones sueltas para redibujar solo lo que cambió (ver repintarMovimiento).
+const contar = k => { if (typeof TR !== 'undefined') TR.stats[k]++; };   // contadores de eventos.js (opcional)
+let capas = null, ultGrilla = '';
+function iniciarCapas() {
+  svg.innerHTML = '<defs id="defs-fondo"></defs><g id="vp"><g id="g-grilla"></g><g id="c"></g><g id="g-tmp"></g></g>';
+  capas = { defs: svg.querySelector('#defs-fondo'), vp: svg.querySelector('#vp'), grilla: svg.querySelector('#g-grilla'), c: svg.querySelector('#c'), tmp: svg.querySelector('#g-tmp') };
+  ultGrilla = '';
+}
+const capasOk = () => !!capas && svg.contains(capas.c) && svg.contains(capas.tmp);
+const patronHat = o => `<pattern id="h${o.id}" width=".25" height=".25" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2=".25" stroke="${o.c}" stroke-width=".07"/></pattern>`;
+
+function renderFondo() {                  // vista (desplazamiento y zoom) y grilla
+  contar('fondo'); if (!capasOk()) iniciarCapas();
+  capas.vp.setAttribute('transform', `translate(${V.ox} ${V.oy}) scale(${V.z})`);
+  const clave = rejilla + '|' + V.z;      // la grilla solo cambia con el zoom o al activarla o desactivarla
+  if (clave !== ultGrilla) { const gr = rejillaSvg(); capas.defs.innerHTML = gr.defs; capas.grilla.innerHTML = gr.rects; ultGrilla = clave; contar('rejilla'); }
+}
+function renderObjetos() {                // objetos del proyecto (lo que se exporta en el PNG)
+  contar('obj'); if (!capasOk()) iniciarCapas();
   asasOut = [];
-  const gr = rejillaSvg();
   // Orden de dibujo: primero por jerarquía de capa (las capas altas se pintan encima) y, dentro de una misma capa, por tipo de objeto (ORD)
-  const E = S.edificio, all = [...S.objs].filter(esVisible).sort((a, b) => rangoCapa(a) - rangoCapa(b) || ORD[a.k] - ORD[b.k]); if (tmp) all.push(tmp);
-  const pats = all.filter(o => o.f == 'hat').map(o => `<pattern id="h${o.id}" width=".25" height=".25" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2=".25" stroke="${o.c}" stroke-width=".07"/></pattern>`).join('');
+  const E = S.edificio, all = [...S.objs].filter(esVisible).sort((a, b) => rangoCapa(a) - rangoCapa(b) || ORD[a.k] - ORD[b.k]);
+  const pats = all.filter(o => o.f == 'hat').map(patronHat).join('');
   const edif = `<rect x="0" y="0" width="${E.w}" height="${E.h}" fill="none" stroke="#17262c" stroke-width=".08" stroke-dasharray=".4 .2"/>` + T(E.w / 2, -.25, E.w + ' m', .4) + `<text x="-.3" y="${E.h / 2}" font-size=".4" text-anchor="middle" transform="rotate(-90 -.3 ${E.h / 2})" fill="#17262c" font-family="Segoe UI,Arial,sans-serif">${E.h} m</text>`;
-  svg.innerHTML = `<defs>${gr.defs}</defs>
-  <g transform="translate(${V.ox} ${V.oy}) scale(${V.z})">${gr.rects}<g id="c"><defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map(o => { const g = draw(o) + resaltar(o); return esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}${asasOut.join('')}</g>${cajaHtml()}${puertaPrevia()}${guiaColocar()}${nodosHtml()}${rotHtml()}${rombo()}${snapPt ? `<circle cx="${snapPt.x}" cy="${snapPt.y}" r=".17" fill="#e0a03044" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : ''}</g>`;
+  capas.c.innerHTML = `<defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map(o => { const g = draw(o) + resaltar(o); return esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}${asasOut.join('')}`;
+}
+function renderTmp() {                    // lo temporal de la interacción (no forma parte del proyecto ni del PNG)
+  contar('tmp'); if (!capasOk()) iniciarCapas();
+  asasOut = [];
+  const enCurso = tmp ? (tmp.f == 'hat' ? `<defs>${patronHat(tmp)}</defs>` : '') + draw(tmp) + asasOut.join('') : '';   // la pieza o el cable que se está dibujando, con sus asas
+  capas.tmp.innerHTML = enCurso + `${cajaHtml()}${puertaPrevia()}${guiaColocar()}${nodosHtml()}${rotHtml()}${rombo()}${snapPt ? `<circle cx="${snapPt.x}" cy="${snapPt.y}" r=".17" fill="#e0a03044" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : ''}`;
+}
+function renderPaneles() {                // botones, opciones, reglas y barra de estado (el menú izquierdo se rehace solo al cambiar de pestaña o herramienta: ver catalogo.js)
+  contar('paneles');
   $('#bundo').disabled = !hist.length; $('#bredo').disabled = !fut.length; $('#bdel').disabled = !seleccionados().length;
   sincronizarOpciones();
-  rulers(); status(); if (tab) menu();
+  rulers(); status();
+}
+function render() { renderFondo(); renderObjetos(); renderTmp(); renderPaneles(); }   // todo, de forma síncrona
+function repintarMovimiento() {           // al mover el ratón: solo lo que puede haber cambiado
+  const m = drag && drag.m;
+  if (m == 'mv' || m == 'h' || m == 'rot' || m == 'lado') renderObjetos();   // se está modificando algún objeto
+  if (m == 'pan') { renderFondo(); rulers(); }                              // solo cambia la vista
+  if (tool || tmp || (drag && m != 'pan')) renderTmp();                     // vista previa, imanes, guías, rectángulo de selección, asa de rotación (al desplazar la vista no cambian)
+  status();                                                                 // coordenadas del cursor (único cambio si no se hace nada más)
 }
 function status(msg) {
   const h = !tool ? 'Clic: seleccionar · Mayús+clic: varios · Mayús+arrastrar: rectángulo · ↻ o tecla R: rotar · arrastrar: mover · fondo vacío: desplazar · rueda: zoom' : tool.k == 'line' ? 'Clic para añadir puntos (sobre un dispositivo o un nodo ○ del mismo tipo para unirlo) · doble clic o Enter para terminar · Esc cancela' : tool.k == 'zona' ? 'Arrastra para marcar la zona' : tool.k == 'puerta' ? 'Pasa sobre una pared para ver cómo queda · clic para colocar la puerta · clic sobre una puerta puesta añade la 2.ª hoja · Esc cancela' : tool.k == 'medida' ? 'Clic en el punto inicial, luego en el final y por último clic donde quieras colocar la cota (clic derecho cancela)' : usaDosPuntos(tool) ? (tmp && tmp.pa ? 'Clic en el segundo punto para terminar (clic derecho o Esc cancela)' : tool.n == 'Círculo' || tool.esc == 'espiral' ? 'Clic en el centro y luego aléjate: cuanto más lejos, más grande el radio' : tool.n == 'Escalera' || tool.esc ? 'Clic en una esquina de la escalera y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)' : 'Clic en una esquina y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)') : 'Clic en el área de trabajo para colocar · Esc para salir';

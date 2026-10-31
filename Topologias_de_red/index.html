@@ -57,6 +57,10 @@
   </div>
 </div>
 <script src="js/estado.js"></script>
+<script src="js/eventos.js"></script>
+<script src="js/tipos.js"></script>
+<script src="js/recursos.js"></script>
+<script src="js/esquema.js"></script>
 <script src="js/catalogo.js"></script>
 <script src="js/dibujo.js"></script>
 <script src="js/reglas.js"></script>
@@ -79,6 +83,10 @@
 <script>
 // Aviso si faltan los archivos css/ o js/ (por ejemplo, si se descargaron sueltos sin sus carpetas)
 if (typeof menu !== 'function') document.body.innerHTML = '<div style="padding:30px;font:16px sans-serif;max-width:600px"><h2>No se encontraron los archivos de la página</h2><p>Esta página necesita las carpetas <b>css</b> y <b>js</b> junto a <b>index.html</b>. Descomprime el .zip completo y abre <b>index.html</b> desde la carpeta Topologias_de_red.</p></div>';
+</script>
+<script>
+// Pruebas de desarrollo: solo se cargan al abrir index.html?pruebas=1 (no afectan al uso normal)
+if (/[?&]pruebas(=|&|$)/.test(location.search) && typeof menu === 'function') { const s = document.createElement('script'); s.src = 'js/pruebas.js'; document.body.appendChild(s); }
 </script>
 </body>
 </html>

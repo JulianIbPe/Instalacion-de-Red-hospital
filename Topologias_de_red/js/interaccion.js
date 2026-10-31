@@ -99,7 +99,7 @@ svg.addEventListener('pointermove', e => {
       else { const it = itemAt(e); o.pts[d.h] = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p; }
     }
   }
-  render();
+  repintarMovimiento();   // solo se redibuja lo que cambió (ver dibujo.js): sin herramienta ni arrastre, solo la barra de estado
 });
 svg.addEventListener('pointerup', e => {
   if (drag && drag.m == 'colocar' && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) terminarColocacion();   // pulsar, arrastrar y soltar también coloca
@@ -107,10 +107,10 @@ svg.addEventListener('pointerup', e => {
   if (drag && drag.m == 'zona') { if (tmp.w > .2 && tmp.h > .2) add(tmp); tmp = null; }
   drag = null; render();
 });
-svg.addEventListener('pointerleave', () => { prevPuerta = null; snapPt = null; render(); });
+svg.addEventListener('pointerleave', () => { prevPuerta = null; snapPt = null; renderTmp(); });
 svg.addEventListener('contextmenu', e => e.preventDefault());
 svg.addEventListener('wheel', e => {
   e.preventDefault(); const r = svg.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
   const z = Math.min(300, Math.max(8, V.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
-  V.ox = mx - (mx - V.ox) * z / V.z; V.oy = my - (my - V.oy) * z / V.z; V.z = z; render();
+  V.ox = mx - (mx - V.ox) * z / V.z; V.oy = my - (my - V.oy) * z / V.z; V.z = z; renderFondo(); rulers(); status();   // el zoom solo cambia la vista y la grilla: los objetos no dependen de ella
 }, { passive: false });
