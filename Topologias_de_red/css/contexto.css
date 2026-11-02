@@ -1,0 +1,10 @@
+/* contexto.css: menú contextual (clic derecho) */
+#ctx{position:fixed;z-index:20;min-width:200px;max-width:min(280px,92vw);padding:4px;border:1px solid var(--borde);border-radius:10px;background:#fff;box-shadow:0 8px 28px rgba(20,35,43,.3);font-size:13px}
+#ctx[hidden]{display:none}
+#ctx .ch{padding:6px 10px;color:#5d7078;font-size:12px;border-bottom:1px solid var(--borde);margin-bottom:3px}
+#ctx .cg+.cg{margin-top:3px;padding-top:3px;border-top:1px solid #e5eaec}
+#ctx .ct{padding:4px 10px 2px;color:#5d7078;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+#ctx button{display:flex;align-items:center;gap:6px;width:100%;padding:6px 10px;border:0;border-radius:6px;background:transparent;color:var(--texto);text-align:left}
+#ctx button i{width:12px;font-style:normal;color:#2e86de}
+#ctx button:hover:not(:disabled),#ctx button:focus-visible{background:#e8eef1}
+#ctx button:disabled{opacity:.4;cursor:default}

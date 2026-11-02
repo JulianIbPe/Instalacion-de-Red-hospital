@@ -2,7 +2,7 @@
 
 Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor). Para usarlo: abrir `index.html` en el navegador. Los scripts se cargan en el orden de `index.html` y comparten variables globales.
 
-> **Última actualización: 31/10/2026.** Documento vigente: reemplaza a cualquier copia anterior (incluida `/mnt/project/SEGUIMIENTO.md`).
+> **Última actualización: 01/11/2026.** Documento vigente: reemplaza a cualquier copia anterior (incluida `/mnt/project/SEGUIMIENTO.md`).
 > **Regla de mantenimiento:** al terminar una fase, o al avanzar dentro de la fase en curso, se actualiza este documento (qué se hizo, resultados reales de las pruebas, qué falta y cuál es el siguiente paso), para poder retomar en otro chat.
 
 ## 1. Estado actual
@@ -12,7 +12,8 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | F0 Saneamiento y pruebas | Completada (28/10/2026) |
 | F1 Renderizado en capas | Completada (28/10/2026) |
 | F2 Núcleo de datos (tipos, formato v2, recursos, historial) | **Completada (31/10/2026)**: 31 pruebas aprobadas, 0 fallidas; dibujo idéntico a la referencia; uso manual correcto |
-| F3 a F12 | No iniciadas (ver sección 5). Se empieza una fase solo cuando el usuario lo confirme |
+| F3 Inspector y menú contextual (base) | **Completada (01/11/2026)**; ajuste posterior del menú contextual (cortar/copiar/pegar, menú del fondo) hecho el mismo día y **pendiente de verificación manual**. Antes del ajuste: 46 pruebas aprobadas, 0 fallidas, dibujo idéntico a la referencia, rendimiento sin regresión; comprobaciones manuales del usuario correctas (ver sección 11) |
+| F4 a F12 | No iniciadas (ver sección 5). Siguiente: **F4**. Se empieza una fase solo cuando el usuario lo confirme |
 
 Pendientes menores de verificación (no bloquean): abrir un `.json` dañado y comprobar que el proyecto no cambia; deshacer justo después de abrir un archivo; lista de uso manual de la F1 (seleccionar, mover, rotar, cables, paredes, puertas, escaleras, medir, deshacer/rehacer, guardar/abrir).
 
@@ -21,9 +22,12 @@ Pendientes menores de verificación (no bloquean): abrir un `.json` dañado y co
 | Ruta | Contenido |
 |---|---|
 | `index.html` | Barra superior, menú izquierdo, área de trabajo con reglas, panel de plantas, barra de estado y aviso de «Nuevo». Carga condicional de `js/pruebas.js` con `?pruebas=1` |
-| `css/` | `base`, `barra`, `menu`, `lienzo`, `plantas`, `dialogo` |
+| `css/` | `base`, `barra`, `menu`, `lienzo`, `plantas`, `dialogo`, `inspector` (F3), `contexto` (F3) |
 | `js/estado.js` | Estado global (`S`, `V`, `tool`, `sel`, `tmp`, `drag`…) y utilidades (`byId`, `pt`, `toW`, `fmt`, `T`) |
-| `js/eventos.js` | Contadores del renderizado (`TR.stats`) para las pruebas. Opcional |
+| `js/eventos.js` | Namespace `TR`: contadores del renderizado (`TR.stats`, sin cambios) y `TR.ui` (F3: reconstrucciones y actualizaciones del inspector, aperturas del menú). **Obligatorio desde la F3** (aloja `TR.acc`, `TR.insp`, `TR.ctx`) |
+| `js/acciones.js` (F3) | `TR.acc`: registro único de **campos** (`registrarCampo`) y **acciones** (`registrar`) por tipo, usado por el inspector y el menú. `TR.acc.fijar(ids, campo, valor, gesto)` cambia un campo con un solo paso de historial y valida (rangos, objetos editables, escaleras contra la planta de abajo). También `rotar`, `copiar`, `cortar`, `pegar` (portapapeles interno), `eliminar`, `ejecutar`, `paraMenu`, `paraInspector`, `sinColor` (la mesa de la F6 se agrega ahí, D18) y `sincronizarColor` (D16) |
+| `js/inspector.js` (F3) | `TR.insp`: panel derecho `#insp` con secciones contraíbles (Objeto, Posición y tamaño, Apariencia, Acciones). Solo reconstruye su DOM si cambia la firma de la selección; si no, actualiza valores en sitio sin tocar el campo enfocado. Se refresca desde `renderPaneles()`, nunca al mover el ratón. Confirma con `change` o al pulsar fuera (antes de que el plano cambie la selección). Botón ⚙️ de la barra; en ≤760 px es un cajón |
+| `js/contexto.js` (F3) | `TR.ctx`: menú contextual `#ctx` (clic derecho, solo sin herramienta ni operación en curso ; sobre un objeto editable: cortar, copiar, pegar, eliminar y las acciones de su tipo; en el fondo vacío o sobre algo no editable: volver atrás, adelante y pegar). Teclado: flechas, Home/End, Enter, Esc, Tab |
 | `js/tipos.js` | Tipo estable por objeto: `tipo` (pared, cable, dispositivo, rack, escalera, ascensor, ventana, puerta, forma, zona, texto, medida) y `sub` (`router`, `utp6`, `circulo`…). `derivarTipo` es el único lugar donde un nombre visible se traduce a tipo. Predicados `esPared`, `esCable`, `esEscalera`, `esAscensor`, `esCirculo`, `claveLinea`. Las escaleras guardan su variante en `o.t` (sin `t` = recta, `descanso`, `espiral`). Ningún módulo decide comportamiento por `o.n` |
 | `js/recursos.js` | Almacén `R` fuera de `S` y del historial: `R.imgs` (id por hash; PNG/JPEG/WebP validados por sus bytes; 5 MB por imagen, 50 MB por proyecto, 8 000 px por lado, 40 M de píxeles) y `R.modelos` (plantillas versionadas). Solo el almacén: la interfaz llega en la F4 |
 | `js/esquema.js` | Formato v2: `ESQ.leer` (valida, sanea con lista blanca y migra v1 → v2 sin tocar `S` ni `R`) y `ESQ.serializar` (rechaza lo que luego no se podría abrir). **Regla R9:** todo campo nuevo de un objeto se registra en `ESPEC`; si no, se pierde al abrir |
@@ -31,15 +35,15 @@ Pendientes menores de verificación (no bloquean): abrir un `.json` dañado y co
 | `js/dibujo.js` | `draw()` por objeto y render en capas: `#vp` > `#g-grilla`, `#c` (objetos; lo que exporta el PNG), `#g-tmp` (lo temporal). `render()` (completo, síncrono), `repintarMovimiento()` (al mover el ratón solo se redibuja lo que cambió), `status()` |
 | `js/historial.js` | Deshacer, rehacer, borrar. Interfaz `Hist` con estrategia intercambiable (hoy snapshots de `S`, tope de 100 pasos y 50 M de caracteres, sin duplicar pasos idénticos) |
 | `js/archivos.js` | Guardar y abrir `.json` v2 (`abrirTexto` no toca nada si el archivo es inválido y restaura el proyecto ante un fallo inesperado), exportar PNG (`construirSvgExport`), «Nuevo» |
-| `js/controles.js` | Teclado (G, F, H, M, R, Enter, Esc, Supr/Retroceso —no actúan con un botón enfocado—, Ctrl+Z/Y), color, relleno, tipo de línea, grilla, imán medio, tamaño del edificio, unidad |
-| `js/interaccion.js` | Ratón: colocar, mover, dibujar, medir, zoom, desplazar; doble clic detectado a mano (flecha de escalera o ascensor cambia de planta; en otro objeto, etiqueta); clic derecho cancela o termina la operación en curso; `add()` asigna el tipo |
+| `js/controles.js` | Teclado (G, F, H, M, R, Ctrl+C/X/V, Enter, Esc, Supr/Retroceso —no actúan con botón, resumen, checkbox o color enfocados; se ignora TEXTAREA—, Ctrl+Z/Y; con el menú contextual abierto solo flechas, Enter, Esc y Tab), color / relleno / tipo de línea (usan `TR.acc.fijar`; el color no afecta a los cables), grilla, imán medio, tamaño del edificio, unidad |
+| `js/interaccion.js` | Ratón: colocar, mover, dibujar, medir, zoom, desplazar; doble clic detectado a mano (flecha de escalera o ascensor cambia de planta; en otro objeto, etiqueta); clic derecho cancela o termina la operación en curso y, sin herramienta ni operación, abre el menú contextual (F3); `add()` asigna el tipo; un cable usa el color de su tipo (`tool.c`) |
 | `js/plantas.js` | Plantas y capas (ocultar, bloquear, jerarquía con ▲ ▼ o arrastrando ⠿), `esVisible`/`esEditable`, `normalizar()` |
 | `js/colocar.js` | Escaleras y formas con dos puntos (esquinas opuestas; círculo y espiral = centro y radio) |
 | `js/escaleras.js` | Escalera recta, con descanso y espiral; reflejo de la planta de abajo y reglas de colocación entre plantas; cables que cruzan escaleras de otras plantas; cambio de planta desde la flecha |
 | `js/formas.js`, `js/puertas.js`, `js/rotacion.js`, `js/seleccion.js` | Formas (8 asas, lados, vértices, medidas), puertas sobre paredes, rotación (asa ↻ o R), selección múltiple y por rectángulo |
 | `js/iman.js`, `js/nodos.js`, `js/medidas.js`, `js/reglas.js`, `js/rejilla.js` | Imanes (puntas, centros, puntos medios), nodos de líneas del mismo tipo, cotas, reglas en metros y grilla |
 | `js/main.js` | Arranque (se carga el último) |
-| `js/pruebas.js` | Con `?pruebas=1`: panel con 31 pruebas, 6 proyectos de prueba (+ uno de estrés), referencia de dibujo (se guarda en `localStorage` con la versión base; se compara con la nueva) y medición de rendimiento |
+| `js/pruebas.js` | Con `?pruebas=1`: panel con 48 pruebas (31 de F0 a F2B + 17 de la F3), 6 proyectos de prueba (+ uno de estrés), referencia de dibujo (se guarda en `localStorage` con la versión base; se compara con la nueva) y medición de rendimiento |
 
 ## 3. Decisiones aprobadas
 
@@ -53,7 +57,7 @@ Pendientes menores de verificación (no bloquean): abrir un `.json` dañado y co
 | D6 | **Formato v2** con validación por lista blanca y migración automática desde v1 (hecho) |
 | D7 | **Renderizado** en capas independientes, sin framework (hecho) |
 | D8 | **Inspector:** aside derecho con secciones contraíbles; `#plantas` se conserva |
-| D9 | **Menú contextual:** clic derecho solo sin herramienta activa ni operación en curso. Cada fase registra sus propias entradas por tipo |
+| D9 | **Menú contextual:** clic derecho solo sin herramienta activa ni operación en curso. Cada fase registra sus propias entradas por tipo. Sobre un objeto: cortar, copiar, pegar y eliminar (no hay «Duplicar»); en el fondo vacío: volver atrás, adelante y pegar (ajuste del 01/11/2026) |
 | D10 | **Filtros:** estado visual `F` fuera de `S` y del historial; ocultar / atenuar / aislar; no tocan `esVisible`, imanes, conexiones ni presupuesto; se aplican **sobre** lo ya visible por planta y capa y se quitan con «Mostrar todo». Las redes/VLAN son lógicas y no se mezclan con las capas del editor |
 | D11 | **Longitud de cables:** ruta completa + tramos verticales por altura de plantas + holgura configurable. Se distingue la longitud medida de la estimación de instalación |
 | D12 | **Presupuesto:** precios por modelo y por metro de cable, moneda, cantidades y holgura; CSV primero (separador `;`, BOM UTF-8, coma decimal) |
@@ -112,11 +116,13 @@ Cada fase deja la aplicación usable y no elimina funciones. Cada fase nueva que
 Archivos: `index.html`, `interaccion.js`, `controles.js`, `plantas.js`, CSS; nuevos `inspector.js`, `contexto.js`, `inspector.css`, `contexto.css`.
 1. El inspector no pierde el foco ni su texto durante 100 movimientos del ratón; secciones contraíbles; en pantalla estrecha pasa a cajón.
 2. Clic derecho con herramienta de cable/pared/forma activa o con una operación en curso conserva el comportamiento actual (cancelar o terminar); con Seleccionar abre el menú adaptado al tipo (varios objetos: acciones comunes).
-3. Acciones generales: color, dimensiones, relleno, contorno, nombre, etiqueta, rotación, **duplicar** y eliminar, según el tipo. El menú de un cable no ofrece cambio de color y el de una mesa tampoco (D16, D18). El selector de color del menú izquierdo deja de afectar a los cables (también al dibujarlos: usan el color de su tipo).
-4. Duplicar crea una copia con id nuevo, en la misma planta y capa y levemente desplazada; no copia conexiones ni hijos.
+3. Acciones generales: color, dimensiones, relleno, contorno, nombre, etiqueta, rotación, **cortar, copiar, pegar** y eliminar, según el tipo (sin «Duplicar», ajuste del 01/11/2026). El menú de un cable no ofrece cambio de color y el de una mesa tampoco (D16, D18). El selector de color del menú izquierdo deja de afectar a los cables (también al dibujarlos: usan el color de su tipo).
+4. Copiar guarda copias independientes en un portapapeles interno (fuera de `S` y del historial); Cortar copia y borra (un paso); Pegar crea objetos con id nuevo en la planta y capa **activas**, centrados en el punto del clic (sin punto, desplazados 0,5 m), sin uniones, sin conexiones, sin hijos y sin puertas; una escalera pegada que obstruye la de abajo se rechaza con aviso; si la capa activa está oculta o bloqueada no se pega.
 5. El menú respeta las capas ocultas y bloqueadas (acciones deshabilitadas).
 6. Cada acción es un solo paso de historial y no interfiere con la creación de cables, el arrastre, la selección múltiple ni el zoom; los atajos (Esc, G, F, H, M, R, Enter, Supr, Ctrl+Z/Y) funcionan igual.
 7. Tabla de acciones por tipo, extensible por las fases siguientes.
+
+**Decisiones de la F3 (confirmadas por el usuario el 01/11/2026):** (1) `js/acciones.js` como registro centralizado; (2) una escalera editada desde el inspector (posición, tamaño, giro, y también los botones de rotar y pegar) se valida con la planta de abajo como al colocarla: si obstruye se rechaza, se conservan los valores, se avisa y no hay paso de historial; (3) posición y tamaño solo en el inspector (el menú enfoca el campo) (el menú del fondo vacío se agregó después, ver sección 11); (4) `eventos.js` obligatorio. Detalles de implementación: el botón del panel es solo el icono ⚙️ para que la barra superior no pase a dos filas; los contadores nuevos están en `TR.ui` (no en `TR.stats`); pegar no usa `add()` (asigna id nuevo y la planta y capa actuales, suelta las uniones `ref`/`rl`, no copia puertas ni conexiones).
 
 ### F4 — Catálogo (Packet Tracer), imágenes y modelos
 Archivos: `catalogo.js`, `dibujo.js`, `archivos.js`, `recursos.js`, `inspector.js`.
@@ -231,7 +237,7 @@ Pendiente (se resuelve al diseñar la F4): número exacto de la última versión
 
 ## 9. Cómo retomar en otro chat
 
-Adjuntar la carpeta `Topologias_de_red` completa (`.zip`). Leer este documento (secciones 1, 3, 5 y 8). Estado: F0, F1 y F2 completadas y verificadas en el navegador del usuario. Siguiente: **F3**. Antes de escribir código, presentar el diseño detallado (archivos a modificar o crear, criterios de la sección 5, pruebas) y esperar confirmación. Al terminar, separar pruebas simuladas y manuales, trabajar con parches y actualizar este documento.
+Adjuntar la carpeta `Topologias_de_red` completa (`.zip`). Leer este documento (secciones 1, 3, 5 y 8). Estado: F0, F1, F2 y F3 completadas y verificadas en el navegador del usuario. **F3 completada y verificada por el usuario en su navegador (sección 11).** Siguiente: **F4**. Antes de escribir código, presentar el diseño detallado (archivos, criterios de la sección 5, pruebas; consultar en la web la última versión de Packet Tracer) y esperar confirmación. Al terminar, separar pruebas simuladas y manuales, trabajar con parches y actualizar este documento.
 
 ## 10. Registro de cambios
 
@@ -239,3 +245,47 @@ Adjuntar la carpeta `Topologias_de_red` completa (`.zip`). Leer este documento (
 - 31/10/2026: F2B aplicada con parches y verificada (31 pruebas, 0 fallidas, dibujo idéntico); F2 completada.
 - 31/10/2026: decisiones confirmadas por el usuario (sección 6): color de cable bloqueado en todas partes, mesa sin color, exportación del interior del rack desde su vista, Packet Tracer última versión con IoT incluido (iconos propios si faltan imágenes).
 - 31/10/2026: documento simplificado. Plan de fases reordenado por dependencias (F3 a F12). Nuevos criterios: catálogo con todos los dispositivos de Packet Tracer; una sola mesa con puestos de 50 cm mínimo y equipos dibujados encima; rellenos sin edición de patrón; sin cambio de color del cable en las pantallas nuevas; duplicar, redes/VLAN, etiquetas por puerto, presupuesto con pendientes, monedas y doble conteo, panel de superposición, filtros combinados con plantas y capas, y fase final de pruebas integrales.
+- 01/11/2026: F3 diseñada y aprobada; implementada (acciones.js, inspector.js, contexto.js, inspector.css, contexto.css y parches en index.html, interaccion.js, controles.js, catalogo.js, dibujo.js, eventos.js, pruebas.js). 46 pruebas automatizadas aprobadas.
+- 01/11/2026: F3 verificada por el usuario en su navegador (46/46, dibujo idéntico a la referencia, uso manual correcto) y **cerrada**.
+
+## 11. Estado de la F3: resultados reales (cerrada el 01/11/2026)
+
+**Pruebas automatizadas (ejecutadas en Chrome 131 sin interfaz, abriendo `index.html?pruebas=1` y pulsando «Ejecutar pruebas»):**
+- 46 aprobadas, 0 fallidas, sin errores de página. Incluye las 31 anteriores (F0 a F2B) y 15 nuevas «Fase 3».
+- La prueba «el dibujo es idéntico a la referencia» se ejecutó contra una referencia generada con el código ORIGINAL de la F2 (copia de respaldo), y pasó. En el navegador del usuario sigue necesitando su referencia guardada de la F0.
+- Prueba extremo a extremo con ratón y teclado reales (simulados con Playwright, **no sustituyen la comprobación manual**): colocar, seleccionar, escribir en un campo con Enter, escribir y hacer clic en otro objeto sin Enter (se aplica al original), Ctrl+Z, menú con clic derecho, Esc, sin menú en el fondo, duplicar, cable (color de su tipo, selector desactivado, clic derecho lo termina sin menú), guardar/abrir válido y 100 movimientos reales del ratón con **0 reconstrucciones** del inspector y `TR.stats` en 0. Cajón en 700 px de ancho.
+- No se probó en Firefox, Safari ni en pantallas táctiles.
+
+**Resultados en el navegador del usuario (01/11/2026):** 46 aprobadas, 0 falladas; «Idéntico a la referencia» del 28/10/2026; rendimiento con 3000 objetos: render 50,6 ms (base F0: 47,4 ms), mover sin arrastrar 0 ms (base 42,3 ms), arrastrar un objeto 40,8 ms, desplazar 0,1 ms, zoom 10,1 ms. El usuario informó que las comprobaciones manuales de abajo funcionan bien.
+
+**Comprobaciones manuales realizadas por el usuario:**
+1. Abrir `index.html?pruebas=1` y ejecutar las pruebas (esperado: 46 aprobadas; si la referencia de la F0 no está guardada, la comparación de dibujo fallará por eso).
+2. Clic derecho sobre cada tipo (dispositivo, pared, cable, forma, zona, texto, medida, puerta, escaleras, ascensor): el menú muestra lo que corresponde; cable sin «Color…»; puerta sin «Duplicar».
+3. Con una herramienta de cable/pared/forma activa o un cable a medio dibujar: el clic derecho sigue terminando/cancelando y no abre menú. En el fondo vacío no hay menú ni menú del navegador.
+4. Editar nombre, etiqueta, posición, tamaño y rotación en el inspector; Enter; Esc descarta; escribir y hacer clic en otro objeto sin Enter; deshacer y rehacer cada cambio (un paso por cambio).
+5. Color: un cable no cambia (selector desactivado); una pared sí; selección mixta cambia solo la pared; el selector de color del menú izquierdo sigue funcionando con formas, zonas, paredes y escaleras.
+6. Escaleras en una planta superior sobre una de la inferior: editar x/y/ancho/alto/rotación, rotar y duplicar deben rechazarse con el aviso y sin paso de historial.
+7. Duplicar uno y varios objetos, en una capa distinta de la activa, con cables unidos y con una pared con puerta.
+8. Capa bloqueada u oculta, Supr/Retroceso con el foco en el inspector, panel ⚙️ en pantalla estrecha, mover el ratón con el inspector abierto y escribiendo en un campo (no debe perder foco ni texto).
+9. Guardar, abrir, exportar PNG (sin menú ni inspector en la imagen) y «Nuevo» con el inspector abierto.
+- 01/11/2026: ajuste pedido por el usuario sobre la F3 ya cerrada: el menú del clic derecho ahora lleva Cortar, Copiar, Pegar y Eliminar (sin «Duplicar», tampoco en el inspector) y en el fondo vacío muestra Volver atrás, Adelante y Pegar. 48 pruebas automatizadas aprobadas (con los atajos Ctrl+C/X/V); **falta la verificación manual del ajuste**.
+
+### Ajuste del menú contextual (01/11/2026): pendiente de verificación manual
+**Cambio respecto a lo aprobado:** antes no había menú en el fondo vacío y existía «Duplicar»; ahora:
+- Sobre un objeto editable: acciones de su tipo, **Cortar, Copiar, Pegar** y **Eliminar**.
+- En el fondo vacío (o sobre algo bloqueado): **Volver atrás**, **Adelante** y **Pegar** (se desactivan si no hay historial o portapapeles); el clic derecho en el fondo suelta la selección.
+- Portapapeles interno: no es el del sistema, no entra en `S` ni en el historial y se conserva al abrir otros archivos. Copiar no guarda historial; Cortar y Pegar guardan un paso cada uno y se pueden deshacer y rehacer.
+- Pegar: planta y capa activas, centrado en el punto del clic (desde el menú) y con la misma validación de escaleras de la planta de abajo; no copia puertas ni uniones.
+- Atajos **Ctrl+C / Ctrl+X / Ctrl+V** (Cmd en Mac), agregados el mismo día a pedido del usuario: copian, cortan y pegan con el portapapeles interno. Solo actúan sin herramienta activa ni operación en curso y fuera de campos de texto (dentro de un campo siguen siendo el copiar/pegar del navegador); sin selección Ctrl+C no bloquea al navegador; Ctrl+V pega centrado en el último punto del cursor sobre el plano; Ctrl+Mayús+V no hace nada. Cada Cortar y cada Pegar es un paso de historial.
+- Para la F4: el portapapeles copia `img` y `modelo` como referencias; si «Nuevo» vacía `R`, un objeto pegado podría apuntar a un recurso inexistente (resolverlo al diseñar el catálogo, por ejemplo vaciando el portapapeles en «Nuevo»).
+
+**Resultados reales (Chrome 131 sin interfaz):** 48 pruebas aprobadas, 0 fallidas (las 31 anteriores y 17 de la F3, incluidas las del portapapeles, el menú del fondo y los atajos), dibujo idéntico a la referencia del código original, y prueba con ratón real simulado correcta (menú del objeto, menú del fondo, pegar en el punto del clic, volver atrás, adelante, cortar y pegar lo cortado). **No sustituye la verificación manual.**
+
+**Comprobaciones manuales pendientes del usuario:**
+1. Clic derecho sobre un objeto: aparecen Cortar, Copiar, Pegar y Eliminar; no aparece «Duplicar» (tampoco en el inspector).
+2. Copiar un objeto, clic derecho en un lugar vacío, Pegar: aparece centrado en ese punto, en la capa activa; Cortar y pegar mueve el objeto; varios objetos a la vez; pared con puerta (la puerta no se copia) y cable unido (se pega suelto).
+3. Clic derecho en el fondo: Volver atrás, Adelante y Pegar; se desactivan cuando no corresponden; Volver atrás/Adelante equivalen a Ctrl+Z / Ctrl+Y.
+4. Cada Cortar y cada Pegar es un solo paso de historial; Copiar no guarda ninguno.
+5. Pegar con la capa activa oculta o bloqueada y pegar una escalera sobre la de la planta de abajo: se rechaza con aviso y sin paso de historial.
+6. Con una herramienta activa o un cable a medio dibujar, el clic derecho sigue terminando o cancelando, sin menú.
+7. Atajos: Ctrl+C / Ctrl+X / Ctrl+V con un objeto seleccionado y el cursor sobre el plano (pega centrado en el cursor); no actúan con una herramienta activa; dentro de un campo del inspector siguen siendo los del navegador; Ctrl+Z / Ctrl+Y deshacen y rehacen cada corte y pegado.

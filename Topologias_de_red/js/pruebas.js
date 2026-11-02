@@ -1,4 +1,4 @@
-// ===== pruebas.js: pruebas de lógica, referencia de dibujo y medición de rendimiento (Fases 0, 1, 2 y 2B) =====
+// ===== pruebas.js: pruebas de lógica, referencia de dibujo y medición de rendimiento (Fases 0, 1, 2, 2B y 3) =====
 // Solo se carga al abrir index.html?pruebas=1. Aparece un panel «Pruebas» abajo a la izquierda.
 // Cada comprobación usa un proyecto de prueba y, al terminar, restaura el proyecto abierto (no toca el historial).
 // Aun así, conviene guardar el trabajo antes de ejecutarlas.
@@ -394,6 +394,224 @@ const TRP = (() => {
     });
   });
 
+  // ---------- Pruebas de la Fase 3 (inspector y menú contextual) ----------
+  // Los eventos de puntero que llegan a svg usan setPointerCapture: con un pointerId inventado fallaría, por eso se reemplaza un momento por una función vacía.
+  const sinCaptura = fn => { svg.setPointerCapture = () => {}; try { return fn(); } finally { delete svg.setPointerCapture; } };
+  const ptr = (el, tipo, x, y, extra = {}) => el.dispatchEvent(new PointerEvent(tipo, { clientX: x, clientY: y, button: 0, bubbles: true, cancelable: true, pointerId: 1, ...extra }));
+  const enObj = id => document.querySelector('#c [data-id="' + id + '"]');
+  const derecho = el => sinCaptura(() => { ptr(el, 'pointerdown', 300, 200, { button: 2, buttons: 2 }); ptr(svg, 'pointerup', 300, 200, { button: 2 }); });
+  const campoInsp = c => document.querySelector('#insp [data-campo="' + c + '"]');
+  const camposInsp = () => [...document.querySelectorAll('#insp [data-campo]')].map(e => e.dataset.campo).join();
+  const idsMenu = () => [...document.querySelectorAll('#ctx [data-a]')].map(b => b.dataset.a);
+  const idsAcc = os => TR.acc.paraMenu(os).flatMap(g => g.items.map(i => i.id));
+  const conInsp = fn => { const v = TR.insp.visible(); TR.insp.abrir(); try { return fn(); } finally { if (!v) TR.insp.alternar(); TR.ctx.cerrar(); } };
+  const conColor = fn => { const c = $('#col'), v = c.value; try { return fn(); } finally { c.value = v; } };
+  const fDup = () => {
+    const e = base({}, [item(1, 'PC', '💻', 3, 3, { cp: 'c2' }), pared(2, [{ x: 1, y: 6 }, { x: 8, y: 6 }]), puerta(3, 2, 0, 2, .9, 1, 1, 'izq'), cable(4, 'UTP Cat6', '#2e86de', .06, '', [{ x: 3, y: 3, ref: 1 }, { x: 9, y: 3 }])]);
+    e.plantas = [{ id: 'p1', nombre: 'Planta 1', ca: 'c1', capas: [capa('c1', 'Base'), capa('c2', 'Otra')] }]; e.cn = 2; return e;
+  };
+  prueba('Fase 3: instalación (acciones.js, inspector.js, contexto.js, eventos.js obligatorio y TR.stats intacto)', () => {
+    afirmar(typeof TR !== 'undefined' && TR.acc && TR.insp && TR.ctx && TR.ui, 'faltan js/acciones.js, js/inspector.js o js/contexto.js (o index.html no los carga)');
+    afirmar($('#insp') && $('#insp-cuerpo') && $('#ctx') && $('#binsp'), 'falta el HTML del inspector o del menú en index.html');
+    igual(Object.keys(TR.stats), ['fondo', 'rejilla', 'obj', 'tmp', 'paneles', 'menu'], 'las claves de TR.stats no deben cambiar');
+    afirmar(TR.acc.campos.length >= 10 && TR.acc.acciones.length >= 10 && typeof TR.acc.fijar == 'function', 'el registro de campos y acciones está vacío');
+  });
+  prueba('Fase 3: el inspector no se reconstruye con 100 movimientos del ratón y no pierde foco ni texto', () => {
+    conInsp(() => conProyecto(fDispositivos().estado, () => {
+      sel = 1; render(); const el = campoInsp('label'); afirmar(el, 'no hay campo de etiqueta');
+      el.focus(); el.value = 'texto sin confirmar'; const dom = $('#insp-cuerpo').firstElementChild; TR.reiniciar();
+      for (let i = 0; i < 100; i++) mover(i);
+      ser(TR.ui.inspector, 0, 'reconstrucciones del inspector'); ser(TR.ui.enSitio, 0, 'actualizaciones del inspector'); ser(document.activeElement, el, 'foco'); ser(el.value, 'texto sin confirmar', 'texto');
+      ser($('#insp-cuerpo').firstElementChild, dom, 'el DOM cambió');
+      render(); ser(TR.ui.inspector, 0, 'un render sin cambios reconstruyó el inspector'); ser(document.activeElement, el, 'foco tras render'); ser(el.value, 'texto sin confirmar', 'texto tras render');
+    }));
+  });
+  prueba('Fase 3: editar desde el inspector: un paso por cambio, deshacer y rehacer, y el proyecto sigue siendo guardable', () => {
+    conR(() => conInsp(() => conProyecto(fDispositivos().estado, () => {
+      completarTipo(byId(1)); sel = 1; render(); let h = hist.length;   // como al crearlo con add(): el tipo queda escrito, así renombrar no lo cambia
+      const cambia = (campo, valor) => { const el = campoInsp(campo); afirmar(el, 'no hay campo ' + campo); el.value = valor; el.dispatchEvent(new Event('change', { bubbles: true })); ser(hist.length, ++h, campo + ': pasos de historial'); };
+      cambia('n', 'Router principal'); cambia('label', 'RX'); cambia('x', '5.5'); cambia('w', '1.5'); cambia('rot', '45');
+      let o = byId(1); igual([o.n, o.label, o.x, o.w, o.rot, tipoDe(o), subDe(o)], ['Router principal', 'RX', 5.5, 1.5, 45, 'dispositivo', 'router'], 'valores tras editar');
+      ser(campoInsp('rot').value, '45', 'el campo no muestra el valor');
+      const g = ESQ.serializar(S, R); afirmar(g.ok, g.error); const l = ESQ.leer(g.texto); afirmar(l.ok && !l.avisos.length, 'el proyecto editado no reabre limpio');
+      for (let i = 0; i < 5; i++) deshacer(); o = byId(1); igual([o.n, o.label, o.x, o.w, o.rot || 0], ['Router', 'R1', 3, .8, 0], 'valores tras deshacer'); ser(hist.length, h - 5, 'pasos tras deshacer');
+      for (let i = 0; i < 5; i++) rehacer(); o = byId(1); igual([o.n, o.label, o.x, o.w, o.rot], ['Router principal', 'RX', 5.5, 1.5, 45], 'valores tras rehacer');
+    })));
+  });
+  prueba('Fase 3: valores inválidos o fuera de rango no rompen nada ni guardan pasos de más', () => {
+    conR(() => conProyecto(fDispositivos().estado, () => {
+      const h = hist.length, o = byId(1), x0 = o.x;
+      ser(TR.acc.fijar([1], 'x', 'abc').ok, false, 'texto en un número'); ser(TR.acc.fijar([1], 'x', '').ok, false, 'vacío'); ser(o.x, x0, 'x cambió'); ser(hist.length, h, 'pasos');
+      afirmar(TR.acc.fijar([1], 'x', String(x0)).sinCambio, 'el mismo valor no es un cambio'); ser(hist.length, h, 'pasos con el mismo valor');
+      TR.acc.fijar([1], 'w', '-4'); ser(o.w, .2, 'ancho mínimo'); TR.acc.fijar([1], 'x', '1e9'); ser(o.x, 1e5, 'tope de coordenada'); TR.acc.fijar([1], 'rot', '-90'); ser(o.rot, 270, 'giro normalizado'); ser(hist.length, h + 3, 'pasos');
+      ser(TR.acc.fijar([1], 'c', '#ff0000').ok, false, 'un dispositivo no tiene color');
+      const g = ESQ.serializar(S, R); afirmar(g.ok, g.error);
+    }));
+    conProyecto(fFormas().estado, () => { const h = hist.length; ser(TR.acc.fijar([7], 'label', '   ').ok, false, 'un texto no puede quedar vacío'); ser(byId(7).label, 'Texto libre'); ser(hist.length, h); });
+  });
+  prueba('Fase 3: escaleras editadas desde el inspector se validan con la planta de abajo (se rechaza, se avisa y no hay paso de historial)', () => {
+    conInsp(() => conProyecto(fEscaleras().estado, () => {
+      irA('p2'); sel = 5; render(); const o = byId(5), h = hist.length, j0 = JSON.stringify(S);
+      let r = TR.acc.fijar([5], 'x', '6.5'); ser(r.ok, false, 'movió sobre la de abajo'); afirmar(/exactamente encima/.test(r.motivo), 'motivo: ' + r.motivo);
+      const t = $('#toast'); afirmar(t && !t.hidden && /exactamente encima/.test(t.textContent), 'no hay aviso en pantalla');
+      ser(TR.acc.fijar([5], 'w', '1.2').ok, false, 'cambió el tamaño sin cumplir la regla'); ser(TR.acc.ejecutar('rotar-der'), false, 'giró y obstruye');
+      const pp0 = [...TR.acc.portapapeles]; TR.acc.ejecutar('copiar'); ser(TR.acc.ejecutar('pegar'), false, 'pegó y obstruye'); TR.acc.portapapeles.splice(0, TR.acc.portapapeles.length, ...pp0); ser(JSON.stringify(S), j0, 'cambió el proyecto'); ser(hist.length, h, 'se guardó un paso');
+      const el = campoInsp('x'); el.value = '6.5'; el.dispatchEvent(new Event('change', { bubbles: true })); ser(el.value, '6', 'el campo no volvió al valor anterior'); ser(hist.length, h, 'paso tras el campo');
+      ser(TR.acc.fijar([5], 'label', 'Escalera A').ok, true, 'la etiqueta no se valida'); ser(hist.length, h + 1);
+      ser(TR.acc.fijar([5], 'x', '20').ok, true, 'lejos de la de abajo sí se puede'); ser(byId(5).x, 20); ser(hist.length, h + 2);
+      deshacer(); ser(byId(5).x, 6, 'deshacer');
+    }));
+  });
+  prueba('Fase 3: D16: el color de un cable no se puede cambiar (ni al editar ni al dibujar); las paredes sí; en una selección mixta solo cambia la pared', () => {
+    conColor(() => conProyecto(base({}, [pared(1, [{ x: 1, y: 1 }, { x: 6, y: 1 }]), cable(2, 'UTP Cat6', '#2e86de', .06, '', [{ x: 1, y: 3 }, { x: 6, y: 3 }])]), () => {
+      const h = hist.length, col = $('#col'), mueve = v => { col.value = v; col.oninput(); col.oninput(); col.onchange(); };
+      sel = 2; render(); ser(col.disabled, true, 'el selector debe estar desactivado con un cable'); mueve('#ff0000'); ser(byId(2).c, '#2e86de', 'el cable cambió de color'); ser(hist.length, h, 'paso por un cable');
+      afirmar(!campoInsp('c') && /lo define su tipo/.test($('#insp-cuerpo').textContent), 'el inspector ofrece color para un cable'); ser(TR.acc.fijar([2], 'c', '#ff0000').ok, false);
+      sel = 1; render(); ser(col.disabled, false, 'con una pared el selector debe estar activo'); mueve('#00aa00'); ser(byId(1).c, '#00aa00', 'la pared no cambió'); ser(hist.length, h + 1, 'un paso por gesto');
+      deshacer(); ser(byId(1).c, '#444444', 'deshacer el color');
+      sel = null; multi = [1, 2]; render(); ser(col.disabled, false, 'selección mixta'); mueve('#0000ff'); ser(byId(1).c, '#0000ff'); ser(byId(2).c, '#2e86de', 'el cable de la selección mixta cambió');
+      multi = []; const r = svg.getBoundingClientRect(), dibujar = () => { sinCaptura(() => { ptr(svg, 'pointerdown', r.left + 100, r.top + 100); ptr(svg, 'pointerup', r.left + 100, r.top + 100); ptr(svg, 'pointerdown', r.left + 400, r.top + 100); ptr(svg, 'pointerup', r.left + 400, r.top + 100); }); finishLine(); return S.objs[S.objs.length - 1]; };
+      tool = CAT['Cables'][0]; tmp = null; render(); ser(col.disabled, true, 'herramienta de cable'); col.value = '#00ff00'; let n = dibujar(); igual([n.k, n.c], ['line', '#2e86de'], 'el cable nuevo debe usar el color de su tipo');
+      tool = CAT['Edificio'][0]; tmp = null; render(); ser(col.disabled, false, 'herramienta de pared'); n = dibujar(); igual([n.k, n.c], ['line', '#00ff00'], 'la pared nueva usa el color elegido');
+    }));
+  });
+  prueba('Fase 3: clic derecho: termina el cable, cancela la medición, abre el menú solo sobre un objeto sin herramienta, y el menú nativo sigue bloqueado', () => {
+    conProyecto(fDispositivos().estado, () => {
+      const cerrado = () => $('#ctx').hidden;
+      tool = CAT['Cables'][0]; tmp = { ...cableEnCurso(), pts: [{ x: 2, y: 2 }, { x: 4, y: 2 }] }; render(); const n0 = S.objs.length, h0 = hist.length; derecho(svg);
+      ser(S.objs.length, n0 + 1, 'el cable no terminó'); ser(hist.length, h0 + 1, 'pasos'); ser(tmp, null, 'tmp'); afirmar(cerrado(), 'abrió el menú con un cable en curso');
+      tool = { k: 'medida' }; tmp = { k: 'medida', a: { x: 1, y: 1 }, b: { x: 3, y: 1 }, off: 0, st: 1, u: 'm' }; render(); derecho(svg); ser(tmp, null, 'la medición no se canceló'); afirmar(cerrado(), 'abrió el menú midiendo');
+      tool = CAT['Dispositivos'][0]; tmp = null; render(); derecho(enObj(1)); afirmar(cerrado(), 'abrió el menú con una herramienta activa');
+      tool = null; sel = null; multi = []; render(); derecho(enObj(2)); afirmar(!cerrado(), 'no abrió el menú sobre un objeto'); ser(sel, 2, 'no seleccionó el objeto'); igual(idsMenu().filter(a => ['cortar', 'copiar', 'pegar', 'eliminar', 'duplicar'].includes(a)), ['cortar', 'copiar', 'pegar', 'eliminar'], 'entradas de portapapeles y borrar (sin duplicar)');
+      sinCaptura(() => { ptr(svg, 'pointerdown', 10, 10); ptr(svg, 'pointerup', 10, 10); }); afirmar(cerrado(), 'un clic fuera no cerró el menú');
+      derecho(svg); afirmar(!cerrado(), 'no hay menú en el fondo vacío'); igual(idsMenu(), ['deshacer', 'rehacer', 'pegar'], 'menú del fondo'); ser(sel, null, 'el fondo debe soltar la selección'); TR.ctx.cerrar();
+      const ev = new MouseEvent('contextmenu', { bubbles: true, cancelable: true }); svg.dispatchEvent(ev); afirmar(ev.defaultPrevented, 'el menú nativo del navegador ya no está bloqueado');
+    });
+  });
+  prueba('Fase 3: cada tipo ofrece lo que corresponde (cable sin color, pared con color, puerta sin copiar, sinColor para la mesa futura)', () => {
+    conProyecto(fDispositivos().estado, () => {
+      const cab = idsAcc([byId(5)]), disp = idsAcc([byId(1)]), varios = idsAcc([byId(1), byId(2)]);
+      afirmar(!cab.includes('enf-c') && cab.includes('enf-label') && cab.includes('copiar') && !cab.includes('duplicar'), 'menú del cable: ' + cab); afirmar(!disp.includes('enf-c') && disp.includes('enf-geo') && disp.includes('enf-n'), 'menú del dispositivo: ' + disp);
+      afirmar(['rotar-der', 'cortar', 'copiar', 'pegar', 'eliminar'].every(a => varios.includes(a)) && !varios.some(a => ['enf-n', 'enf-label', 'enf-geo'].includes(a)), 'acciones comunes de varios objetos: ' + varios);
+    });
+    conProyecto(fParedes().estado, () => {
+      afirmar(idsAcc([byId(1)]).includes('enf-c'), 'la pared debe ofrecer color'); const pu = idsAcc([byId(3)]); afirmar(pu.includes('voltear-lado') && pu.includes('eliminar') && !pu.includes('copiar') && !pu.includes('cortar') && !pu.includes('rotar-der'), 'menú de la puerta: ' + pu);
+      const f = o => o.id == 1; TR.acc.sinColor.push(f); try { afirmar(!idsAcc([byId(1)]).includes('enf-c') && TR.acc.fijar([1], 'c', '#123456').ok === false, 'sinColor no se respeta'); } finally { TR.acc.sinColor.splice(TR.acc.sinColor.indexOf(f), 1); }
+    });
+    conProyecto(fFormas().estado, () => {
+      const m = TR.acc.paraMenu([byId(1)]).flatMap(g => g.items); afirmar(m.some(i => i.id == 'f-sol' && i.marca) && m.some(i => i.id == 'ls-con' && i.marca) && m.some(i => i.id == 'enf-c'), 'menú de la forma');
+      afirmar(TR.acc.campo('rot').aplica(byId(3)) && !TR.acc.campo('rot').aplica(byId(1)), 'solo el círculo tiene giro numérico');
+      const me = idsAcc([byId(8)]); afirmar(me.includes('copiar') && me.includes('cortar') && !me.includes('enf-label') && !me.includes('enf-n'), 'menú de la medida: ' + me);
+    });
+  });
+  prueba('Fase 3: el inspector muestra los campos del tipo (cable sin color, texto sin tamaño, círculo con giro, varios objetos solo lo común)', () => {
+    conProyecto(fFormas().estado, () => {
+      sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,c,f,ls', 'rectángulo'); sel = 3; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot,c,f,ls', 'círculo'); sel = 5; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot,c,f,ls', 'zona');
+      sel = 7; render(); ser(camposInsp(), 'label,x,y,rot', 'texto'); sel = 8; render(); ser(camposInsp(), '', 'medida'); sel = null; multi = [1, 3]; render(); ser(camposInsp(), 'c,f,ls', 'varios');
+    });
+    conProyecto(fDispositivos().estado, () => { sel = 5; render(); ser(camposInsp(), 'n,label', 'cable'); sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot', 'dispositivo'); });
+    conProyecto(fParedes().estado, () => { sel = 1; render(); ser(camposInsp(), 'n,label,c', 'pared'); sel = 3; render(); ser(camposInsp(), '', 'puerta'); });
+  });
+  prueba('Fase 3: con la capa bloqueada ninguna acción ni campo actúa y no se guarda historial', () => {
+    conProyecto(fDispositivos().estado, () => {
+      sel = 1; render(); const pp0 = [...TR.acc.portapapeles]; TR.acc.ejecutar('copiar'); S.plantas[0].capas[0].bloqueada = true; const h = hist.length, j0 = JSON.stringify(S);
+      ser(TR.acc.fijar([1], 'label', 'X').ok, false, 'campo'); ['cortar', 'copiar', 'pegar', 'eliminar', 'rotar-der', 'f-sol'].forEach(a => ser(TR.acc.ejecutar(a), false, 'acción ' + a));
+      ser(TR.ctx.abrir({ target: enObj(1), clientX: 5, clientY: 5 }), true, 'sobre algo bloqueado se muestra el menú del fondo'); igual(idsMenu(), ['deshacer', 'rehacer', 'pegar'], 'menú sobre un objeto bloqueado'); TR.ctx.cerrar();
+      ser(JSON.stringify(S), j0, 'cambió el proyecto'); ser(hist.length, h, 'historial'); TR.acc.portapapeles.splice(0, TR.acc.portapapeles.length, ...pp0);
+    });
+  });
+  prueba('Fase 3: copiar, cortar y pegar: en la capa activa y en el punto del clic, un paso, reversible, sin uniones ni puertas; no hay «Duplicar»', () => {
+    const guardado = [...TR.acc.portapapeles], P = TR.acc.portapapeles;
+    try { conProyecto(fDup(), () => {
+      ser(TR.acc.acciones.some(a => a.id == 'duplicar'), false, 'duplicar sigue registrado');
+      const n0 = S.objs.length, h0 = hist.length; sel = 1; render();
+      ser(TR.acc.ejecutar('copiar'), true, 'no copió'); ser(hist.length, h0, 'copiar no debe guardar historial'); ser(S.objs.length, n0, 'copiar no cambia el proyecto'); ser(P.length, 1, 'portapapeles');
+      afirmar(!JSON.stringify(P).includes('"id"') && !('pl' in P[0]), 'el portapapeles guarda ids o planta');
+      afirmar(TR.acc.ejecutar('pegar', { punto: { x: 10, y: 7 } }), 'no pegó'); ser(S.objs.length, n0 + 1, 'objetos'); ser(hist.length, h0 + 1, 'pasos');
+      const c = S.objs[S.objs.length - 1]; igual([c.id > 4, c.pl, c.cp, c.x, c.y, tipoDe(c), subDe(c), sel], [true, 'p1', 'c1', 10, 7, 'dispositivo', 'pc', c.id], 'pegado en la capa activa y en el punto del clic');
+      deshacer(); ser(S.objs.length, n0, 'deshacer'); rehacer(); ser(S.objs.length, n0 + 1, 'rehacer');
+      sel = 2; render(); TR.acc.ejecutar('copiar'); TR.acc.ejecutar('pegar', { punto: { x: 5, y: 10 } }); const p = S.objs[S.objs.length - 1];
+      igual([p.k, p.pts.map(q => [q.x, q.y])], ['line', [[1.5, 10], [8.5, 10]]], 'pared pegada'); ser(S.objs.filter(o => o.k == 'puerta').length, 1, 'se pegó una puerta');
+      sel = 4; render(); TR.acc.ejecutar('copiar'); TR.acc.ejecutar('pegar', { punto: { x: 6, y: 5 } }); const k = S.objs[S.objs.length - 1];
+      igual(k.pts.map(q => [q.x, q.y]), [[3, 5], [9, 5]], 'cable pegado'); afirmar(k.pts.every(q => !q.ref && !q.rl && !q.ri), 'el cable pegado conserva uniones'); ser(byId(4).pts[0].ref, 1, 'el original perdió su unión');
+      const n1 = S.objs.length, h1 = hist.length; fijarSeleccion([1, 4]); render(); TR.acc.copiar(); TR.acc.pegar(); ser(S.objs.length, n1 + 2, 'varios objetos'); ser(hist.length, h1 + 1, 'un paso para varios'); ser(multi.length, 2, 'selección de lo pegado'); afirmar(multi.every(i => i > 4), 'ids nuevos');
+      const n2 = S.objs.length, h2 = hist.length; sel = 1; multi = []; render(); ser(TR.acc.ejecutar('cortar'), true, 'no cortó'); ser(byId(1), undefined, 'el objeto cortado sigue'); ser(hist.length, h2 + 1, 'cortar = un paso'); ser(P.length, 1, 'lo cortado debe quedar en el portapapeles');
+      deshacer(); afirmar(byId(1), 'deshacer el corte'); ser(S.objs.length, n2, 'objetos tras deshacer'); rehacer(); ser(byId(1), undefined, 'rehacer el corte');
+      ser(TR.acc.ejecutar('pegar', { punto: { x: 3, y: 3 } }), true, 'pegar lo cortado'); ser(S.objs.length, n2, 'cortar y pegar mantiene la cantidad');
+      sel = 3; multi = []; render(); const n3 = S.objs.length; ser(TR.acc.ejecutar('copiar'), false, 'copió una puerta sola'); ser(TR.acc.ejecutar('cortar'), false, 'cortó una puerta sola'); ser(S.objs.length, n3);
+      P.length = 0; sel = null; render(); const h4 = hist.length; ser(TR.acc.ejecutar('pegar'), false, 'pegó con el portapapeles vacío'); ser(hist.length, h4);
+    }); } finally { P.splice(0, P.length, ...guardado); }
+    conProyecto(fFormas().estado, () => {
+      const h = hist.length; sel = 1; selEdge = { id: 1, i: 0 }; render(); TR.acc.ejecutar('eliminar'); ser(byId(1), undefined, 'debe borrarse el objeto completo, no solo el lado'); ser(hist.length, h + 1); deshacer(); afirmar(byId(1), 'deshacer');
+    });
+  });
+  prueba('Fase 3: clic derecho en el fondo vacío: volver atrás, adelante y pegar (se desactivan si no se pueden usar) y pegar en el punto del clic', () => {
+    const guardado = [...TR.acc.portapapeles], P = TR.acc.portapapeles;
+    try { conProyecto(fDispositivos().estado, () => {
+      const ok = () => [...document.querySelectorAll('#ctx button')].map(b => !b.disabled);
+      P.length = 0; hist.length = 0; fut.length = 0; sel = 1; render(); derecho(svg); igual(idsMenu(), ['deshacer', 'rehacer', 'pegar'], 'entradas'); igual(ok(), [false, false, false], 'sin historial ni portapapeles todo debe estar desactivado'); ser(sel, null, 'selección'); TR.ctx.cerrar();
+      const w0 = S.edificio.w; push(); S.edificio.w = 25; derecho(svg); igual(ok(), [true, false, false], 'con un paso hecho'); $('#ctx [data-a="deshacer"]').click(); ser(S.edificio.w, w0, 'volver atrás'); ser(fut.length, 1, 'rehacer disponible');
+      derecho(svg); igual(ok(), [false, true, false], 'tras deshacer'); $('#ctx [data-a="rehacer"]').click(); ser(S.edificio.w, 25, 'adelante');
+      sel = 1; render(); TR.acc.ejecutar('copiar'); const n0 = S.objs.length, h0 = hist.length; derecho(svg); igual(ok(), [true, false, true], 'con portapapeles'); $('#ctx [data-a="pegar"]').click();
+      const pt0 = toW({ clientX: 300, clientY: 200 }), c = S.objs[S.objs.length - 1]; ser(S.objs.length, n0 + 1, 'no pegó'); ser(hist.length, h0 + 1, 'pasos'); igual([c.x, c.y], [pt0.x, pt0.y], 'debe pegarse centrado en el punto del clic');
+      derecho(enObj(2)); igual(idsMenu().filter(a => ['deshacer', 'rehacer'].includes(a)), [], 'el menú de un objeto no lleva deshacer/rehacer'); TR.ctx.cerrar();
+    }); } finally { P.splice(0, P.length, ...guardado); TR.ctx.cerrar(); }
+  });
+  prueba('Fase 3: atajos Ctrl+C, Ctrl+X y Ctrl+V (Cmd en Mac): copian, cortan y pegan en el cursor, un paso cada uno, y no actúan dentro de un campo ni con una herramienta activa', () => {
+    const guardado = [...TR.acc.portapapeles], P = TR.acc.portapapeles, tecla = (el, key, extra = {}) => { const ev = new KeyboardEvent('keydown', { key, ctrlKey: true, bubbles: true, cancelable: true, ...extra }); el.dispatchEvent(ev); return ev; };
+    try { conProyecto(fDispositivos().estado, () => {
+      const n0 = S.objs.length, h0 = hist.length; P.length = 0; sel = 1; render();
+      afirmar(tecla(svg, 'c').defaultPrevented, 'Ctrl+C no actuó'); ser(P.length, 1, 'portapapeles'); ser(hist.length, h0, 'copiar no guarda historial'); ser(S.objs.length, n0);
+      curP = { x: 12, y: 6 }; afirmar(tecla(svg, 'v').defaultPrevented, 'Ctrl+V no actuó'); const c = S.objs[S.objs.length - 1];
+      ser(S.objs.length, n0 + 1, 'pegar'); ser(hist.length, h0 + 1, 'pegar = un paso'); igual([c.x, c.y], [12, 6], 'debe pegarse centrado en el cursor'); ser(sel, c.id, 'selección = lo pegado');
+      ser(tecla(svg, 'x').defaultPrevented, true, 'Ctrl+X no actuó'); ser(byId(c.id), undefined, 'cortar'); ser(hist.length, h0 + 2, 'cortar = un paso'); ser(P.length, 1);
+      ser(tecla(svg, 'v', { ctrlKey: false, metaKey: true }).defaultPrevented, true, 'Cmd+V (Mac)'); ser(S.objs.length, n0 + 1, 'pegar con Cmd');
+      const h1 = hist.length, n1 = S.objs.length, inp = document.createElement('input'); inp.type = 'text'; document.body.appendChild(inp);
+      try { tecla(inp, 'v'); tecla(inp, 'x'); } finally { inp.remove(); } ser(S.objs.length, n1, 'los atajos actuaron dentro de un campo'); ser(hist.length, h1);
+      tool = CAT['Dispositivos'][0]; sel = null; render(); tecla(svg, 'v'); ser(S.objs.length, n1, 'pegó con una herramienta activa'); tool = null;
+      sel = 1; render(); const ev = tecla(svg, 'v', { shiftKey: true }); ser(ev.defaultPrevented, false, 'Ctrl+Mayús+V no es pegar'); ser(S.objs.length, n1);
+      sel = null; render(); ser(tecla(svg, 'c').defaultPrevented, false, 'Ctrl+C sin selección no debe bloquear el copiar del navegador');
+    }); } finally { P.splice(0, P.length, ...guardado); }
+  });
+  prueba('Fase 3: una edición escrita y sin confirmar se aplica al objeto original aunque se haga clic en otro objeto', () => {
+    conInsp(() => conProyecto(fDispositivos().estado, () => {
+      sel = 1; render(); const el = campoInsp('label'); el.focus(); el.value = 'PENDIENTE'; const h = hist.length;
+      sinCaptura(() => { ptr(enObj(2), 'pointerdown', 300, 200); ptr(svg, 'pointerup', 300, 200); });
+      ser(byId(1).label, 'PENDIENTE', 'la edición se perdió'); ser(byId(2).label, '', 'la edición cayó en otro objeto'); ser(sel, 2, 'selección'); ser(hist.length, h + 1, 'pasos'); ser(campoInsp('label').value, '', 'el inspector no pasó al objeto nuevo');
+    }));
+  });
+  prueba('Fase 3: acciones del menú: relleno (un paso, reversible), «Etiqueta…» enfoca el campo del inspector y rotar guarda un paso', () => {
+    conInsp(() => conProyecto(fFormas().estado, () => {
+      derecho(enObj(1)); let h = hist.length; $('#ctx [data-a="f-hat"]').click(); ser(byId(1).f, 'hat', 'relleno'); ser(hist.length, h + 1, 'pasos'); afirmar($('#ctx').hidden, 'el menú sigue abierto');
+      deshacer(); ser(byId(1).f, 'sol', 'deshacer'); rehacer(); ser(byId(1).f, 'hat', 'rehacer');
+      derecho(enObj(1)); $('#ctx [data-a="enf-label"]').click(); ser(document.activeElement, campoInsp('label'), 'el campo de etiqueta no recibió el foco');
+      h = hist.length; derecho(enObj(1)); $('#ctx [data-a="rotar-der"]').click(); ser(hist.length, h + 1, 'pasos al rotar');
+      const pngSel = (() => { derecho(enObj(1)); const x = construirSvgExport().xml; TR.ctx.cerrar(); return x; })(); afirmar(!/data-a=|insp|ctx/.test(pngSel), 'el PNG incluye partes del menú o del inspector'); ser(sel, 1, 'la selección no se conservó tras exportar');
+    }));
+  });
+  prueba('Fase 3: teclado: Supr/Retroceso no borran con checkbox, color, resumen o textarea enfocados; dentro de un campo los atajos no actúan; Esc cierra primero el menú', () => {
+    const b0 = window.borrar, s0 = window.setTool; let nb = 0, ns = 0; window.borrar = () => { nb++; }; window.setTool = () => { ns++; };
+    const mk = (tag, type) => { const e = document.createElement(tag); if (type) e.type = type; document.body.appendChild(e); return e; };
+    const els = [mk('input', 'checkbox'), mk('input', 'color'), mk('textarea'), mk('input', 'text'), mk('input', 'number')], det = mk('details'), sm = document.createElement('summary'); det.appendChild(sm);
+    const tecla = (el, key, extra = {}) => el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, ...extra }));
+    try {
+      [...els, sm].forEach(el => ['Delete', 'Backspace'].forEach(k => tecla(el, k))); ser(nb, 0, 'borró con un campo enfocado');
+      ['Delete', 'Backspace'].forEach(k => tecla(svg, k)); ser(nb, 2, 'no borra con el foco en el plano');
+      const g0 = rejilla, h0 = hist.length; tecla(els[3], 'g'); tecla(els[3], 'z', { ctrlKey: true }); tecla(els[2], 'g'); ser(rejilla, g0, 'G dentro de un campo'); ser(hist.length, h0, 'Ctrl+Z dentro de un campo');
+      conProyecto(fDispositivos().estado, () => {
+        derecho(enObj(1)); afirmar(!$('#ctx').hidden, 'el menú no abrió'); tecla(document.activeElement || document.body, 'Escape'); afirmar($('#ctx').hidden, 'Esc no cerró el menú'); ser(ns, 0, 'Esc con el menú abierto cambió la herramienta');
+        tecla(svg, 'Escape'); ser(ns, 1, 'Esc sin menú debe seguir soltando la herramienta');
+        derecho(enObj(1)); const bs = [...document.querySelectorAll('#ctx button:not(:disabled)')]; tecla(document.activeElement, 'ArrowDown'); ser(document.activeElement, bs[1], 'flecha abajo'); tecla(document.activeElement, 'End'); ser(document.activeElement, bs[bs.length - 1], 'fin'); TR.ctx.cerrar();
+      });
+    } finally { window.borrar = b0; window.setTool = s0; els.forEach(e => e.remove()); det.remove(); TR.ctx.cerrar(); }
+  });
+  prueba('Fase 3: abrir y cerrar el inspector (cajón) no cambia el proyecto y mantiene las reglas al día', () => {
+    const v = TR.insp.visible(); try {
+      const j0 = JSON.stringify(S), h0 = hist.length; TR.insp.alternar(); ser($('#insp').classList.contains('cerrado'), v, 'clase cerrado'); ser($('#binsp').getAttribute('aria-pressed'), String(!v), 'aria-pressed');
+      TR.insp.alternar(); ser($('#insp').classList.contains('cerrado'), !v); ser(JSON.stringify(S), j0, 'cambió el proyecto'); ser(hist.length, h0, 'cambió el historial');
+    } finally { if (TR.insp.visible() != v) TR.insp.alternar(); }
+  });
+
   // ---------- Panel ----------
   const CLAVE_REF = 'topologias_ref_f0', CLAVE_PERF = 'topologias_perf_f0', CLAVE_PERF1 = 'topologias_perf_f1';
   const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
@@ -407,7 +625,7 @@ const TRP = (() => {
     if (document.getElementById('trp')) return;
     const d = document.createElement('div'); d.id = 'trp';
     d.style.cssText = 'position:fixed;left:10px;bottom:36px;z-index:30;width:440px;max-height:60vh;display:flex;flex-direction:column;background:#fff;border:1px solid #14232b;border-radius:10px;box-shadow:0 6px 22px rgba(0,0,0,.3);font:12px/1.4 "Segoe UI",Arial,sans-serif;color:#1d2a2f';
-    d.innerHTML = '<div style="display:flex;gap:4px;flex-wrap:wrap;padding:8px;border-bottom:1px solid #d3dadd;background:#eef2f4;border-radius:10px 10px 0 0"><b style="flex:1">Pruebas (Fases 0 a 2B)</b><button data-a="x">✕</button>'
+    d.innerHTML = '<div style="display:flex;gap:4px;flex-wrap:wrap;padding:8px;border-bottom:1px solid #d3dadd;background:#eef2f4;border-radius:10px 10px 0 0"><b style="flex:1">Pruebas (Fases 0 a 3)</b><button data-a="x">✕</button>'
       + '<button data-a="run">Ejecutar pruebas</button><button data-a="cap">Guardar referencia de dibujo</button><button data-a="cmp">Comparar con la referencia</button><button data-a="perf">Medir rendimiento</button></div>'
       + '<pre id="trp-out" style="margin:0;padding:8px;overflow:auto;white-space:pre-wrap;flex:1"></pre>';
     document.body.appendChild(d);

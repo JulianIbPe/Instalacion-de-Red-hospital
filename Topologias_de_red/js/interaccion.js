@@ -8,7 +8,11 @@ function finishLine() {
 }
 svg.addEventListener('pointerdown', e => {
   svg.setPointerCapture(e.pointerId); let p = toW(e); avisoMsg = '';
-  if (e.button == 2) { finishLine(); if (tmp && (tmp.k == 'medida' || tmp.pa)) { tmp = null; drag = null; render(); } return; }   // clic derecho cancela la medición o la pieza a medio colocar
+  if (e.button == 2) {                                            // clic derecho: termina el cable, cancela la medición o la pieza a medio colocar; sin herramienta ni operación en curso abre el menú contextual (Fase 3)
+    const enCurso = !!tmp || !!drag; finishLine();
+    if (tmp && (tmp.k == 'medida' || tmp.pa)) { tmp = null; drag = null; render(); } else if (!tool && !enCurso) TR.ctx.abrir(e);
+    return;
+  }
   if (e.button == 1) { drag = { m: 'pan', sx: e.clientX, sy: e.clientY, ox: V.ox, oy: V.oy }; return; }
   // Doble clic detectado a mano: la página se redibuja en cada clic y el evento 'dblclick' nativo se pierde.
   const now = Date.now(), dbl = !e.shiftKey && now - lastDown.t < 350 && Math.hypot(e.clientX - lastDown.x, e.clientY - lastDown.y) < 6;
@@ -57,7 +61,7 @@ svg.addEventListener('pointerdown', e => {
   else if (tool.k == 'line') {
     snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e));   // los imanes miden la distancia con el cursor real, no con el punto ya ajustado a la grilla
     const it = itemAt(e), q = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p;   // nodo del mismo tipo > dispositivo > punto libre
-    if (!tmp) tmp = { k: 'line', n: tool.n, c: col(), w: tool.w, d: tool.d, pts: [q], label: '' }; else tmp.pts.push(q);
+    if (!tmp) tmp = { k: 'line', n: tool.n, c: esCable(tool) ? tool.c : col(), w: tool.w, d: tool.d, pts: [q], label: '' }; else tmp.pts.push(q);
   }
   render();
 });

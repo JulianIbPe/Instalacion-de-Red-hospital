@@ -10,6 +10,8 @@
 <link rel="stylesheet" href="css/lienzo.css">
 <link rel="stylesheet" href="css/plantas.css">
 <link rel="stylesheet" href="css/dialogo.css">
+<link rel="stylesheet" href="css/inspector.css">
+<link rel="stylesheet" href="css/contexto.css">
 </head>
 <body>
 <header id="top">
@@ -18,7 +20,7 @@
   <div class="grp"><button id="bsel" title="Seleccionar y mover objetos (Esc)">🖱️ Seleccionar</button><button id="bmed" title="Medir de un punto a otro">📏 Medir</button><button id="bgrid" class="on" title="Mostrar u ocultar la grilla y ajustar los objetos a ella (G)">▦ Grilla</button><button id="bmid" title="Imán al punto medio: el cursor se pega a la mitad de líneas, paredes y lados de formas (tecla M)">◇ Medio</button><button id="unit" title="Unidad de las PRÓXIMAS mediciones (las ya hechas no cambian)">Medir en: m</button></div>
   <div class="grp"><button id="bundo" title="Deshacer (Ctrl+Z)">↶</button><button id="bredo" title="Rehacer (Ctrl+Y)">↷</button><button id="bdel" title="Borrar el objeto seleccionado (Supr)">🗑️ Borrar</button></div>
   <span class="sp"></span>
-  <div class="grp last"><button id="bnew" title="Empezar un archivo nuevo">📄 Nuevo</button><button id="save" class="prim" title="Descargar la topología como archivo .json">💾 Guardar</button><button id="load" title="Abrir un archivo .json guardado">📂 Abrir</button><button id="png" title="Exportar la topología como imagen PNG">🖼️ PNG</button></div>
+  <div class="grp last"><button id="binsp" class="on" aria-pressed="true" title="Mostrar u ocultar el panel de propiedades">⚙️</button><button id="bnew" title="Empezar un archivo nuevo">📄 Nuevo</button><button id="save" class="prim" title="Descargar la topología como archivo .json">💾 Guardar</button><button id="load" title="Abrir un archivo .json guardado">📂 Abrir</button><button id="png" title="Exportar la topología como imagen PNG">🖼️ PNG</button></div>
   <input type="file" id="file" accept=".json" hidden>
 </header>
 <div id="main">
@@ -43,6 +45,7 @@
     <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
     <aside id="plantas" aria-label="Plantas y capas"></aside>
   </div>
+  <aside id="insp" aria-label="Propiedades del objeto"><div class="ih"><b>Propiedades</b><button id="insp-x" title="Cerrar el panel">✕</button></div><div id="insp-cuerpo"></div></aside>
 </div>
 <footer id="status"></footer>
 <div id="dlg" class="velo" hidden>
@@ -56,6 +59,7 @@
     </div>
   </div>
 </div>
+<div id="ctx" role="menu" aria-label="Menú del objeto" hidden></div>
 <script src="js/estado.js"></script>
 <script src="js/eventos.js"></script>
 <script src="js/tipos.js"></script>
@@ -78,6 +82,9 @@
 <script src="js/colocar.js"></script>
 <script src="js/interaccion.js"></script>
 <script src="js/controles.js"></script>
+<script src="js/acciones.js"></script>
+<script src="js/inspector.js"></script>
+<script src="js/contexto.js"></script>
 <script src="js/archivos.js"></script>
 <script src="js/main.js"></script>
 <script>
