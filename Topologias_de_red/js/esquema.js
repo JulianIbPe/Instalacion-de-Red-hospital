@@ -29,11 +29,11 @@ const ESQ = (() => {
   const coord = numero(-LIM.coord, LIM.coord), dim = numero(0, 1e5), ang = numero(-7200, 7200);
   const idNum = entero(1, Number.MAX_SAFE_INTEGER), idTxt = patron(RE_ID, 32), etq = patron(RE_ETQ, 32);
   const puntoSimple = (v, c) => { if (!v || typeof v != 'object') return INV; const x = coord(v.x, c), y = coord(v.y, c); return x === INV || y === INV ? INV : { x, y }; };
-  const punto = (v, c) => {                // punto de un cable: {x, y} y, opcionalmente, unión a un objeto (ref) o al nodo de otra línea (rl, ri)
+  const punto = (v, c) => {                // punto de un cable: {x, y} y, opcionalmente, unión a un objeto (ref) o al nodo de otra línea (rl, ri), su planta y capa (pl, cp) y el recorrido de escalera al que pertenece (es, ed)
     const p = puntoSimple(v, c); if (p === INV) return INV;
     for (const k of Object.keys(v)) {
       if (k == 'x' || k == 'y') continue;
-      const f = k == 'ref' || k == 'rl' ? idNum : k == 'ri' ? entero(0, LIM.puntos) : null; const val = f ? f(v[k]) : INV;
+      const f = k == 'ref' || k == 'rl' || k == 'es' ? idNum : k == 'ri' ? entero(0, LIM.puntos) : k == 'pl' || k == 'cp' ? idTxt : k == 'ed' ? en([1, -1]) : null; const val = f ? f(v[k]) : INV;
       if (val === INV) aviso(c, 'campos desconocidos omitidos'); else p[k] = val;
     }
     return p;
@@ -108,6 +108,11 @@ const ESQ = (() => {
     objs.forEach(o => { if (o.k != 'line') return; o.pts.forEach(q => {          // uniones a objetos o nodos que ya no existen: el punto queda libre donde estaba
       if (q.ref && !ids.has(q.ref)) { delete q.ref; aviso(c, 'uniones a objetos inexistentes soltadas'); }
       if (q.rl) { const L = porId.get(q.rl); if (!L || L.k != 'line' || q.ri === undefined || !L.pts[q.ri]) { delete q.rl; delete q.ri; aviso(c, 'uniones a objetos inexistentes soltadas'); } } else if (q.ri !== undefined) delete q.ri;
+    }); });
+    const plantasOk = r.plantas ? new Map(r.plantas.map(p => [p.id, new Set(p.capas.map(k => k.id))])) : null;
+    objs.forEach(o => { if (o.k != 'line') return; o.pts.forEach(q => {      // recorridos de escalera: la escalera debe existir; planta y capa del punto: deben existir
+      if (q.es !== undefined || q.ed !== undefined) { const E = porId.get(q.es); if (q.es === undefined || q.ed === undefined || !E || E.k != 'item' || (E.tipo && E.tipo != 'escalera')) { delete q.es; delete q.ed; aviso(c, 'uniones a objetos inexistentes soltadas'); } }
+      if (plantasOk && q.pl !== undefined) { const caps = plantasOk.get(q.pl); if (!caps) { delete q.pl; delete q.cp; aviso(c, 'uniones a objetos inexistentes soltadas'); } else if (q.cp !== undefined && !caps.has(q.cp)) { delete q.cp; aviso(c, 'uniones a objetos inexistentes soltadas'); } }
     }); });
     r.objs = objs.filter(o => { if (o.k != 'puerta') return true; const w = porId.get(o.pared); if (w && w.k == 'line') return true; aviso(c, 'puertas sin pared omitidas'); return false; });
     return r;

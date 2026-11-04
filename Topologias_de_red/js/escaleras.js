@@ -5,6 +5,7 @@ const PELDANO = .28;                      // separación entre peldaños (m): al
 const BORDE = .2, SEP = .08;              // BORDE = grosor de una pared; SEP = separación de los peldaños al borde
 const DV = .11, DW = .16;                 // escalera con descanso: dos líneas gruesas (grosor DW, centradas a ±DV) con una ranura chica entre ellas (ancho 2·DV−DW)
 const COL_SUBE = '#1d2a2f', COL_BAJA = '#2e86de';
+const OA_DESC = .07, AY_DESC = .035;      // escalera con descanso con las dos flechas: separación lateral de cada flecha respecto al eje del tramo y diferencia de altura en el descanso (la que sube un poco más arriba que la que baja)
 const tipoEsc = o => o.t || 'recta';
 const esEsc = o => o.k == 'item' && esEscalera(o);
 const NOMBRE_ESC = { recta: 'recta', descanso: 'con descanso', espiral: 'espiral' };
@@ -50,10 +51,10 @@ function gDescanso(o, baja, doble) {
   g += `<line x1="${a0}" y1="${yT}" x2="${-a0}" y2="${yT}" stroke="${c}" stroke-width="${DW}" pointer-events="none"/>`;   // borde del descanso (grueso, como las líneas divisorias)
   if (x1 > x0) for (let i = 1; i < n; i++) { const y = yT + i * paso; g += `<path d="M${x0} ${y}H${x1}M${-x1} ${y}H${-x0}" stroke="${c}" stroke-opacity=".6" stroke-width=".03" pointer-events="none"/>`; }
   let top = rotulo(0, -h / 2 + Dl * .3, Math.max(.04, Math.min(.25, w / 7)));
-  const oa = doble ? Math.min(.1, Math.max(0, x1 - x0) * .25) : 0;
-  const ruta = (off, col, inv) => { const xa = (inv ? -xl : xl) + off, xb = (inv ? xl : -xl) + off; return flecha(`M${xa} ${yb}V${yL}H${xb}V${yb}`, col, xb, yb, 0, 1, k); };
-  if (!baja) top += ruta(doble ? -oa : 0, COL_SUBE, false);        // sube por la izquierda, da la vuelta y baja por la derecha
-  if (baja || doble) top += ruta(doble ? oa : 0, COL_BAJA, true);  // recorrido de la planta de abajo: en sentido contrario
+  const oa = doble ? Math.min(OA_DESC, Math.max(0, x1 - x0) * .2) : 0, ay = doble ? AY_DESC : 0, kd = doble ? k * .6 : k;   // con las dos flechas: puntas más chicas para que no se pisen
+  const ruta = (ox, dy, col) => flecha(`M${xl + ox} ${yb}V${yL + dy}H${-xl - ox}V${yb}`, col, -xl - ox, yb, 0, 1, kd);   // las dos empiezan por el tramo izquierdo, dan la vuelta por el descanso y terminan por el derecho
+  if (!baja) top += ruta(doble ? -oa : 0, -ay, COL_SUBE);           // la que sube: por fuera y un poco más arriba en el descanso
+  if (baja || doble) top += ruta(doble ? oa : 0, ay, COL_BAJA);     // la que baja: por dentro y un poco más abajo
   return [g, top];
 }
 
@@ -111,15 +112,14 @@ function cablesFantasma() {
   const i = S.plantas.findIndex(p => p.id == S.plantaAct); let h = '';
   [-1, 1].forEach(d => {
     const q = S.plantas[i + d]; if (!q) return;
-    const vis = o => o.pl == q.id && (capaDe(o) || {}).visible;                       // solo lo que está en capas visibles de esa planta
-    const cables = S.objs.filter(o => o.k == 'line' && !esPared(o) && vis(o));
+    const cables = S.objs.filter(o => o.k == 'line' && !esPared(o)).map(o => ({ o, ls: segmentosEnPlanta(o, q.id) })).filter(x => x.ls.length);   // solo lo que está en capas visibles de esa planta (los tramos de escalera de un cable los dibuja trazas.js)
     if (!cables.length) return;
-    S.objs.filter(o => esEsc(o) && vis(o)).forEach(e => {
-      const b = bboxDe(e), cs = cables.filter(c => { const k = bboxDe(c); return k.x0 <= b.x1 && k.x1 >= b.x0 && k.y0 <= b.y1 && k.y1 >= b.y0; });
+    S.objs.filter(o => esEsc(o) && o.pl == q.id && (capaDe(o) || {}).visible).forEach(e => {
+      const b = bboxDe(e), cs = cables.filter(({ o: c, ls }) => { const P = ls.flat(), x0 = Math.min(...P.map(v => v.x)), x1 = Math.max(...P.map(v => v.x)), y0 = Math.min(...P.map(v => v.y)), y1 = Math.max(...P.map(v => v.y)), m = c.w / 2; return x0 - m <= b.x1 && x1 + m >= b.x0 && y0 - m <= b.y1 && y1 + m >= b.y0; });
       if (!cs.length) return;
       const cid = 'cf' + e.id;
       h += `<clipPath id="${cid}"><polygon points="${polyEsc(e).map(v => v.x + ',' + v.y).join(' ')}"/></clipPath><g clip-path="url(#${cid})" opacity=".5" pointer-events="none">`
-        + cs.map(c => `<polyline points="${c.pts.map(v => pt(v)).map(v => v.x + ',' + v.y).join(' ')}" fill="none" stroke="${c.c}" stroke-width="${c.w}" stroke-dasharray="${c.d}" stroke-linecap="round" stroke-linejoin="round"/>`).join('') + '</g>';
+        + cs.map(({ o: c, ls }) => ls.map(L => `<polyline points="${L.map(v => v.x + ',' + v.y).join(' ')}" fill="none" stroke="${c.c}" stroke-width="${c.w}" stroke-dasharray="${c.d}" stroke-linecap="round" stroke-linejoin="round"/>`).join('')).join('') + '</g>';
     });
   });
   return h;
@@ -180,12 +180,4 @@ function flechaEn(e) {                   // 'sube' | 'baja' | null: flecha de es
     }
   });
   return best;
-}
-function cableAOtraPlanta(d, p) {        // se está dibujando un cable y se toca una flecha: el cable termina ahí y sigue en la otra planta, desde el mismo punto
-  const i = S.plantas.findIndex(x => x.id == S.plantaAct);
-  if (!S.plantas[i + d]) { avisoEmergente(d > 0 ? 'No hay una planta superior: añade una con «＋ Planta»' : 'No hay una planta inferior'); return; }
-  const t = tmp, a = t.pts[t.pts.length - 1], seguir = { k: 'line', n: t.n, c: t.c, w: t.w, d: t.d, pts: [{ x: p.x, y: p.y }], label: '' };
-  delete t.cur; if (Math.hypot(p.x - a.x, p.y - a.y) >= .05 || a.ref) t.pts.push({ x: p.x, y: p.y });   // último punto del cable en esta planta: la flecha
-  if (t.pts.length > 1) add(t);          // queda guardado en la planta y capa actuales
-  irPlanta(d); tmp = seguir;             // irPlanta limpia lo que se estaba dibujando: se retoma el cable nuevo en la otra planta
 }

@@ -1,9 +1,9 @@
 // ---------- Interacción ----------
 const col = () => $('#col').value, fil = () => $('#fill').value, lin = () => $('#lstyle').value;
-const add = o => (push(), o.id = nid++, o.pl = S.plantaAct, o.cp = S.capaAct, completarTipo(o), S.objs.push(o), o);
+const add = o => (push(), o.id = nid++, o.pl = o.pl === undefined ? S.plantaAct : o.pl, o.cp = o.cp === undefined ? S.capaAct : o.cp, completarTipo(o), S.objs.push(o), o);   // un cable que ya trae su planta y capa (donde se empezó a dibujar) las conserva aunque termine en otra planta
 function finishLine() {
   if (!tmp || tmp.k != 'line') return; const q = tmp.pts, a = q[q.length - 1], b = q[q.length - 2];
-  if (b && Math.hypot(a.x - b.x, a.y - b.y) < .05 && !a.ref) q.pop();
+  if (b && Math.hypot(a.x - b.x, a.y - b.y) < .05 && !a.ref && !a.es) q.pop();
   if (q.length > 1) { delete tmp.cur; add(tmp); } tmp = null; render();
 }
 svg.addEventListener('pointerdown', e => {
@@ -42,9 +42,9 @@ svg.addEventListener('pointerdown', e => {
   }
   if (tool.k == 'puerta') { colocarPuerta(e); return; }   // las puertas validan la capa de su pared
   if (!capaEditable()) { avisoMsg = '⚠ La capa «' + capaActual().nombre + '» está oculta o bloqueada: elige otra capa para dibujar'; render(); return; }
-  if (tool.k == 'line' && tmp && tmp.k == 'line') {          // cable a medio dibujar: tocar una flecha de escalera lo lleva a la otra planta y allí sigue
-    const fl = flechaEn(e);                                             // se busca por posición (ver escaleras.js): el propio cable en curso tapa la flecha bajo el cursor
-    if (fl) { cableAOtraPlanta(fl == 'baja' ? -1 : 1, p); render(); return; }
+  if (tool.k == 'line' && tmp && tmp.k == 'line') {          // cable a medio dibujar: un clic sobre una escalera ofrece pasarlo a la planta de arriba o de abajo (ver trazas.js); Esc cancela ese clic
+    const E = escaleraEn(rawW(e));                                      // se busca por geometría: el reflejo de la escalera de abajo no recibe clics del DOM
+    if (E) { menuEscalera(E, e); return; }
   }
   if (usaDosPuntos(tool)) { snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e)); if (snapPt) p = { x: snapPt.x, y: snapPt.y }; }   // escalera y formas: se pegan a los extremos de las paredes o, con ◇ Medio, a los puntos medios
   else if (medioOn && tool.k != 'medida' && tool.k != 'line') { snapPt = null; snapMedio = false; imanMedio(rawW(e)); if (snapMedio) p = { x: snapPt.x, y: snapPt.y }; }   // colocar justo en el punto medio
@@ -61,7 +61,8 @@ svg.addEventListener('pointerdown', e => {
   else if (tool.k == 'line') {
     snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e));   // los imanes miden la distancia con el cursor real, no con el punto ya ajustado a la grilla
     const it = itemAt(e), q = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p;   // nodo del mismo tipo > dispositivo > punto libre
-    if (!tmp) tmp = { k: 'line', n: tool.n, c: esCable(tool) ? tool.c : col(), w: tool.w, d: tool.d, pts: [q], label: '' }; else tmp.pts.push(q);
+    if (!tmp) tmp = { k: 'line', n: tool.n, c: esCable(tool) ? tool.c : col(), w: tool.w, d: tool.d, pts: [q], label: '', pl: S.plantaAct, cp: S.capaAct };   // pl y cp: dónde empieza el cable
+    else { if (S.plantaAct != tmp.pl) { q.pl = S.plantaAct; q.cp = S.capaAct; } tmp.pts.push(q); }   // un punto en otra planta (tras cruzar una escalera) lleva la suya
   }
   render();
 });
@@ -88,7 +89,7 @@ svg.addEventListener('pointermove', e => {
       const dx = p.x - d.last.x, dy = p.y - d.last.y; d.last = p;
       if ((dx || dy) && !d.pu) { push(); d.pu = 1; }
       d.os.forEach(o => {               // mueve todos los objetos seleccionados a la vez
-        if (o.k == 'line') o.pts.forEach(q => { if (!q.ref && !q.rl) { q.x += dx; q.y += dy; } });
+        if (o.k == 'line') o.pts.forEach(q => { if (!q.ref && !q.rl && !q.es && puntoEn(o, q)) { q.x += dx; q.y += dy; } });   // solo los puntos libres de ESTA planta (los de escalera siguen a su escalera)
         else if (o.k == 'puerta') { if (!d.os.some(x => x.id == o.pared)) moverPuerta(o, rawW(e)); }   // se desliza por la pared
         else if (o.k == 'medida') { o.a = { x: o.a.x + dx, y: o.a.y + dy }; o.b = { x: o.b.x + dx, y: o.b.y + dy }; }
         else { o.x = sn(o.x + dx); o.y = sn(o.y + dy); }
@@ -100,7 +101,7 @@ svg.addEventListener('pointermove', e => {
       else if (o.k == 'item' && esEscalera(o)) redimensionarRot(o, d.h, p);
       else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else redimensionarRot(o, d.h, p); }
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
-      else { const it = itemAt(e); o.pts[d.h] = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p; }
+      else { const it = itemAt(e), v = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p, antes = o.pts[d.h]; if (antes.pl) { v.pl = antes.pl; v.cp = antes.cp; } o.pts[d.h] = v; }   // el punto conserva su planta y capa
     }
   }
   repintarMovimiento();   // solo se redibuja lo que cambió (ver dibujo.js): sin herramienta ni arrastre, solo la barra de estado

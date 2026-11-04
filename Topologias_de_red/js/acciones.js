@@ -63,8 +63,12 @@ TR.acc = (() => {
   function copiarSel() {
     const os = seleccionados().filter(o => o.k != 'puerta'); if (!os.length) return false;
     portapapeles.length = 0;
-    os.forEach(o => { const c = copiar(o); delete c.id; delete c.pl; delete c.cp; if (o.k == 'line') c.pts = o.pts.map(q => { const p = pt(q); return { x: p.x, y: p.y }; }); portapapeles.push(c); });
-    return true;
+    os.forEach(o => {
+      const c = copiar(o); delete c.id; delete c.pl; delete c.cp;
+      if (o.k == 'line') { const aqui = o.pts.filter(q => puntoEn(o, q) && !q.es); if (aqui.length < 2) return; c.pts = aqui.map(q => { const p = pt(q); return { x: p.x, y: p.y }; }); }   // un cable que atraviesa plantas: solo su tramo de la planta actual (cortar sí borra el cable completo)
+      portapapeles.push(c);
+    });
+    return portapapeles.length > 0;
   }
   function cortar() { return copiarSel() && eliminar(); }          // copia y borra lo seleccionado (el borrado es un solo paso de historial)
   function trasladar(c, dx, dy) {

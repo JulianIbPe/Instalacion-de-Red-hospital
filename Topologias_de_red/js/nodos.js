@@ -13,13 +13,14 @@ function nodosDeTipo(tipo, ex) {
   S.objs.filter(esVisible).forEach(o => {
     if (o.k != 'line' || claveLinea(o) != tipo) return;
     o.pts.forEach((q, i) => {
+      if (q.es || !puntoEn(o, q)) return;                 // los puntos de escalera no son nodos; solo los de esta planta
       if (tipo != 'pared' && i != 0 && i != o.pts.length - 1) return;
       if (ex) { const rz = raizNodo(o.id, i); if (rz.lid == ex.lid && rz.i == ex.i) return; }   // no pegarse a sí mismo ni a lo que depende de ello
       r.push({ ...pt(q), lid: o.id, i, c: o.c });
     });
   });
   if (tmp && tmp.k == 'line' && claveLinea(tmp) == tipo)          // puntos ya puestos de la línea en curso (para cerrar un contorno)
-    tmp.pts.slice(0, -1).forEach((q, i) => { if (tipo == 'pared' || i == 0) r.push({ ...pt(q), lid: null, i, c: tmp.c }); });
+    tmp.pts.slice(0, -1).forEach((q, i) => { if (!q.es && puntoEn(tmp, q) && (tipo == 'pared' || i == 0)) r.push({ ...pt(q), lid: null, i, c: tmp.c }); });
   if (tipo == 'pared')                                   // esquinas de las escaleras: el cursor se pega a ellas (queda un punto libre, no unido a la escalera)
     S.objs.filter(o => esVisible(o) && o.k == 'item' && esEscalera(o)).forEach(o => {
       const { xs, ys } = esqRot([[o.x - o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y - o.h / 2], [o.x + o.w / 2, o.y + o.h / 2], [o.x - o.w / 2, o.y + o.h / 2]], { x: o.x, y: o.y }, o.rot || 0);

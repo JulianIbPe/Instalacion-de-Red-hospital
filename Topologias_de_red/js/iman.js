@@ -4,7 +4,7 @@ function puntosIman() {
   const E = S.edificio, c = [{ x: 0, y: 0 }, { x: E.w, y: 0 }, { x: 0, y: E.h }, { x: E.w, y: E.h }];
   S.objs.filter(esVisible).forEach(o => {
     if (o.k == 'item' || o.k == 'shape' || o.k == 'texto') c.push({ x: o.x, y: o.y });          // centro
-    else if (o.k == 'line') o.pts.forEach(q => c.push(pt(q)));                                    // puntas y vértices
+    else if (o.k == 'line') o.pts.forEach(q => { if (puntoEn(o, q)) c.push(pt(q)); });                                    // puntas y vértices
     else if (o.k == 'zona') c.push(...esquinasZona(o));
   });
   return c;
@@ -21,7 +21,7 @@ function puntosMedios(excl) {                       // mitad de cada tramo de l�
   const r = [], mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
   S.objs.filter(esVisible).forEach(o => {
     if (o === excl) return;
-    if (o.k == 'line') { const P = o.pts.map(q => pt(q)); for (let i = 0; i < P.length - 1; i++) r.push(mid(P[i], P[i + 1])); }
+    if (o.k == 'line') { const P = o.pts.map(q => pt(q)); for (let i = 0; i < P.length - 1; i++) { const a = o.pts[i], b = o.pts[i + 1]; if (puntoEn(o, a) && puntoEn(o, b) && !(a.es && b.es)) r.push(mid(P[i], P[i + 1])); } }
     else if (o.k == 'shape' && !esCirculo(o)) { const A = vertsAbs(o), hid = o.hid || []; A.forEach((a, i) => { if (!hid.includes(i)) r.push(mid(a, A[(i + 1) % A.length])); }); }
   });
   return r;

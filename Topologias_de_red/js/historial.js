@@ -31,7 +31,7 @@ function borrar() {                     // borra todo lo seleccionado (uno o var
   if (ladoSel() !== null) { borrarLado(); return; }
   const ids = seleccionados().map(o => o.id); if (!ids.length) return; push();
   S.objs.forEach(o => { if (o.k == 'puerta' && ids.includes(o.pared) && !ids.includes(o.id)) ids.push(o.id); });   // las puertas se van con su pared
-  S.objs.forEach(o => o.pts && (o.pts = o.pts.map(q => ids.includes(q.ref) || ids.includes(q.rl) ? { ...pt(q) } : q)));  // los cables conectados se sueltan donde estaba el dispositivo
-  S.objs = S.objs.filter(o => !ids.includes(o.id));
+  S.objs.forEach(o => o.pts && (o.pts = o.pts.map(q => ids.includes(q.ref) || ids.includes(q.rl) ? soltarPunto(q) : q)));  // los cables conectados se sueltan donde estaba el dispositivo
+  S.objs = S.objs.filter(o => !ids.includes(o.id)); soltarTrazasHuerfanas();   // si se borra una escalera, el recorrido de los cables que la cruzan queda como puntos libres
   sel = null; multi = []; render();
 }

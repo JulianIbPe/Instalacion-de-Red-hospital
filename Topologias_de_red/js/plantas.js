@@ -9,8 +9,8 @@ function capaDe(o) { const p = S.plantas.find(p => p.id == o.pl); return p && p.
 function rangoCapa(o) {                  // posición de la capa del objeto dentro de su planta (mayor = más arriba); lo que no tiene capa (lo que se está dibujando) va arriba de todo
   const p = S.plantas.find(p => p.id == o.pl), i = p ? p.capas.findIndex(c => c.id == o.cp) : -1; return i < 0 ? 1e9 : i;
 }
-function esVisible(o) { if (o.pl === undefined) return true; const c = capaDe(o); return o.pl == S.plantaAct && !!c && c.visible; }
-function esEditable(o) { if (o.pl === undefined) return true; return esVisible(o) && !capaDe(o).bloqueada; }
+function esVisible(o) { if (o.pl === undefined) return true; if (esMultiplanta(o)) return o.pts.some(q => puntoVisible(o, q)); const c = capaDe(o); return o.pl == S.plantaAct && !!c && c.visible; }   // un cable que atraviesa plantas se ve en cada planta donde tiene puntos en una capa visible (trazas.js)
+function esEditable(o) { if (o.pl === undefined) return true; if (esMultiplanta(o)) return o.pts.some(q => puntoEditable(o, q)); return esVisible(o) && !capaDe(o).bloqueada; }
 const capaEditable = () => { const c = capaActual(); return c.visible && !c.bloqueada; };
 
 function normalizar() {                  // deja S coherente: sirve también para abrir archivos antiguos (sin plantas)
@@ -28,7 +28,9 @@ function normalizar() {                  // deja S coherente: sirve también par
   S.objs.forEach(o => {                  // todo objeto debe pertenecer a una planta y una capa que existan
     const q = S.plantas.find(q => q.id == o.pl) || S.plantas[0]; o.pl = q.id;
     if (!q.capas.some(c => c.id == o.cp)) o.cp = q.capas[0].id;
+    if (o.k == 'line') o.pts.forEach(p => { if (p.pl) { const pp = S.plantas.find(x => x.id == p.pl); if (!pp) { delete p.pl; delete p.cp; } else if (!pp.capas.some(c => c.id == p.cp)) p.cp = pp.capas[0].id; } });   // planta y capa de cada punto de un cable
   });
+  soltarTrazasHuerfanas();
 }
 
 function panel() {                       // dibuja el panel de abajo a la derecha (solo se rehace cuando cambian plantas o capas)
@@ -57,8 +59,8 @@ $('#plantas').onclick = e => {
   else if (a == 'rp') { const n = prompt('Nombre de la planta:', p.nombre); if (n && n.trim() && n.trim() != p.nombre) { push(); p.nombre = n.trim(); } }
   else if (a == 'dp') {
     if (S.plantas.length < 2) { alert('El edificio debe tener al menos una planta.'); return; }
-    const k = nObjs(o => o.pl == p.id); if (!confirm(`¿Borrar «${p.nombre}»${k ? ' y sus ' + k + ' objetos' : ''}?`)) return;
-    push(); S.objs = S.objs.filter(o => o.pl != p.id); S.plantas = S.plantas.filter(x => x.id != p.id); normalizar(); limpiarSel();
+    const k = cuentaEn(p.id), cr = cablesQueCruzan(p.id); if (!confirm(`¿Borrar «${p.nombre}»${k ? ' y sus ' + k + ' objetos' : ''}?` + (cr ? `\n${cr} cable(s) atraviesan esta planta: se quitarán solo sus puntos de aquí y el resto de cada cable se conserva.` : ''))) return;
+    push(); podarCables(p.id); S.objs = S.objs.filter(o => o.pl != p.id); S.plantas = S.plantas.filter(x => x.id != p.id); normalizar(); limpiarSel();
   }
   else if (a == 'sc') { p.ca = idc; S.capaAct = idc; tmp = null; }
   else if (a == 'mc') { const i = p.capas.findIndex(x => x.id == idc), j = i + d; if (j >= 0 && j < p.capas.length) { push(); intercambiar(p.capas, i, j); } }   // subir / bajar la capa: cambia qué se dibuja encima
@@ -67,8 +69,8 @@ $('#plantas').onclick = e => {
   else if (a == 'rc') { const c = cap(idc), n = prompt('Nombre de la capa:', c.nombre); if (n && n.trim() && n.trim() != c.nombre) { push(); c.nombre = n.trim(); } }
   else if (a == 'dc') {
     if (p.capas.length < 2) { alert('Cada planta debe tener al menos una capa.'); return; }
-    const c = cap(idc), k = nObjs(o => o.pl == p.id && o.cp == c.id); if (k && !confirm(`La capa «${c.nombre}» tiene ${k} objetos y se borrarán. ¿Continuar?`)) return;
-    push(); S.objs = S.objs.filter(o => !(o.pl == p.id && o.cp == c.id)); p.capas = p.capas.filter(x => x.id != c.id); normalizar(); limpiarSel();
+    const c = cap(idc), k = cuentaEn(p.id, c.id), cr = cablesQueCruzan(p.id, c.id); if (k && !confirm(`La capa «${c.nombre}» tiene ${k} objetos y se borrarán. ¿Continuar?` + (cr ? `\n${cr} cable(s) atraviesan esta capa: se quitarán solo sus puntos de aquí y el resto de cada cable se conserva.` : ''))) return;
+    push(); podarCables(p.id, c.id); S.objs = S.objs.filter(o => !(o.pl == p.id && o.cp == c.id)); p.capas = p.capas.filter(x => x.id != c.id); normalizar(); limpiarSel();
   }
   else if (a == 'nc') { push(); const id = 'c' + (++S.cn); p.capas.push({ id, nombre: 'Capa ' + (p.capas.length + 1), visible: true, bloqueada: false }); p.ca = id; S.capaAct = id; }   // la capa nueva queda arriba de todas
   panel(); render();

@@ -9,6 +9,9 @@ const TRP = (() => {
   const ser = (a, b, m) => afirmar(a === b, (m || 'valores distintos') + ': esperado ' + JSON.stringify(b) + ', obtenido ' + JSON.stringify(a));
   const igual = (a, b, m) => ser(JSON.stringify(a), JSON.stringify(b), m);
 
+  // Cambios de dibujo hechos A PROPÓSITO después de guardar la referencia de la Fase 0 (se omiten al compararla; cualquier otra diferencia sigue fallando):
+  const CAMBIOS_INTENCIONALES = { 'escaleras y plantas/p2': 'Fase 3, ajuste 3: flechas de la escalera con descanso con las dos flechas (las dos de izquierda a derecha; la que sube por fuera y un poco más arriba, la que baja por dentro y un poco más abajo)' };
+
   // ---------- Proyectos de prueba (formato actual, versión 1) ----------
   const P = { pl: 'p1', cp: 'c1' };
   const base = (extra = {}, objs = []) => { const s = estadoInicial('m'); Object.assign(s, extra); s.objs = objs; return s; };
@@ -214,7 +217,7 @@ const TRP = (() => {
   prueba('Fase 1: el dibujo es idéntico a la referencia guardada en la Fase 0', () => {
     const ref = leer(CLAVE_REF); afirmar(ref && ref.datos, 'no hay referencia guardada en este navegador (se guarda con «Guardar referencia de dibujo» con la versión de la Fase 0)');
     const act = referenciaActual(), dif = [];
-    Object.keys(ref.datos).forEach(n => Object.keys(ref.datos[n]).forEach(v => { const x = ref.datos[n][v], y = (act[n] || {})[v]; if (!y || x.hash !== y.hash || x.largo !== y.largo) dif.push(n + '/' + v); }));
+    Object.keys(ref.datos).forEach(n => Object.keys(ref.datos[n]).forEach(v => { const x = ref.datos[n][v], y = (act[n] || {})[v]; if (!y || x.hash !== y.hash || x.largo !== y.largo) { if (!CAMBIOS_INTENCIONALES[n + '/' + v]) dif.push(n + '/' + v); } }));
     afirmar(!dif.length, 'diferencias respecto a la referencia: ' + dif.join(', '));
   });
 
@@ -612,6 +615,162 @@ const TRP = (() => {
     } finally { if (TR.insp.visible() != v) TR.insp.alternar(); }
   });
 
+  // ---------- Pruebas del cable único que atraviesa escaleras (ajuste de la Fase 3) ----------
+  const fCruce = () => {                       // 3 plantas; en la planta 2 hay una escalera de cada tipo
+    const e = base({ pn: 3, cn: 3 }, [esc(1, 'descanso', 1.6, 2.8, 6, 3, { pl: 'p2', cp: 'c2' }), esc(2, '', 1.2, 2.8, 12, 3, { pl: 'p2', cp: 'c2' }), esc(3, 'espiral', 1.8, 1.8, 9, 3, { pl: 'p2', cp: 'c2' }),
+      esc(11, 'descanso', 1.6, 2.8, 6, 3), esc(12, '', 1.2, 2.8, 12, 3), esc(13, 'espiral', 1.8, 1.8, 9, 3)]);   // iguales en la planta 1 (justo debajo): sin ellas no se puede bajar
+    e.plantas = [{ id: 'p1', nombre: 'Planta 1', ca: 'c1', capas: [capa('c1', 'Base')] }, { id: 'p2', nombre: 'Planta 2', ca: 'c2', capas: [capa('c2', 'Base')] }, { id: 'p3', nombre: 'Planta 3', ca: 'c3', capas: [capa('c3', 'Base')] }];
+    return e;
+  };
+  const tecla = (el, key) => el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+  const pant = (x, y) => { const r = svg.getBoundingClientRect(); return { x: r.left + V.ox + x * V.z, y: r.top + V.oy + y * V.z }; };
+  const clic = (x, y) => sinCaptura(() => { const p = pant(x, y); ptr(svg, 'pointerdown', p.x, p.y); ptr(svg, 'pointerup', p.x, p.y); });
+  const cruzar = (idEsc, sube, libres = [[1, 7], [2, 7]], destino = [[8, 1], [9, 1]]) => {   // dibuja con la herramienta de cable: puntos libres, clic en la escalera, opción elegida, más puntos libres y termina
+    tool = CAT['Cables'][0]; tmp = null; S.plantaAct = 'p2'; S.capaAct = 'c2'; render(); libres.forEach(([x, y]) => clic(x, y));
+    const E = byId(idEsc); clic(E.x, E.y); afirmar(!$('#ctx').hidden, 'no se abrió el menú de la escalera');
+    const b = $('#ctx [data-a="' + (sube ? 'sube' : 'baja') + '"]'); afirmar(!b.disabled, 'la opción está desactivada'); b.click();
+    destino.forEach(([x, y]) => clic(x, y)); finishLine(); return S.objs[S.objs.length - 1];
+  };
+  prueba('Cable por escalera: la geometría del recorrido de las tres escaleras (mitades, punto medio repetido, giro; subir y bajar por el mismo camino)', () => {
+    conProyecto(fCruce(), () => {
+      const R = (E, s) => trazaEscalera(E, s), ult = a => a[a.length - 1], pn = p => [p.x, p.y];
+      const rec = byId(2), a = R(rec, true), b = R(rec, false);
+      igual([a.inicio.map(pn), a.fin.map(pn)], [[[11.65, 4.4], [11.65, 3]], [[11.65, 3], [11.65, 1.6]]], 'recta subiendo (borde izquierdo, con un poco de espacio)'); igual([b.inicio.map(pn), b.fin.map(pn)], [[[11.82, 4.4], [11.82, 3]], [[11.82, 3], [11.82, 1.6]]], 'recta bajando (lado izquierdo, interior, mismo camino)');
+      const des = byId(1), d = R(des, true), db = R(des, false); igual(pn(ult(d.inicio)), pn(d.fin[0]), 'el punto medio debe estar en las dos mitades'); ser(d.inicio.length + d.fin.length, 6, 'puntos del descanso'); ser(ult(d.inicio).x, 6, 'el medio del descanso está en el eje');
+      afirmar(d.inicio[0].x < 6 && d.fin[2].x > 6, 'subiendo: empieza por el tramo izquierdo y termina por el derecho'); afirmar(db.inicio[0].x < 6 && db.fin[2].x > 6, 'bajando: TAMBIÉN empieza por el tramo izquierdo y termina por el derecho');
+      const esp = byId(3), e = R(esp, true); ser(e.inicio.length + e.fin.length, 20, 'puntos de la espiral'); igual(pn(ult(e.inicio)), pn(e.fin[0]), 'medio de la espiral'); afirmar(e.inicio[0].x < 9, 'la espiral empieza a la izquierda');
+      rec.rot = 90; const g = R(rec, true); igual([g.inicio[0].x, g.inicio[0].y], [10.6, 2.65], 'la escalera girada 90° gira su recorrido');
+    });
+  });
+  prueba('Cable por escalera: bajar solo si justo debajo hay una escalera igual; subir solo desde una escalera de esta planta; el reflejo solo permite bajar', () => {
+    conProyecto(fCruce(), () => {
+      tool = CAT['Cables'][0]; tmp = null; S.plantaAct = 'p2'; S.capaAct = 'c2'; render(); const E = byId(1), ok = d => puedeCruzar(E, d);
+      ser(ok(1).ok, true, 'subir desde una escalera de esta planta'); ser(ok(-1).ok, true, 'bajar con una igual justo debajo');
+      byId(11).x += .5; ser(ok(-1).ok, false, 'la de abajo está corrida'); afirmar(/igual/.test(ok(-1).motivo), ok(-1).motivo); byId(11).x -= .5; ser(ok(-1).ok, true);
+      byId(11).t = 'espiral'; ser(ok(-1).ok, false, 'la de abajo es de otro tipo'); byId(11).t = 'descanso'; byId(11).w = 1.8; ser(ok(-1).ok, false, 'la de abajo tiene otro tamaño'); byId(11).w = 1.6; byId(11).rot = 90; ser(ok(-1).ok, false, 'la de abajo está girada'); byId(11).rot = 0;
+      byId(11).x += .5; render(); const antes = S.plantaAct; tmp = null; clic(1, 7); clic(E.x, E.y);
+      ser($('#ctx [data-a="baja"]').disabled, true, 'el menú debe desactivar bajar'); afirmar(/no hay una escalera igual/.test($('#ctx [data-a="baja"]').textContent), $('#ctx [data-a="baja"]').textContent); ser($('#ctx [data-a="sube"]').disabled, false, 'subir sí'); TR.ctx.cerrar();
+      const n = tmp.pts.length; ser(cruzarEscalera(E, -1), false, 'cruzarEscalera debe rechazar bajar'); ser(tmp.pts.length, n, 'no debe agregar puntos'); ser(S.plantaAct, antes, 'no debe cambiar de planta'); byId(11).x -= .5;
+      S.plantaAct = 'p1'; S.capaAct = 'c1'; render(); const E1 = byId(11); ser(puedeCruzar(E1, -1).ok, false, 'en la planta más baja no hay planta inferior'); ser(puedeCruzar(E1, 1).ok, true);
+      S.objs = S.objs.filter(o => ![1, 2, 3].includes(o.id)); S.plantaAct = 'p2'; S.capaAct = 'c2'; render(); tmp = null; clic(1, 7); clic(6, 3);
+      afirmar(!$('#ctx').hidden, 'el reflejo de la escalera de abajo debe recibir el clic'); ser($('#ctx [data-a="sube"]').disabled, true, 'el reflejo no deja subir'); afirmar(/llega aquí desde abajo/.test($('#ctx [data-a="sube"]').textContent)); ser($('#ctx [data-a="baja"]').disabled, false, 'el reflejo sí deja bajar'); $('#ctx [data-a="baja"]').click(); ser(S.plantaAct, 'p1');
+    });
+  });
+  prueba('Cable por escalera: el que sube va por el exterior (cerca del borde, con espacio) y el que baja por el interior, ambos junto a las flechas y no debajo de ellas (recta, con descanso y espiral)', () => {
+    conProyecto(fCruce(), () => {
+      const R = (id, s) => trazaEscalera(byId(id), s), todos = r => [...r.inicio, ...r.fin];
+      const rs = R(2, true), rb = R(2, false); afirmar(todos(rs).every(p => p.x < 12) && todos(rb).every(p => p.x < 12), 'recta: los dos van por el lado izquierdo de la flecha'); afirmar(rs.inicio[0].x < rb.inicio[0].x, 'recta: el que sube más cerca del borde y el que baja más hacia el centro'); afirmar(12 - rb.inicio[0].x >= .14 && 12 - 0.6 + .1 < rs.inicio[0].x, 'recta: separados de la flecha y con espacio respecto del borde');
+      const ds = R(1, true), db = R(1, false), eje = 6 - .445;
+      afirmar(Math.abs(ds.inicio[0].x - eje) > .11 && Math.abs(db.inicio[0].x - eje) > .11, 'descanso: el cable no debe ir bajo la flecha'); afirmar(ds.inicio[0].x < eje && db.inicio[0].x > eje, 'descanso, tramo izquierdo: sube por el borde exterior y baja por el interior'); afirmar(ds.fin[2].x > 12 - eje && db.fin[2].x < 12 - eje, 'descanso, tramo derecho: sube por el exterior (derecha) y baja por el interior');
+      const yL = 3 - .824; afirmar(ds.inicio[1].y < yL && db.inicio[1].y > yL, 'descanso: en el descanso el que sube va por encima de las flechas y el que baja por debajo'); afirmar(todos(ds).concat(todos(db)).every(p => Math.abs(p.x - 6) <= .8 && p.y >= 3 - 1.4 && p.y <= 3 + 1.4), 'descanso: el cable debe quedar dentro de la escalera');
+      const es = R(3, true), eb = R(3, false), rad = p => Math.hypot(p.x - 9, p.y - 3), medio = r => r.inicio.slice(1).concat(r.fin.slice(0, -1)).map(rad);
+      afirmar(Math.min(...medio(es)) > Math.max(...medio(eb)), 'espiral: el que sube va por el anillo exterior y el que baja por el interior'); afirmar(Math.max(...medio(es)) < .8, 'espiral: sin tocar la pared');
+    });
+  });
+  prueba('Escalera con descanso: las dos flechas empiezan por el tramo izquierdo y terminan por el derecho; la que sube va por fuera y un poco más arriba en el descanso, la que baja por dentro y un poco más abajo', () => {
+    const flechas = () => { const o = {}; document.querySelectorAll('#c path[data-flecha]').forEach(pa => { const m = /^M(-?[\d.]+) (-?[\d.]+)V(-?[\d.]+)H(-?[\d.]+)V/.exec(pa.getAttribute('d')); if (m) o[pa.dataset.flecha] = { xa: +m[1], yL: +m[3], xb: +m[4] }; }); return o; };
+    conProyecto(fEscaleras().estado, () => {
+      irA('p2'); render(); const f = flechas(); afirmar(f.sube && f.baja, 'debe haber las dos flechas (hay una escalera igual debajo)');
+      afirmar(f.sube.xa < f.sube.xb && f.baja.xa < f.baja.xb, 'las dos van de izquierda a derecha'); afirmar(f.sube.xa < f.baja.xa && f.sube.xb > f.baja.xb, 'la que sube por fuera y la que baja por dentro'); afirmar(f.sube.yL < f.baja.yL, 'en el descanso la que sube un poco más arriba'); afirmar(f.baja.yL - f.sube.yL < .2, 'solo un poco');
+      irA('p1'); render(); const g = flechas(); afirmar(g.sube && !g.baja && g.sube.xa < g.sube.xb, 'con una sola flecha (sin escalera debajo) también de izquierda a derecha');
+    });
+    conProyecto(fCruce(), () => { irA('p3'); render(); const h = flechas(); afirmar(h.baja && h.baja.xa < h.baja.xb, 'el reflejo de la escalera de abajo (flecha de bajar) también va de izquierda a derecha'); });
+  });
+  prueba('Cable por escalera: en la espiral el cable (subiendo y bajando) entra y sale en línea recta por el cuarto abierto, cruzando los dos bordes rectos y sin cortarse a sí mismo', () => {
+    conProyecto(fCruce(), () => {
+      const E = byId(3), cx = E.x, cy = E.y, u = trazaEscalera(E, true), d = trazaEscalera(E, false), ult = a => a[a.length - 1], pen = a => a[a.length - 2];
+      [[u, 'subiendo'], [d, 'bajando']].forEach(([r, n]) => {
+        ser(r.inicio.length + r.fin.length, 20, n + ': puntos'); ser(r.inicio[0].x, r.inicio[1].x, n + ': la entrada es vertical'); afirmar(r.inicio[0].y > cy && r.inicio[1].y < cy, n + ': cruza el borde recto horizontal (de abajo hacia arriba)'); afirmar(r.inicio[0].x < cx, n + ': la entrada está en el cuarto abierto');
+        ser(ult(r.fin).y, pen(r.fin).y, n + ': la salida es horizontal'); afirmar(pen(r.fin).x > cx && ult(r.fin).x < cx, n + ': cruza el borde recto vertical (hacia la izquierda)'); afirmar(ult(r.fin).y > cy, n + ': la salida está en el cuarto abierto');
+        const corta = (A, B, C, D) => { const o = (p, q, s) => Math.sign((q.x - p.x) * (s.y - p.y) - (q.y - p.y) * (s.x - p.x)); return o(A, B, C) != o(A, B, D) && o(C, D, A) != o(C, D, B); };
+        const P = [...r.inicio, ...r.fin].filter((q, k, A) => !k || q.x !== A[k - 1].x || q.y !== A[k - 1].y); let cruces = 0; for (let a = 0; a < P.length - 1; a++) for (let b = a + 2; b < P.length - 1; b++) if (corta(P[a], P[a + 1], P[b], P[b + 1])) cruces++; ser(cruces, 0, n + ': el cable se corta a sí mismo');
+        afirmar([...r.inicio, ...r.fin].every(p => Math.abs(p.x - cx) <= .9 + 1e-6 && Math.abs(p.y - cy) <= .9 + 1e-6), n + ': dentro del cuadro de la escalera');
+      });
+      afirmar(d.inicio[0].x > u.inicio[0].x && ult(d.fin).y < ult(u.fin).y, 'el que baja usa los carriles de más adentro');
+    });
+  });
+  prueba('Cable por escalera: un solo objeto y un solo paso de historial; opciones según las plantas; Esc cancela el clic', () => {
+    conProyecto(fCruce(), () => {
+      const n0 = S.objs.length, h0 = hist.length; tool = CAT['Cables'][0]; tmp = null; S.plantaAct = 'p2'; S.capaAct = 'c2'; render();
+      clic(1, 7); const E = byId(1); clic(E.x, E.y);
+      afirmar(!$('#ctx').hidden && !$('#ctx [data-a="sube"]').disabled && !$('#ctx [data-a="baja"]').disabled, 'en la planta del medio las dos opciones deben estar activas');
+      const j0 = JSON.stringify(tmp); tecla(document.activeElement, 'Escape'); afirmar($('#ctx').hidden, 'Esc no cerró'); ser(JSON.stringify(tmp), j0, 'Esc debe cancelar el clic sin tocar el cable'); ser(S.plantaAct, 'p2');
+      tmp = null; const o = cruzar(1, true); ser(S.objs.length, n0 + 1, 'debe ser UN objeto'); ser(hist.length, h0 + 1, 'un solo paso'); ser(o.k, 'line'); ser(o.pl, 'p2', 'planta de origen'); ser(S.plantaAct, 'p3', 'la vista pasó a la planta de arriba');
+      afirmar(esMultiplanta(o), 'el cable debe tener puntos de varias plantas'); ser(o.pts.length, 2 + 6 + 2, 'puntos: 2 libres, 6 de la escalera y 2 libres arriba');
+      igual(o.pts.slice(2, 8).map(q => [q.pl, q.es, q.ed]), [['p2', 1, 1], ['p2', 1, 1], ['p2', 1, 1], ['p3', 1, 1], ['p3', 1, 1], ['p3', 1, 1]], 'marcas del recorrido'); igual(o.pts.slice(8).map(q => q.pl), ['p3', 'p3'], 'puntos libres de la planta de arriba'); afirmar(!o.pts[0].pl && !o.pts[1].pl, 'los puntos de origen no llevan marca');
+      const g = ESQ.serializar(S, R); afirmar(g.ok, g.error); const l = ESQ.leer(g.texto); afirmar(l.ok && !l.avisos.length, 'no reabre limpio: ' + (l.avisos || l.errores)); const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v == 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v; ser(JSON.stringify(canon(JSON.parse(ESQ.serializar(l.estado, R).texto))), JSON.stringify(canon(JSON.parse(g.texto))), 'la ida y vuelta perdió o cambió algún campo (sin contar el orden de las claves)');
+    });
+  });
+  prueba('Cable por escalera: cada planta ve su mitad en sólido y la otra translúcida; sin cruzar, nada se ve de más', () => {
+    conProyecto(fCruce(), () => {
+      const o = cruzar(1, true), solidos = () => [...document.querySelectorAll('#c polyline')].filter(p => p.getAttribute('stroke') == '#2e86de' && !p.getAttribute('opacity')).length, fantasmas = () => [...document.querySelectorAll('#c polyline[opacity=".35"]')].length;
+      S.plantaAct = 'p2'; S.capaAct = 'c2'; render(); ser(solidos(), 1, 'planta 2: tramo libre + su mitad en un trazo'); ser(fantasmas(), 1, 'planta 2: la otra mitad translúcida');
+      S.plantaAct = 'p3'; S.capaAct = 'c3'; render(); ser(solidos(), 1, 'planta 3: su mitad + los puntos libres de arriba'); ser(fantasmas(), 1, 'planta 3: la mitad de abajo translúcida');
+      S.plantaAct = 'p1'; S.capaAct = 'c1'; render(); ser(solidos() + fantasmas(), 0, 'la planta 1 no debe mostrar el cable'); afirmar(!esVisible(o), 'no debe ser visible en la planta 1');
+      S.plantaAct = 'p3'; S.capaAct = 'c3'; S.plantas[2].capas[0].visible = false; render(); ser(solidos() + fantasmas(), 0, 'con la capa oculta no se ve'); ser(esVisible(o), false);
+      S.plantas[2].capas[0].visible = true; S.plantas[2].capas[0].bloqueada = true; render(); ser(esVisible(o), true); ser(esEditable(o), false, 'capa bloqueada: visible pero no editable');
+      S.plantaAct = 'p2'; S.capaAct = 'c2'; render(); ser(esEditable(o), true, 'en la planta 2 sí se edita');
+    });
+  });
+  prueba('Cable por escalera: se puede agarrar dentro de la escalera, es un solo cable (borrar quita todo) y deshacer lo restituye', () => {
+    conProyecto(fCruce(), () => {
+      const o = cruzar(1, true); tool = null; tmp = null; S.plantaAct = 'p2'; S.capaAct = 'c2'; sel = null; render();
+      const enEsc = document.querySelector('#c [data-id="' + o.id + '"][stroke="transparent"]'); afirmar(enEsc, 'no hay zona de clic del cable');
+      const hits = [...document.querySelectorAll('#c > [data-id="' + o.id + '"]')]; afirmar(hits.length >= 1, 'la zona de clic de la escalera debe dibujarse por encima de las escaleras (hijo directo de #c)');
+      const idx = [...$('#c').children].indexOf(hits[0]), idxEsc = [...$('#c').children].indexOf(document.querySelector('#c > g[data-id="1"]')); afirmar(idx > idxEsc, 'el cable debe quedar por encima de la escalera');
+      sinCaptura(() => { ptr(hits[0], 'pointerdown', 300, 200); ptr(svg, 'pointerup', 300, 200); }); ser(sel, o.id, 'no se seleccionó el cable al agarrarlo en la escalera');
+      const n = S.objs.length, h = hist.length; borrar(); ser(S.objs.length, n - 1, 'borrar debe quitar el cable completo'); ser(byId(o.id), undefined); ser(hist.length, h + 1);
+      S.plantaAct = 'p3'; S.capaAct = 'c3'; render(); ser(document.querySelectorAll('#c polyline[opacity=".35"]').length, 0, 'no debe quedar rastro en la planta de arriba');
+      deshacer(); const r = byId(o.id); afirmar(r && r.pts.length == 10 && r.pts.some(q => q.es), 'deshacer no restituyó el cable con su recorrido');
+    });
+  });
+  prueba('Cable por escalera: el recorrido sigue a la escalera si se mueve o gira, y si se borra los puntos quedan libres', () => {
+    conProyecto(fCruce(), () => {
+      const o = cruzar(1, true), E = byId(1), p0 = { x: o.pts[2].x, y: o.pts[2].y }, h = hist.length;
+      E.x += 2; E.y += 1; render(); igual([o.pts[2].x, o.pts[2].y], [r3(p0.x + 2), r3(p0.y + 1)], 'el recorrido no siguió a la escalera'); ser(o.pts.length, 10);
+      E.rot = 90; render(); const g = trazaEscalera(E, true), t = [...g.inicio, ...g.fin]; igual(o.pts.slice(2, 8).map(q => [q.x, q.y]), t.map(q => [q.x, q.y]), 'el recorrido no giró con la escalera');
+      const antes = o.pts.slice(2, 8).map(q => [q.x, q.y]); tool = null; tmp = null; S.plantaAct = 'p2'; S.capaAct = 'c2'; sel = 1; render(); borrar(); const c = byId(o.id); afirmar(c, 'el cable no debe borrarse al borrar la escalera'); afirmar(c.pts.every(q => !q.es && !q.ed), 'los puntos deben quedar libres');
+      igual(c.pts.slice(2, 8).map(q => [q.x, q.y]), antes, 'los puntos libres deben quedar donde estaban'); afirmar(c.pts.slice(2, 5).every(q => q.pl == 'p2') && c.pts.slice(5, 8).every(q => q.pl == 'p3'), 'conservan su planta'); ser(esMultiplanta(c), true);
+      deshacer(); afirmar(byId(1) && byId(o.id).pts.some(q => q.es), 'deshacer no restituyó la escalera con su recorrido');
+    });
+  });
+  prueba('Cable por escalera: las otras dos escaleras (recta y espiral) y el sentido hacia abajo', () => {
+    conProyecto(fCruce(), () => {
+      const a = cruzar(2, true), na = a.pts.filter(q => q.es == 2).length; ser(na, 4, 'recta'); igual([...new Set(a.pts.filter(q => q.es == 2).map(q => q.pl))].sort(), ['p2', 'p3'], 'plantas de la recta');
+      const b = cruzar(3, true), nb = b.pts.filter(q => q.es == 3).length; ser(nb, 20, 'espiral'); ser(S.plantaAct, 'p3');
+      const c = cruzar(1, false, [[1, 7], [2, 7]], [[8, 5], [9, 5]]); ser(S.plantaAct, 'p1', 'bajando la vista pasa a la planta de abajo'); const bajan = c.pts.filter(q => q.es == 1); ser(bajan.length, 6); afirmar(bajan.every(q => q.ed == -1), 'sentido');
+      igual(bajan.map(q => q.pl), ['p2', 'p2', 'p2', 'p1', 'p1', 'p1'], 'al bajar, la primera mitad es de la planta de salida'); afirmar(bajan[0].x < 6 && bajan[5].x > 6, 'bajando también se empieza por el tramo izquierdo y se termina por el derecho');
+    });
+  });
+  prueba('Cable por escalera: imanes, nodos, límites y giro actúan solo sobre los puntos de la planta actual; copiar toma solo ese tramo y cortar borra el cable completo', () => {
+    const guardado = [...TR.acc.portapapeles];
+    try { conProyecto(fCruce(), () => {
+      const o = cruzar(1, true); S.plantaAct = 'p2'; S.capaAct = 'c2'; render();
+      const x2 = bboxDe(o), en7 = () => puntosIman().filter(p => p.y == 7).length, n2 = en7(); S.plantaAct = 'p3'; S.capaAct = 'c3'; render(); const x3 = bboxDe(o);
+      afirmar(x2.y1 > 6 && x3.y1 < 6, 'el rectángulo del cable debe ser distinto en cada planta'); ser(n2, 2, 'imán en la planta 2: los 2 puntos libres'); ser(en7(), 0, 'imán en la planta 3: ninguno de los de la planta 2');
+      ser(nodosDeTipo('utp6').length, 1, 'nodos en la planta 3: solo el extremo libre de arriba (el otro extremo está en la planta 2)'); S.plantaAct = 'p2'; S.capaAct = 'c2'; ser(nodosDeTipo('utp6').length, 1, 'nodos en la planta 2: solo el extremo del origen');
+      tool = null; tmp = null; sel = o.id; render(); const g = geoSel(), rot = copiar(o); rotarDesde(o, rot, 90, g.c); afirmar(o.pts.slice(2, 8).every((q, i) => q.x == rot.pts[i + 2].x && q.y == rot.pts[i + 2].y), 'el giro no debe mover los puntos de la escalera'); afirmar(o.pts[8].x == rot.pts[8].x, 'ni los de otra planta');
+      const P = TR.acc.portapapeles; P.length = 0; const n = S.objs.length; sel = o.id; render(); ser(TR.acc.ejecutar('copiar'), true, 'copiar'); ser(P[0].pts.length, 2, 'solo los 2 puntos libres de esta planta'); afirmar(P[0].pts.every(q => !q.es && !q.pl));
+      ser(TR.acc.ejecutar('cortar'), true); ser(byId(o.id), undefined, 'cortar borra el cable completo'); ser(S.objs.length, n - 1);
+    }); } finally { TR.acc.portapapeles.splice(0, TR.acc.portapapeles.length, ...guardado); }
+  });
+  prueba('Cable por escalera: borrar una planta o capa quita solo los puntos de ahí (con aviso previo); con menos de 2 puntos se borra el cable; el origen pasa a la planta que queda', () => {
+    conProyecto(fCruce(), () => {
+      let o = cruzar(1, true); const id = o.id; ser(cuentaEn('p3'), 1, 'cuenta de objetos en la planta 3'); ser(cablesQueCruzan('p3'), 1, 'cables que cruzan la planta 3'); ser(cablesQueCruzan('p2'), 1);
+      const j = JSON.stringify(S); podarCables('p3'); o = byId(id); ser(o.pts.length, 2 + 3, 'quedan 2 libres + media escalera'); afirmar(o.pts.every(q => !q.es), 'la corrida incompleta debe quedar como puntos libres'); ser(esMultiplanta(o), false); ser(o.pl, 'p2');
+      S = JSON.parse(j); normalizar(); o = byId(id); podarCables('p2'); o = byId(id); afirmar(o, 'el cable debe seguir existiendo'); ser(o.pts.length, 3 + 2, 'quedan la media escalera de arriba y los 2 puntos libres'); ser(o.pl, 'p3', 'el origen pasa a la planta que queda'); ser(esMultiplanta(o), false); afirmar(o.pts.every(q => !q.es));
+      S = JSON.parse(j); normalizar(); podarCables('p2', 'c2'); ser(byId(id).pl, 'p3'); S = JSON.parse(j); normalizar(); podarCables('p1'); ser(S.objs.filter(x => x.k == 'line').length, 1, 'planta sin puntos del cable: no cambia nada');
+      S = JSON.parse(j); normalizar(); o = byId(id); o.pts = [o.pts[0], o.pts[9]]; podarCables('p3'); ser(byId(id), undefined, 'con menos de 2 puntos el cable se borra');
+    });
+  });
+  prueba('Cable por escalera: un archivo con una escalera o planta inexistente en un recorrido se abre soltando esos datos (con aviso) y sin romper nada', () => {
+    conR(() => conProyecto(fCruce(), () => {
+      const o = cruzar(1, true), g = ESQ.serializar(S, R); afirmar(g.ok, g.error); const d = JSON.parse(g.texto);
+      d.estado.objs = d.estado.objs.filter(x => x.id != 1); let l = ESQ.leer(JSON.stringify(d)); afirmar(l.ok, (l.errores || []).join()); afirmar(l.avisos.length > 0, 'debía avisar'); afirmar(l.estado.objs.find(x => x.id == o.id).pts.every(q => !q.es && !q.ed), 'el recorrido sin escalera debe soltarse');
+      const d2 = JSON.parse(g.texto); d2.estado.objs.find(x => x.id == o.id).pts[3].pl = 'p9'; l = ESQ.leer(JSON.stringify(d2)); afirmar(l.ok && l.avisos.length > 0 && l.estado.objs.find(x => x.id == o.id).pts[3].pl === undefined, 'una planta inexistente debe soltarse');
+      const d3 = JSON.parse(g.texto); d3.estado.objs.find(x => x.id == o.id).pts[3].ed = 5; l = ESQ.leer(JSON.stringify(d3)); afirmar(l.ok && l.avisos.length > 0 && l.estado.objs.find(x => x.id == o.id).pts[3].es === undefined, 'un sentido inválido debe soltar el punto del recorrido');
+    }));
+  });
   // ---------- Panel ----------
   const CLAVE_REF = 'topologias_ref_f0', CLAVE_PERF = 'topologias_perf_f0', CLAVE_PERF1 = 'topologias_perf_f1';
   const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
@@ -639,7 +798,7 @@ const TRP = (() => {
         else if (a == 'cmp') {
           const ref = leer(CLAVE_REF); if (!ref) { log('No hay referencia guardada: usa «Guardar referencia de dibujo» con la versión anterior.'); return; }
           const act = referenciaActual(); let dif = 0;
-          Object.keys(ref.datos).forEach(n => Object.keys(ref.datos[n]).forEach(v => { const x = ref.datos[n][v], y = (act[n] || {})[v]; if (!y || x.hash !== y.hash || x.largo !== y.largo) { dif++; log('✘ DIFERENTE: ' + n + ' / ' + v); } }));
+          Object.keys(ref.datos).forEach(n => Object.keys(ref.datos[n]).forEach(v => { const x = ref.datos[n][v], y = (act[n] || {})[v]; if (!y || x.hash !== y.hash || x.largo !== y.largo) { if (CAMBIOS_INTENCIONALES[n + '/' + v]) log('· cambio intencional (se omite): ' + n + ' / ' + v + ' — ' + CAMBIOS_INTENCIONALES[n + '/' + v]); else { dif++; log('✘ DIFERENTE: ' + n + ' / ' + v); } } }));
           log(dif ? dif + ' diferencias respecto a la referencia del ' + ref.fecha : '✔ Idéntico a la referencia del ' + ref.fecha);
         } else if (a == 'perf') {
           const r = medirRendimiento(), b = leer(CLAVE_PERF) || { render_ms: 49.9, mover_sin_arrastrar_ms: 43.9, fecha: 'informada por el usuario' };

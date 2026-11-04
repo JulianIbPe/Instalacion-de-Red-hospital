@@ -18,6 +18,8 @@ function draw(o) {
     if (o.label) h += T(o.x, bboxDe(o).y1 + .3, o.label);
     if (on) h += `<rect x="${o.x - o.w / 2 - .1}" y="${o.y - o.h / 2 - .1}" width="${o.w + .2}" height="${o.h + .2}" fill="none" stroke="#e0a030" stroke-dasharray=".15 .1" stroke-width=".04" transform="rotate(${o.rot || 0} ${o.x} ${o.y})" pointer-events="none"/>`;
     }
+  } else if (o.k == 'line' && esMultiplanta(o)) {
+    h = dibujarCableMP(o, id, on, hd);        // cable que atraviesa plantas por escaleras (trazas.js)
   } else if (o.k == 'line') {
     const P = o.pts.map(pt); if (o.cur) P.push(o.cur);
     const s = P.map(q => `${q.x},${q.y}`).join(' ');
@@ -36,7 +38,7 @@ function draw(o) {
   return h;
 }
 const ORD = { zona: 0, shape: 1, line: 2, puerta: 2.5, item: 3, texto: 4, medida: 5 };
-let asasOut = [];                         // asas de edición de lo seleccionado (se agregan después de todos los objetos)
+let asasOut = [], hitsOut = [];           // asas de edición de lo seleccionado y zonas de clic de los cables dentro de escaleras (se agregan después de todos los objetos, para quedar por encima)
 
 // ---------- Renderizado en capas (Fase 1) ----------
 // El SVG tiene una estructura fija que se crea una sola vez (iniciarCapas):
@@ -66,16 +68,17 @@ function renderFondo() {                  // vista (desplazamiento y zoom) y gri
 }
 function renderObjetos() {                // objetos del proyecto (lo que se exporta en el PNG)
   contar('obj'); if (!capasOk()) iniciarCapas();
-  asasOut = [];
+  sincronizarTrazas();                    // el recorrido de un cable por una escalera sigue a la escalera si ésta se movió, giró o cambió de tamaño
+  asasOut = []; hitsOut = [];
   // Orden de dibujo: primero por jerarquía de capa (las capas altas se pintan encima) y, dentro de una misma capa, por tipo de objeto (ORD)
   const E = S.edificio, all = [...S.objs].filter(esVisible).sort((a, b) => rangoCapa(a) - rangoCapa(b) || ORD[a.k] - ORD[b.k]);
   const pats = all.filter(o => o.f == 'hat').map(patronHat).join('');
   const edif = `<rect x="0" y="0" width="${E.w}" height="${E.h}" fill="none" stroke="#17262c" stroke-width=".08" stroke-dasharray=".4 .2"/>` + T(E.w / 2, -.25, E.w + ' m', .4) + `<text x="-.3" y="${E.h / 2}" font-size=".4" text-anchor="middle" transform="rotate(-90 -.3 ${E.h / 2})" fill="#17262c" font-family="Segoe UI,Arial,sans-serif">${E.h} m</text>`;
-  capas.c.innerHTML = `<defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map(o => { const g = draw(o) + resaltar(o); return esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}${asasOut.join('')}`;
+  capas.c.innerHTML = `<defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map(o => { const g = draw(o) + resaltar(o); return esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}${hitsOut.join('')}${asasOut.join('')}`;
 }
 function renderTmp() {                    // lo temporal de la interacción (no forma parte del proyecto ni del PNG)
   contar('tmp'); if (!capasOk()) iniciarCapas();
-  asasOut = [];
+  asasOut = []; hitsOut = [];
   const enCurso = tmp ? (tmp.f == 'hat' ? `<defs>${patronHat(tmp)}</defs>` : '') + draw(tmp) + asasOut.join('') : '';   // la pieza o el cable que se está dibujando, con sus asas
   capas.tmp.innerHTML = enCurso + `${cajaHtml()}${puertaPrevia()}${guiaColocar()}${nodosHtml()}${rotHtml()}${rombo()}${snapPt ? `<circle cx="${snapPt.x}" cy="${snapPt.y}" r=".17" fill="#e0a03044" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : ''}`;
 }
@@ -95,6 +98,6 @@ function repintarMovimiento() {           // al mover el ratón: solo lo que pue
   status();                                                                 // coordenadas del cursor (único cambio si no se hace nada más)
 }
 function status(msg) {
-  const h = !tool ? 'Clic: seleccionar · clic derecho: menú · Mayús+clic: varios · Mayús+arrastrar: rectángulo · ↻ o tecla R: rotar · arrastrar: mover · fondo vacío: desplazar · rueda: zoom' : tool.k == 'line' ? 'Clic para añadir puntos (sobre un dispositivo o un nodo ○ del mismo tipo para unirlo) · doble clic o Enter para terminar · Esc cancela' : tool.k == 'zona' ? 'Arrastra para marcar la zona' : tool.k == 'puerta' ? 'Pasa sobre una pared para ver cómo queda · clic para colocar la puerta · clic sobre una puerta puesta añade la 2.ª hoja · Esc cancela' : tool.k == 'medida' ? 'Clic en el punto inicial, luego en el final y por último clic donde quieras colocar la cota (clic derecho cancela)' : usaDosPuntos(tool) ? (tmp && tmp.pa ? 'Clic en el segundo punto para terminar (clic derecho o Esc cancela)' : esCirculo(tool) || tool.esc == 'espiral' ? 'Clic en el centro y luego aléjate: cuanto más lejos, más grande el radio' : esEscalera(tool) ? 'Clic en una esquina de la escalera y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)' : 'Clic en una esquina y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)') : 'Clic en el área de trabajo para colocar · Esc para salir';
+  const h = !tool ? 'Clic: seleccionar · clic derecho: menú · Mayús+clic: varios · Mayús+arrastrar: rectángulo · ↻ o tecla R: rotar · arrastrar: mover · fondo vacío: desplazar · rueda: zoom' : tool.k == 'line' ? 'Clic para añadir puntos (sobre un dispositivo o un nodo ○ del mismo tipo para unirlo) · clic sobre una escalera: pasar el cable a la planta de arriba o de abajo · doble clic o Enter para terminar · Esc cancela' : tool.k == 'zona' ? 'Arrastra para marcar la zona' : tool.k == 'puerta' ? 'Pasa sobre una pared para ver cómo queda · clic para colocar la puerta · clic sobre una puerta puesta añade la 2.ª hoja · Esc cancela' : tool.k == 'medida' ? 'Clic en el punto inicial, luego en el final y por último clic donde quieras colocar la cota (clic derecho cancela)' : usaDosPuntos(tool) ? (tmp && tmp.pa ? 'Clic en el segundo punto para terminar (clic derecho o Esc cancela)' : esCirculo(tool) || tool.esc == 'espiral' ? 'Clic en el centro y luego aléjate: cuanto más lejos, más grande el radio' : esEscalera(tool) ? 'Clic en una esquina de la escalera y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)' : 'Clic en una esquina y luego en la esquina opuesta (se pega a los extremos ○ de las paredes)') : 'Clic en el área de trabajo para colocar · Esc para salir';
   $('#status').textContent = `x ${curP.x.toFixed(1)} m · y ${curP.y.toFixed(1)} m · escala ${V.z.toFixed(0)} px/m · grilla ${rejilla ? +pasoGrilla().toFixed(2) + ' m' : 'off'} · ${plantaActual().nombre} › ${capaActual().nombre}  |  ${msg || avisoMsg || (ladoSel() !== null ? 'Lado seleccionado: arrastra el lado o sus puntas para modificarlo · Supr lo borra · clic fuera para soltarlo' : h)}`;
 }

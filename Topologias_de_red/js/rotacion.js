@@ -20,7 +20,7 @@ function geoSel() {                      // centro y borde superior de lo selecc
 function rotarDesde(o, g, ang, c) {      // deja en o el resultado de girar la copia original g un ángulo ang alrededor de c
   if (o.k == 'puerta') return;           // las puertas giran con su pared
   const rp = q => { const r = rotP(q, c, ang); return { x: r3(r.x), y: r3(r.y) }; };
-  if (o.k == 'line') o.pts = g.pts.map(q => q.ref || q.rl ? { ...q } : rp(q));
+  if (o.k == 'line') o.pts = g.pts.map(q => q.ref || q.rl || q.es || !puntoEn(g, q) ? { ...q } : { ...q, ...rp(q) });   // solo giran los puntos libres de esta planta (los de escalera siguen a su escalera)
   else if (o.k == 'medida') { o.a = rp(g.a); o.b = rp(g.b); }
   else if (o.k == 'shape' && !esCirculo(o)) fijarVerts(o, vertsAbs(g).map(rp));
   else {

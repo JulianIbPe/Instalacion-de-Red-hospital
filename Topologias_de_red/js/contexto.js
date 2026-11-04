@@ -4,24 +4,31 @@
 // Las entradas salen de TR.acc.paraMenu (acciones.js), según el tipo de lo seleccionado.
 // Posición y tamaño no se editan aquí: el menú lleva al campo del inspector. Se cierra con Esc, clic fuera, rueda, cambio de ventana o al ejecutar una acción.
 TR.ctx = (() => {
-  const m = $('#ctx'); let abierto = false, puntoClic = { x: 0, y: 0 };   // puntoClic: dónde se pega
+  const m = $('#ctx'); let abierto = false, puntoClic = { x: 0, y: 0 }, alElegir = null;   // puntoClic: dónde se pega; alElegir: función a llamar con el id elegido (menú de escalera de un cable en curso)
   const tipoNom = { pared: 'Pared', cable: 'Cable', dispositivo: 'Dispositivo', rack: 'Rack', escalera: 'Escalera', ascensor: 'Ascensor', ventana: 'Ventana', puerta: 'Puerta', forma: 'Forma', zona: 'Zona', texto: 'Texto', medida: 'Medida' };
   const botones = () => [...m.querySelectorAll('button:not(:disabled)')];
-  function cerrar() { if (!abierto) return; abierto = false; m.hidden = true; m.innerHTML = ''; }
+  function cerrar() { if (!abierto) return; abierto = false; alElegir = null; m.hidden = true; m.innerHTML = ''; }
+  function ubicar(e) {                                                                  // dentro de la ventana, con el foco en la primera entrada activa
+    m.hidden = false; abierto = true; const w = m.offsetWidth, h = m.offsetHeight;
+    m.style.left = Math.max(4, Math.min(e.clientX, innerWidth - w - 4)) + 'px'; m.style.top = Math.max(4, Math.min(e.clientY, innerHeight - h - 4)) + 'px';
+    const b = botones()[0]; if (b) b.focus();
+  }
+  function abrirItems(titulo, items, e, cb) {                                           // menú sencillo de opciones (lo usa trazas.js al hacer clic en una escalera con un cable en curso)
+    cerrar(); TR.ui.menu++; alElegir = cb;
+    m.innerHTML = `<div class="ch">${esc(titulo)}</div><div class="cg">${items.map(i => `<button role="menuitem" data-a="${i.id}"${i.habil ? '' : ' disabled'}><i></i>${esc(i.texto)}</button>`).join('')}</div>`;
+    ubicar(e); return true;
+  }
   function abrir(e) {
     const t = e.target.closest && e.target.closest('[data-id]'), o = t && byId(t.dataset.id);
     puntoClic = toW(e);
     if (o && esEditable(o)) { if (!multi.includes(o.id)) { sel = o.id; multi = []; } } else { sel = null; multi = []; }   // el objeto bajo el cursor queda seleccionado (o se mantiene la selección múltiple); en el fondo se suelta la selección
     selEdge = null; render();
     const os = seleccionados(), grupos = TR.acc.paraMenu(os); if (!grupos.length) return false;
-    TR.ui.menu++;
+    TR.ui.menu++; alElegir = null;
     const tit = !os.length ? 'Área de trabajo' : os.length > 1 ? os.length + ' objetos' : (tipoNom[tipoDe(os[0])] || tipoDe(os[0])) + (os[0].label ? ' · ' + os[0].label : '');
     m.innerHTML = `<div class="ch">${esc(tit)}</div>` + grupos.map(g => `<div class="cg">${g.titulo ? `<div class="ct">${g.titulo}</div>` : ''}${g.items.map(i =>
       `<button role="${g.titulo ? 'menuitemradio' : 'menuitem'}"${g.titulo ? ` aria-checked="${i.marca}"` : ''} data-a="${i.id}"${i.habil ? '' : ' disabled'}><i>${i.marca ? '✓' : ''}</i>${esc(i.texto)}</button>`).join('')}</div>`).join('');
-    m.hidden = false; abierto = true;
-    const w = m.offsetWidth, h = m.offsetHeight;                                      // dentro de la ventana
-    m.style.left = Math.max(4, Math.min(e.clientX, innerWidth - w - 4)) + 'px'; m.style.top = Math.max(4, Math.min(e.clientY, innerHeight - h - 4)) + 'px';
-    const b = botones()[0]; if (b) b.focus();
+    ubicar(e);
     return true;
   }
   function tecla(e) {                                                                 // lo llama controles.js mientras el menú está abierto
@@ -33,10 +40,10 @@ TR.ctx = (() => {
     else if (n && e.key == 'Home') { e.preventDefault(); bs[0].focus(); }
     else if (n && e.key == 'End') { e.preventDefault(); bs[n - 1].focus(); }
   }
-  m.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (!b || b.disabled) return; cerrar(); TR.acc.ejecutar(b.dataset.a, { punto: puntoClic }); });
+  m.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (!b || b.disabled) return; const f = alElegir; cerrar(); if (f) f(b.dataset.a); else TR.acc.ejecutar(b.dataset.a, { punto: puntoClic }); });
   m.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('pointerdown', e => { if (abierto && !m.contains(e.target)) cerrar(); }, true);   // en captura: corre antes que la apertura de un menú nuevo
   document.addEventListener('wheel', () => cerrar(), { capture: true, passive: true });
   window.addEventListener('blur', cerrar); window.addEventListener('resize', cerrar);
-  return { abrir, cerrar, tecla, abierto: () => abierto };
+  return { abrir, abrirItems, cerrar, tecla, abierto: () => abierto };
 })();
