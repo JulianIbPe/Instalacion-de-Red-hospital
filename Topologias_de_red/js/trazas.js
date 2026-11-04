@@ -14,26 +14,29 @@ const puntoVisible = (o, q) => { const c = capaPunto(o, q); return plantaDe(o, q
 const puntoEditable = (o, q) => { const c = capaPunto(o, q); return plantaDe(o, q) == S.plantaAct && !!c && c.visible && !c.bloqueada; };
 
 // ---------- Geometría del recorrido ----------
+const CARRIL = .13, CARRIL_DESC = .10;   // separación (m) entre el eje de la flecha de la escalera y el cable, para que la flecha no lo tape
 function trazaLocal(E, sube) {           // {inicio, fin} en coordenadas locales (sin giro): inicio = mitad de la planta de salida, fin = la de llegada (el punto medio está en las dos)
-  // Subir y bajar recorren el MISMO camino (empiezan por el tramo izquierdo y terminan por el derecho) en carriles distintos: el que SUBE va por el exterior (cerca del borde, con un poco de espacio) y el que BAJA por el interior; las flechas quedan entre los dos.
+  // Cada cable va a la DERECHA de su sentido de marcha, pegado a un costado de la flecha: así el que sube y el que baja (que recorre el camino al revés) quedan en carriles distintos y no chocan.
   const w = E.w, h = E.h, t = tipoEsc(E), c = Math.min;
-  if (t == 'descanso') {
-    const Dl = c(h * .4, Math.max(.8, w / 2)), a0 = -w / 2 + BORDE / 2, a1 = -DV - DW / 2, xl = (a0 + a1) / 2, yL = -h / 2 + Dl * .72, yT = -h / 2 + Dl, x0 = a0 + SEP, x1 = a1 - SEP, ancho = x1 - x0;
-    const x = ancho > .2 ? (sube ? x0 + .05 : x1 - .05) : xl;                      // tramo izquierdo (el derecho es su espejo): exterior al subir, interior al bajar
-    const y = sube ? yL - AY_DESC - .07 : yL + Math.max(.04, c(AY_DESC + .07, (yT - DW / 2) - yL - .03));   // en el descanso: el que sube por arriba de las flechas y el que baja por debajo
-    return { inicio: [[x, h / 2], [x, y], [0, y]], fin: [[0, y], [-x, y], [-x, h / 2]] };
+  if (t == 'descanso') {                 // sube por el tramo izquierdo, da la vuelta en el descanso y sigue por el derecho (igual que la flecha de gDescanso)
+    const Dl = c(h * .4, Math.max(.8, w / 2)), a0 = -w / 2 + BORDE / 2, a1 = -DV - DW / 2, xl = (a0 + a1) / 2, yL = -h / 2 + Dl * .72, yT = -h / 2 + Dl;
+    const dF = Math.max(0, c(CARRIL, ((a1 - SEP) - (a0 + SEP)) / 2 - .03)), dL = Math.max(0, c(CARRIL_DESC, (yT - DW / 2) - yL - .03, yL - (-h / 2 + BORDE / 2) - .03));
+    return sube ? { inicio: [[xl + dF, h / 2], [xl + dF, yL + dL], [0, yL + dL]], fin: [[0, yL + dL], [-xl - dF, yL + dL], [-xl - dF, h / 2]] }
+                : { inicio: [[-xl + dF, h / 2], [-xl + dF, yL - dL], [0, yL - dL]], fin: [[0, yL - dL], [xl - dF, yL - dL], [xl - dF, h / 2]] };
   }
-  if (t == 'espiral') {                  // 270° en sentido horario, de 195° a 435° (como gEspiral); sube por el anillo exterior y baja por el interior
-    // Entra y sale por el CUARTO ABIERTO (abajo a la izquierda), en línea recta: entra en vertical cruzando el borde recto horizontal (izquierdo) y sale en horizontal cruzando el borde recto vertical (inferior); no atraviesa la pared curva.
-    const rx = w / 2, ry = h / 2, rm = (rx + ry) / 2, rin = c(rx, ry) - BORDE / 2, f = sube ? c(.92, Math.max(.7, (rin - .12) / rm)) : Math.max(.25, .62 - .17 / rm), ext = c(.3, .5 * c(rx, ry));
+  if (t == 'espiral') {                  // 270° en sentido horario (al subir), de 195° a 435° (como gEspiral); el que sube va por dentro del anillo de la flecha y el que baja por fuera
+    // Entra y sale por el CUARTO ABIERTO (abajo a la izquierda), en línea recta: sube en vertical cruzando el borde recto horizontal (izquierdo) y sale en horizontal cruzando el borde recto vertical (inferior); no atraviesa la pared curva.
+    const rx = w / 2, ry = h / 2, dS = c(CARRIL, .3 * c(rx, ry)) / ((rx + ry) / 2), f = sube ? .62 - dS : .62 + dS, ext = c(.3, .5 * c(rx, ry));   // ext: cuánto sale del borde recto hacia el cuarto abierto
     const pc = (g, k = f) => { const q = g * Math.PI / 180; return [rx * k * Math.cos(q), ry * k * Math.sin(q)]; };
-    const arco = (g0, g1) => { const r = []; for (let g = g0; g <= g1; g += 15) r.push(pc(g)); return r; };
-    return { inicio: [[pc(195)[0], ext], ...arco(195, 315)], fin: [...arco(315, 435), [-ext, pc(435)[1]]] };
+    const sentido = (g0, g1) => { const r = []; for (let g = g0; g1 >= g0 ? g <= g1 : g >= g1; g += g1 >= g0 ? 15 : -15) r.push(pc(g)); return r; };
+    const entra = [pc(195)[0], ext], sale = [-ext, pc(435)[1]];                       // extremos en el cuarto abierto: bajo el inicio del arco y a la izquierda de su final
+    return sube ? { inicio: [entra, ...sentido(195, 315)], fin: [...sentido(315, 435), sale] }
+                : { inicio: [sale, ...sentido(435, 315)], fin: [...sentido(315, 195), entra] };
   }
-  const ent = w / 2 - BORDE / 2 - SEP, up = Math.max(.1, ent - .07), x = -(sube ? up : Math.max(.05, c(.18, up - .09)));   // recta: los dos por el lado izquierdo de la flecha: el que sube cerca del borde y el que baja más al centro
-  return { inicio: [[x, h / 2], [x, 0]], fin: [[x, 0], [x, -h / 2]] };
+  const d = Math.max(0, c(CARRIL, w / 2 - BORDE / 2 - SEP - .03));   // recta: sube por la derecha del eje de la flecha (este) y baja por su izquierda (oeste)
+  return sube ? { inicio: [[d, h / 2], [d, 0]], fin: [[d, 0], [d, -h / 2]] } : { inicio: [[-d, -h / 2], [-d, 0]], fin: [[-d, 0], [-d, h / 2]] };
 }
-function trazaEscalera(E, sube) {        // {inicio, fin}: puntos del mundo; inicio = mitad de la planta desde la que se sale (la primera: hasta la mitad del descanso), fin = mitad de la planta a la que se llega (punto medio repetido)
+function trazaEscalera(E, sube) {        // {inicio, fin}: puntos del mundo; inicio = mitad de la planta desde la que se sale, fin = mitad de la planta a la que se llega (punto medio repetido)
   const L = trazaLocal(E, sube), c = { x: E.x, y: E.y }, rot = E.rot || 0;
   const mundo = ([x, y]) => { const p = rotP({ x: E.x + x, y: E.y + y }, c, rot); return { x: r3(p.x), y: r3(p.y) }; };
   return { inicio: L.inicio.map(mundo), fin: L.fin.map(mundo) };

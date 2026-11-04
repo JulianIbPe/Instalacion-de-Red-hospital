@@ -5,7 +5,6 @@ const PELDANO = .28;                      // separación entre peldaños (m): al
 const BORDE = .2, SEP = .08;              // BORDE = grosor de una pared; SEP = separación de los peldaños al borde
 const DV = .11, DW = .16;                 // escalera con descanso: dos líneas gruesas (grosor DW, centradas a ±DV) con una ranura chica entre ellas (ancho 2·DV−DW)
 const COL_SUBE = '#1d2a2f', COL_BAJA = '#2e86de';
-const OA_DESC = .07, AY_DESC = .035;      // escalera con descanso con las dos flechas: separación lateral de cada flecha respecto al eje del tramo y diferencia de altura en el descanso (la que sube un poco más arriba que la que baja)
 const tipoEsc = o => o.t || 'recta';
 const esEsc = o => o.k == 'item' && esEscalera(o);
 const NOMBRE_ESC = { recta: 'recta', descanso: 'con descanso', espiral: 'espiral' };
@@ -51,10 +50,10 @@ function gDescanso(o, baja, doble) {
   g += `<line x1="${a0}" y1="${yT}" x2="${-a0}" y2="${yT}" stroke="${c}" stroke-width="${DW}" pointer-events="none"/>`;   // borde del descanso (grueso, como las líneas divisorias)
   if (x1 > x0) for (let i = 1; i < n; i++) { const y = yT + i * paso; g += `<path d="M${x0} ${y}H${x1}M${-x1} ${y}H${-x0}" stroke="${c}" stroke-opacity=".6" stroke-width=".03" pointer-events="none"/>`; }
   let top = rotulo(0, -h / 2 + Dl * .3, Math.max(.04, Math.min(.25, w / 7)));
-  const oa = doble ? Math.min(OA_DESC, Math.max(0, x1 - x0) * .2) : 0, ay = doble ? AY_DESC : 0, kd = doble ? k * .6 : k;   // con las dos flechas: puntas más chicas para que no se pisen
-  const ruta = (ox, dy, col) => flecha(`M${xl + ox} ${yb}V${yL + dy}H${-xl - ox}V${yb}`, col, -xl - ox, yb, 0, 1, kd);   // las dos empiezan por el tramo izquierdo, dan la vuelta por el descanso y terminan por el derecho
-  if (!baja) top += ruta(doble ? -oa : 0, -ay, COL_SUBE);           // la que sube: por fuera y un poco más arriba en el descanso
-  if (baja || doble) top += ruta(doble ? oa : 0, ay, COL_BAJA);     // la que baja: por dentro y un poco más abajo
+  const oa = doble ? Math.min(.1, Math.max(0, x1 - x0) * .25) : 0;
+  const ruta = (off, col, inv) => { const xa = (inv ? -xl : xl) + off, xb = (inv ? xl : -xl) + off; return flecha(`M${xa} ${yb}V${yL}H${xb}V${yb}`, col, xb, yb, 0, 1, k); };
+  if (!baja) top += ruta(doble ? -oa : 0, COL_SUBE, false);        // sube por la izquierda, da la vuelta y baja por la derecha
+  if (baja || doble) top += ruta(doble ? oa : 0, COL_BAJA, true);  // recorrido de la planta de abajo: en sentido contrario
   return [g, top];
 }
 

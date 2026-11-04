@@ -9,9 +9,6 @@ const TRP = (() => {
   const ser = (a, b, m) => afirmar(a === b, (m || 'valores distintos') + ': esperado ' + JSON.stringify(b) + ', obtenido ' + JSON.stringify(a));
   const igual = (a, b, m) => ser(JSON.stringify(a), JSON.stringify(b), m);
 
-  // Cambios de dibujo hechos A PROPÓSITO después de guardar la referencia de la Fase 0 (se omiten al compararla; cualquier otra diferencia sigue fallando):
-  const CAMBIOS_INTENCIONALES = { 'escaleras y plantas/p2': 'Fase 3, ajuste 3: flechas de la escalera con descanso con las dos flechas (las dos de izquierda a derecha; la que sube por fuera y un poco más arriba, la que baja por dentro y un poco más abajo)' };
-
   // ---------- Proyectos de prueba (formato actual, versión 1) ----------
   const P = { pl: 'p1', cp: 'c1' };
   const base = (extra = {}, objs = []) => { const s = estadoInicial('m'); Object.assign(s, extra); s.objs = objs; return s; };
@@ -217,7 +214,7 @@ const TRP = (() => {
   prueba('Fase 1: el dibujo es idéntico a la referencia guardada en la Fase 0', () => {
     const ref = leer(CLAVE_REF); afirmar(ref && ref.datos, 'no hay referencia guardada en este navegador (se guarda con «Guardar referencia de dibujo» con la versión de la Fase 0)');
     const act = referenciaActual(), dif = [];
-    Object.keys(ref.datos).forEach(n => Object.keys(ref.datos[n]).forEach(v => { const x = ref.datos[n][v], y = (act[n] || {})[v]; if (!y || x.hash !== y.hash || x.largo !== y.largo) { if (!CAMBIOS_INTENCIONALES[n + '/' + v]) dif.push(n + '/' + v); } }));
+    Object.keys(ref.datos).forEach(n => Object.keys(ref.datos[n]).forEach(v => { const x = ref.datos[n][v], y = (act[n] || {})[v]; if (!y || x.hash !== y.hash || x.largo !== y.largo) dif.push(n + '/' + v); }));
     afirmar(!dif.length, 'diferencias respecto a la referencia: ' + dif.join(', '));
   });
 
@@ -631,15 +628,15 @@ const TRP = (() => {
     const b = $('#ctx [data-a="' + (sube ? 'sube' : 'baja') + '"]'); afirmar(!b.disabled, 'la opción está desactivada'); b.click();
     destino.forEach(([x, y]) => clic(x, y)); finishLine(); return S.objs[S.objs.length - 1];
   };
-  prueba('Cable por escalera: la geometría del recorrido de las tres escaleras (mitades, punto medio repetido, giro; subir y bajar por el mismo camino)', () => {
+  prueba('Cable por escalera: la geometría del recorrido de las tres escaleras (mitades, punto medio repetido, giro y sentido contrario)', () => {
     conProyecto(fCruce(), () => {
       const R = (E, s) => trazaEscalera(E, s), ult = a => a[a.length - 1], pn = p => [p.x, p.y];
-      const rec = byId(2), a = R(rec, true), b = R(rec, false);
-      igual([a.inicio.map(pn), a.fin.map(pn)], [[[11.65, 4.4], [11.65, 3]], [[11.65, 3], [11.65, 1.6]]], 'recta subiendo (borde izquierdo, con un poco de espacio)'); igual([b.inicio.map(pn), b.fin.map(pn)], [[[11.82, 4.4], [11.82, 3]], [[11.82, 3], [11.82, 1.6]]], 'recta bajando (lado izquierdo, interior, mismo camino)');
-      const des = byId(1), d = R(des, true), db = R(des, false); igual(pn(ult(d.inicio)), pn(d.fin[0]), 'el punto medio debe estar en las dos mitades'); ser(d.inicio.length + d.fin.length, 6, 'puntos del descanso'); ser(ult(d.inicio).x, 6, 'el medio del descanso está en el eje');
-      afirmar(d.inicio[0].x < 6 && d.fin[2].x > 6, 'subiendo: empieza por el tramo izquierdo y termina por el derecho'); afirmar(db.inicio[0].x < 6 && db.fin[2].x > 6, 'bajando: TAMBIÉN empieza por el tramo izquierdo y termina por el derecho');
+      const rec = byId(2), a = R(rec, true); igual([a.inicio.map(pn), a.fin.map(pn)], [[[12.13, 4.4], [12.13, 3]], [[12.13, 3], [12.13, 1.6]]], 'recta subiendo');
+      const b = R(rec, false); igual([b.inicio.map(pn), b.fin.map(pn)], [[[11.87, 1.6], [11.87, 3]], [[11.87, 3], [11.87, 4.4]]], 'recta bajando');
+      const des = byId(1), d = R(des, true); igual(pn(ult(d.inicio)), pn(d.fin[0]), 'el punto medio debe estar en las dos mitades'); ser(d.inicio.length + d.fin.length, 6, 'puntos del descanso'); afirmar(d.inicio[0].x < 6 && d.fin[2].x > 6, 'sube por la izquierda y baja por la derecha'); ser(ult(d.inicio).x, 6, 'el medio del descanso está en el eje');
+      const db = R(des, false); afirmar(db.inicio[0].x > 6 && ult(db.fin).x < 6, 'bajando se entra por la derecha (como la imagen de referencia) y se sale por la izquierda');
       const esp = byId(3), e = R(esp, true); ser(e.inicio.length + e.fin.length, 20, 'puntos de la espiral'); igual(pn(ult(e.inicio)), pn(e.fin[0]), 'medio de la espiral'); afirmar(e.inicio[0].x < 9, 'la espiral empieza a la izquierda');
-      rec.rot = 90; const g = R(rec, true); igual([g.inicio[0].x, g.inicio[0].y], [10.6, 2.65], 'la escalera girada 90° gira su recorrido');
+      rec.rot = 90; const g = R(rec, true); igual([g.inicio[0].x, g.inicio[0].y], [10.6, 3.13], 'la escalera girada 90° gira su recorrido (la entrada pasa de abajo a la izquierda)');
     });
   });
   prueba('Cable por escalera: bajar solo si justo debajo hay una escalera igual; subir solo desde una escalera de esta planta; el reflejo solo permite bajar', () => {
@@ -656,37 +653,26 @@ const TRP = (() => {
       afirmar(!$('#ctx').hidden, 'el reflejo de la escalera de abajo debe recibir el clic'); ser($('#ctx [data-a="sube"]').disabled, true, 'el reflejo no deja subir'); afirmar(/llega aquí desde abajo/.test($('#ctx [data-a="sube"]').textContent)); ser($('#ctx [data-a="baja"]').disabled, false, 'el reflejo sí deja bajar'); $('#ctx [data-a="baja"]').click(); ser(S.plantaAct, 'p1');
     });
   });
-  prueba('Cable por escalera: el que sube va por el exterior (cerca del borde, con espacio) y el que baja por el interior, ambos junto a las flechas y no debajo de ellas (recta, con descanso y espiral)', () => {
+  prueba('Cable por escalera: el cable va a un costado de la flecha y el que baja usa otro carril que el que sube (recta, con descanso y espiral)', () => {
     conProyecto(fCruce(), () => {
       const R = (id, s) => trazaEscalera(byId(id), s), todos = r => [...r.inicio, ...r.fin];
-      const rs = R(2, true), rb = R(2, false); afirmar(todos(rs).every(p => p.x < 12) && todos(rb).every(p => p.x < 12), 'recta: los dos van por el lado izquierdo de la flecha'); afirmar(rs.inicio[0].x < rb.inicio[0].x, 'recta: el que sube más cerca del borde y el que baja más hacia el centro'); afirmar(12 - rb.inicio[0].x >= .14 && 12 - 0.6 + .1 < rs.inicio[0].x, 'recta: separados de la flecha y con espacio respecto del borde');
-      const ds = R(1, true), db = R(1, false), eje = 6 - .445;
-      afirmar(Math.abs(ds.inicio[0].x - eje) > .11 && Math.abs(db.inicio[0].x - eje) > .11, 'descanso: el cable no debe ir bajo la flecha'); afirmar(ds.inicio[0].x < eje && db.inicio[0].x > eje, 'descanso, tramo izquierdo: sube por el borde exterior y baja por el interior'); afirmar(ds.fin[2].x > 12 - eje && db.fin[2].x < 12 - eje, 'descanso, tramo derecho: sube por el exterior (derecha) y baja por el interior');
-      const yL = 3 - .824; afirmar(ds.inicio[1].y < yL && db.inicio[1].y > yL, 'descanso: en el descanso el que sube va por encima de las flechas y el que baja por debajo'); afirmar(todos(ds).concat(todos(db)).every(p => Math.abs(p.x - 6) <= .8 && p.y >= 3 - 1.4 && p.y <= 3 + 1.4), 'descanso: el cable debe quedar dentro de la escalera');
-      const es = R(3, true), eb = R(3, false), rad = p => Math.hypot(p.x - 9, p.y - 3), medio = r => r.inicio.slice(1).concat(r.fin.slice(0, -1)).map(rad);
-      afirmar(Math.min(...medio(es)) > Math.max(...medio(eb)), 'espiral: el que sube va por el anillo exterior y el que baja por el interior'); afirmar(Math.max(...medio(es)) < .8, 'espiral: sin tocar la pared');
+      const rs = R(2, true), rb = R(2, false); afirmar(todos(rs).every(p => p.x > 12) && todos(rb).every(p => p.x < 12), 'recta: sube a un lado del eje de la flecha y baja al otro');
+      const ds = R(1, true), db = R(1, false); afirmar(ds.inicio[0].x != 6 + (-.445) && Math.abs(ds.inicio[0].x - (6 - .445)) > .1, 'descanso: el cable no debe ir sobre el eje de la flecha');
+      afirmar(Math.abs(ds.inicio[0].x - db.fin[2].x) > .2 && Math.abs(ds.fin[2].x - db.inicio[0].x) > .2, 'descanso: carriles distintos al subir y al bajar en cada tramo'); const yL = ds.inicio[1].y, yb = db.inicio[1].y; afirmar(Math.abs(yL - yb) > .15, 'descanso: carriles distintos en el descanso');
+      afirmar(todos(ds).every(p => Math.abs(p.x - 6) <= .8 && p.y >= 3 - 1.4 && p.y <= 3 + 1.4), 'descanso: el cable debe quedar dentro de la escalera');
+      const es = R(3, true), eb = R(3, false), rad = p => Math.hypot(p.x - 9, p.y - 3); const interno = es.inicio.slice(1).concat(es.fin.slice(0, -1)).map(rad), externo = eb.inicio.slice(1).concat(eb.fin.slice(0, -1)).map(rad);
+      afirmar(Math.max(...interno) < Math.min(...externo), 'espiral: el que sube va por dentro del anillo y el que baja por fuera');
     });
   });
-  prueba('Escalera con descanso: las dos flechas empiezan por el tramo izquierdo y terminan por el derecho; la que sube va por fuera y un poco más arriba en el descanso, la que baja por dentro y un poco más abajo', () => {
-    const flechas = () => { const o = {}; document.querySelectorAll('#c path[data-flecha]').forEach(pa => { const m = /^M(-?[\d.]+) (-?[\d.]+)V(-?[\d.]+)H(-?[\d.]+)V/.exec(pa.getAttribute('d')); if (m) o[pa.dataset.flecha] = { xa: +m[1], yL: +m[3], xb: +m[4] }; }); return o; };
-    conProyecto(fEscaleras().estado, () => {
-      irA('p2'); render(); const f = flechas(); afirmar(f.sube && f.baja, 'debe haber las dos flechas (hay una escalera igual debajo)');
-      afirmar(f.sube.xa < f.sube.xb && f.baja.xa < f.baja.xb, 'las dos van de izquierda a derecha'); afirmar(f.sube.xa < f.baja.xa && f.sube.xb > f.baja.xb, 'la que sube por fuera y la que baja por dentro'); afirmar(f.sube.yL < f.baja.yL, 'en el descanso la que sube un poco más arriba'); afirmar(f.baja.yL - f.sube.yL < .2, 'solo un poco');
-      irA('p1'); render(); const g = flechas(); afirmar(g.sube && !g.baja && g.sube.xa < g.sube.xb, 'con una sola flecha (sin escalera debajo) también de izquierda a derecha');
-    });
-    conProyecto(fCruce(), () => { irA('p3'); render(); const h = flechas(); afirmar(h.baja && h.baja.xa < h.baja.xb, 'el reflejo de la escalera de abajo (flecha de bajar) también va de izquierda a derecha'); });
-  });
-  prueba('Cable por escalera: en la espiral el cable (subiendo y bajando) entra y sale en línea recta por el cuarto abierto, cruzando los dos bordes rectos y sin cortarse a sí mismo', () => {
+  prueba('Cable por escalera: en la espiral el cable entra y sale en línea recta por el cuarto abierto, cruzando los dos bordes rectos y sin cortarse a sí mismo', () => {
     conProyecto(fCruce(), () => {
       const E = byId(3), cx = E.x, cy = E.y, u = trazaEscalera(E, true), d = trazaEscalera(E, false), ult = a => a[a.length - 1], pen = a => a[a.length - 2];
-      [[u, 'subiendo'], [d, 'bajando']].forEach(([r, n]) => {
-        ser(r.inicio.length + r.fin.length, 20, n + ': puntos'); ser(r.inicio[0].x, r.inicio[1].x, n + ': la entrada es vertical'); afirmar(r.inicio[0].y > cy && r.inicio[1].y < cy, n + ': cruza el borde recto horizontal (de abajo hacia arriba)'); afirmar(r.inicio[0].x < cx, n + ': la entrada está en el cuarto abierto');
-        ser(ult(r.fin).y, pen(r.fin).y, n + ': la salida es horizontal'); afirmar(pen(r.fin).x > cx && ult(r.fin).x < cx, n + ': cruza el borde recto vertical (hacia la izquierda)'); afirmar(ult(r.fin).y > cy, n + ': la salida está en el cuarto abierto');
-        const corta = (A, B, C, D) => { const o = (p, q, s) => Math.sign((q.x - p.x) * (s.y - p.y) - (q.y - p.y) * (s.x - p.x)); return o(A, B, C) != o(A, B, D) && o(C, D, A) != o(C, D, B); };
-        const P = [...r.inicio, ...r.fin].filter((q, k, A) => !k || q.x !== A[k - 1].x || q.y !== A[k - 1].y); let cruces = 0; for (let a = 0; a < P.length - 1; a++) for (let b = a + 2; b < P.length - 1; b++) if (corta(P[a], P[a + 1], P[b], P[b + 1])) cruces++; ser(cruces, 0, n + ': el cable se corta a sí mismo');
-        afirmar([...r.inicio, ...r.fin].every(p => Math.abs(p.x - cx) <= .9 + 1e-6 && Math.abs(p.y - cy) <= .9 + 1e-6), n + ': dentro del cuadro de la escalera');
-      });
-      afirmar(d.inicio[0].x > u.inicio[0].x && ult(d.fin).y < ult(u.fin).y, 'el que baja usa los carriles de más adentro');
+      ser(u.inicio.length + u.fin.length, 20, 'puntos'); ser(u.inicio[0].x, u.inicio[1].x, 'subiendo: la entrada es vertical'); afirmar(u.inicio[0].y > cy && u.inicio[1].y < cy, 'subiendo: cruza el borde recto horizontal (de abajo hacia arriba)'); afirmar(u.inicio[0].x < cx, 'la entrada está en el cuarto abierto (a la izquierda del centro)');
+      ser(ult(u.fin).y, pen(u.fin).y, 'subiendo: la salida es horizontal'); afirmar(pen(u.fin).x > cx && ult(u.fin).x < cx, 'cruza el borde recto vertical (hacia la izquierda)'); afirmar(ult(u.fin).y > cy, 'la salida está en el cuarto abierto (debajo del centro)');
+      ser(d.inicio[0].y, d.inicio[1].y, 'bajando: entra en horizontal'); afirmar(d.inicio[0].x < cx && d.inicio[1].x > cx, 'bajando: cruza el borde recto vertical hacia la derecha'); ser(ult(d.fin).x, pen(d.fin).x, 'bajando: sale en vertical'); afirmar(pen(d.fin).y < cy && ult(d.fin).y > cy, 'bajando: sale cruzando el borde recto horizontal hacia abajo');
+      const corta = (A, B, C, D) => { const o = (p, q, r) => Math.sign((q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x)); return o(A, B, C) != o(A, B, D) && o(C, D, A) != o(C, D, B); };
+      [u, d].forEach((r, i) => { const P = [...r.inicio, ...r.fin].filter((q, k, A) => !k || q.x !== A[k - 1].x || q.y !== A[k - 1].y); /* sin el punto medio repetido */ let cruces = 0; for (let a = 0; a < P.length - 1; a++) for (let b = a + 2; b < P.length - 1; b++) if (corta(P[a], P[a + 1], P[b], P[b + 1])) cruces++; ser(cruces, 0, (i ? 'bajando' : 'subiendo') + ': el cable se corta a sí mismo'); });
+      const dentro = P => P.every(p => Math.abs(p.x - cx) <= .9 + 1e-6 && Math.abs(p.y - cy) <= .9 + 1e-6); afirmar(dentro([...u.inicio, ...u.fin]) && dentro([...d.inicio, ...d.fin]), 'el cable debe quedar dentro del cuadro de la escalera');
     });
   });
   prueba('Cable por escalera: un solo objeto y un solo paso de historial; opciones según las plantas; Esc cancela el clic', () => {
@@ -739,7 +725,7 @@ const TRP = (() => {
       const a = cruzar(2, true), na = a.pts.filter(q => q.es == 2).length; ser(na, 4, 'recta'); igual([...new Set(a.pts.filter(q => q.es == 2).map(q => q.pl))].sort(), ['p2', 'p3'], 'plantas de la recta');
       const b = cruzar(3, true), nb = b.pts.filter(q => q.es == 3).length; ser(nb, 20, 'espiral'); ser(S.plantaAct, 'p3');
       const c = cruzar(1, false, [[1, 7], [2, 7]], [[8, 5], [9, 5]]); ser(S.plantaAct, 'p1', 'bajando la vista pasa a la planta de abajo'); const bajan = c.pts.filter(q => q.es == 1); ser(bajan.length, 6); afirmar(bajan.every(q => q.ed == -1), 'sentido');
-      igual(bajan.map(q => q.pl), ['p2', 'p2', 'p2', 'p1', 'p1', 'p1'], 'al bajar, la primera mitad es de la planta de salida'); afirmar(bajan[0].x < 6 && bajan[5].x > 6, 'bajando también se empieza por el tramo izquierdo y se termina por el derecho');
+      igual(bajan.map(q => q.pl), ['p2', 'p2', 'p2', 'p1', 'p1', 'p1'], 'al bajar, la primera mitad es de la planta de salida'); afirmar(bajan[0].x > 6, 'bajando se entra por el tramo derecho');
     });
   });
   prueba('Cable por escalera: imanes, nodos, límites y giro actúan solo sobre los puntos de la planta actual; copiar toma solo ese tramo y cortar borra el cable completo', () => {
@@ -798,7 +784,7 @@ const TRP = (() => {
         else if (a == 'cmp') {
           const ref = leer(CLAVE_REF); if (!ref) { log('No hay referencia guardada: usa «Guardar referencia de dibujo» con la versión anterior.'); return; }
           const act = referenciaActual(); let dif = 0;
-          Object.keys(ref.datos).forEach(n => Object.keys(ref.datos[n]).forEach(v => { const x = ref.datos[n][v], y = (act[n] || {})[v]; if (!y || x.hash !== y.hash || x.largo !== y.largo) { if (CAMBIOS_INTENCIONALES[n + '/' + v]) log('· cambio intencional (se omite): ' + n + ' / ' + v + ' — ' + CAMBIOS_INTENCIONALES[n + '/' + v]); else { dif++; log('✘ DIFERENTE: ' + n + ' / ' + v); } } }));
+          Object.keys(ref.datos).forEach(n => Object.keys(ref.datos[n]).forEach(v => { const x = ref.datos[n][v], y = (act[n] || {})[v]; if (!y || x.hash !== y.hash || x.largo !== y.largo) { dif++; log('✘ DIFERENTE: ' + n + ' / ' + v); } }));
           log(dif ? dif + ' diferencias respecto a la referencia del ' + ref.fecha : '✔ Idéntico a la referencia del ' + ref.fecha);
         } else if (a == 'perf') {
           const r = medirRendimiento(), b = leer(CLAVE_PERF) || { render_ms: 49.9, mover_sin_arrastrar_ms: 43.9, fecha: 'informada por el usuario' };
