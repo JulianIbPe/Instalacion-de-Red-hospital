@@ -2,8 +2,31 @@
 
 Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor). Para usarlo: abrir `index.html` en el navegador. Los scripts se cargan en el orden de `index.html` y comparten variables globales.
 
-> **Última actualización: 01/11/2026.** Documento vigente: reemplaza a cualquier copia anterior (incluida `/mnt/project/SEGUIMIENTO.md`).
+> **Última actualización: 10/11/2026** (reorganizado para poder continuar en otra cuenta; sin cambios de código desde el 01/11/2026). Documento vigente: reemplaza a cualquier copia anterior (incluida `/mnt/project/SEGUIMIENTO.md`).
 > **Regla de mantenimiento:** al terminar una fase, o al avanzar dentro de la fase en curso, se actualiza este documento (qué se hizo, resultados reales de las pruebas, qué falta y cuál es el siguiente paso), para poder retomar en otro chat.
+
+## 0. Resumen para retomar (leer primero)
+
+**Qué es:** editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor ni framework). Se abre `Topologias_de_red/index.html` en el navegador; `index.html?pruebas=1` abre además el panel de pruebas. Todas las coordenadas del modelo están en **metros**.
+
+**Dónde estamos (10/11/2026):**
+- F0, F1 y F2: completadas y verificadas por el usuario en su navegador.
+- F3 (inspector + menú contextual): **cerrada** el 01/11/2026 (46 pruebas, dibujo idéntico a la referencia, uso manual correcto).
+- Después de cerrarla, el usuario pidió **dos ajustes** que están implementados y probados solo en Chrome sin interfaz (60 pruebas automatizadas aprobadas, 0 fallidas), pero **sin verificación manual del usuario**: (1) menú contextual con Cortar/Copiar/Pegar/Eliminar, menú del fondo y atajos Ctrl+C/X/V; (2) cable único que atraviesa escaleras entre plantas (D21, `js/trazas.js`) con tres correcciones (regla de bajar, carril junto a la flecha, espiral por el cuarto abierto). Un «ajuste 3» de las flechas del descanso se pidió y luego se **deshizo** (se conserva el comportamiento anterior). Las listas de comprobación están en la sección 11.
+- F4 a F12: **no iniciadas**. Siguiente: **F4** (catálogo Packet Tracer, imágenes y modelos), solo cuando el usuario lo confirme.
+
+**Qué hacer al retomar (en este orden):**
+1. Pedir al usuario la carpeta `Topologias_de_red` completa (`.zip`) y este documento. No hay acceso a su navegador: nada se da por probado si no lo ejecutó él o se ejecutó realmente.
+2. Leer las secciones 0, 1, 3, 5, 8, 11 y 12.
+3. Preguntar al usuario cómo le fue con las comprobaciones manuales pendientes de la sección 11 (ajuste 1 y ajuste 2). No asumir que pasaron. Si hay fallos, corregirlos con parches antes de pasar a la F4; si confirma que están bien, marcarlas como verificadas en las secciones 1 y 11 y en el registro de cambios.
+4. Para la F4: consultar en la web el número exacto de la última versión de Packet Tracer, presentar el diseño detallado (archivos a tocar o crear, criterios de la sección 5, pruebas) y **esperar confirmación** antes de escribir código.
+5. Al terminar cualquier avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
+
+**Cómo trabaja el usuario (resumen de la sección 8):** español de Argentina (voseo), respuestas claras y breves con tablas y listas cuando ayuden; una fase por vez; **parches de texto** sobre los archivos reales (indicando qué reemplazar y qué respaldo conservar) en lugar de reescribir módulos; archivos completos con su ruta exacta cuando se entregan; no cambiar tecnología ni el orden de carga sin justificación; conservar funciones y compatibilidad con proyectos antiguos; nunca afirmar que una prueba pasó si no se ejecutó; ante una decisión de diseño importante, presentar alternativas y consecuencias.
+
+**Pendientes ya identificados para la F4 (no resueltos):**
+- El portapapeles interno copia `img` y `modelo` como referencias: si «Nuevo» vacía `R`, un objeto pegado podría apuntar a un recurso inexistente (resolver, p. ej., vaciando el portapapeles en «Nuevo»).
+- Número exacto de la última versión de Packet Tracer (consultar la web) y si el usuario aporta imágenes de sus dispositivos (material de Cisco: uso bajo su responsabilidad, no se incluyen en el proyecto entregado; los iconos SVG generados son de diseño propio).
 
 ## 1. Estado actual
 
@@ -237,9 +260,9 @@ Pendiente (se resuelve al diseñar la F4): número exacto de la última versión
 - Mantener compatibilidad con proyectos antiguos, historial y archivos; actualizar este documento en cada avance.
 - Si una función requiere una decisión de diseño importante, presentar alternativas y consecuencias antes de elegir.
 
-## 9. Cómo retomar en otro chat
+## 9. Cómo retomar en otro chat o en otra cuenta
 
-Adjuntar la carpeta `Topologias_de_red` completa (`.zip`). Leer este documento (secciones 1, 3, 5 y 8). Estado: F0, F1, F2 y F3 completadas y verificadas en el navegador del usuario. **F3 completada y verificada por el usuario en su navegador (sección 11).** Siguiente: **F4**. Antes de escribir código, presentar el diseño detallado (archivos, criterios de la sección 5, pruebas; consultar en la web la última versión de Packet Tracer) y esperar confirmación. Al terminar, separar pruebas simuladas y manuales, trabajar con parches y actualizar este documento.
+Ver la **sección 0** (pasos de retomada) y la **sección 12** (mapa técnico). Resumen: adjuntar la carpeta `Topologias_de_red` completa (`.zip`) y este archivo; en una cuenta nueva, la copia de `/mnt/project/SEGUIMIENTO.md` puede ser una versión vieja, y manda la de la carpeta o la que adjunte el usuario. Estado: F0, F1, F2 y F3 completadas; ajustes 1 y 2 de la F3 pendientes de verificación manual; siguiente: **F4**. Antes de escribir código, presentar el diseño detallado y esperar confirmación; al terminar, separar pruebas simuladas y manuales, trabajar con parches y actualizar este documento.
 
 ## 10. Registro de cambios
 
@@ -309,3 +332,28 @@ Adjuntar la carpeta `Topologias_de_red` completa (`.zip`). Leer este documento (
 - 01/11/2026: correcciones al ajuste 2 pedidas por el usuario tras probarlo: (a) **regla de bajar**: solo si justo debajo hay una escalera igual (mismo tipo, lugar, tamaño y giro); subir solo desde una escalera de la planta actual; el reflejo de la escalera de abajo solo permite bajar (`puedeCruzar` en `trazas.js`); (b) el recorrido va **a un costado de la flecha** (0,13 m) y el que baja usa otro carril que el que sube (siempre a la derecha del sentido de marcha); (c) espiral: ver la línea siguiente.
 - 01/11/2026: la escalera en espiral ya no deja entrar ni salir el cable por la pared curva: **entra y sale por el cuarto abierto, en línea recta** (decisión del usuario): al subir entra en vertical cruzando el borde recto horizontal y sale en horizontal cruzando el borde recto vertical; al bajar, al revés; los dos carriles (sube por dentro del anillo de la flecha, baja por fuera) no se cortan a sí mismos. 60 pruebas automatizadas aprobadas (capturas de un cable que sube y otro que baja revisadas); **falta la verificación manual de las tres correcciones** (regla de bajar, carriles junto a las flechas y espiral).
 - 01/11/2026: el usuario pidió un ajuste 3 de las flechas del descanso y de los carriles (mismo sentido al subir y bajar, exterior/interior) y luego pidió **deshacerlo**: se restauró el comportamiento anterior (regla de bajar, carriles junto a las flechas con el que baja recorriendo el camino al revés, espiral por el cuarto abierto). 60 pruebas automatizadas aprobadas.
+- 10/11/2026: documento reorganizado para continuar en otra cuenta: nueva sección 0 (resumen y pasos de retomada), sección 9 actualizada y nueva sección 12 (mapa técnico). No se modificó código ni cambió ningún estado de verificación.
+
+## 12. Mapa técnico para retomar
+
+**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `inspector` → `contexto` → `archivos` → `main` (siempre el último). `pruebas.js` se carga solo con `?pruebas=1`. CSS: `base`, `barra`, `menu`, `lienzo`, `plantas`, `dialogo`, `inspector`, `contexto`.
+
+**Estado global (`estado.js`):** `S` (proyecto; entra al historial), `V` (vista: `ox`, `oy`, `z` px/m), `sel`, `multi`, `selEdge`, `tool`, `tmp`, `drag`, `nid`, `curP`. `R` (recursos, `recursos.js`) está fuera de `S`. Namespace `TR` (`eventos.js`): `TR.stats`, `TR.ui`, `TR.acc`, `TR.insp`, `TR.ctx`. Código nuevo usa `TR` (los nombres de una letra `I`, `L`, `T`, `S`, `V` ya están ocupados).
+
+**Convenciones que no hay que romper:**
+- Todo cambio de `S` llama antes a `push()` (un paso de historial por acción; `push` no duplica pasos idénticos). Los snapshots serializan solo `S`.
+- El comportamiento lo decide el `tipo`/`sub` estable (`tipoDe`, `subDe`, `esPared`, `esCable`, `esEscalera`…), nunca el nombre visible `o.n`. `add()` asigna el tipo (`completarTipo`).
+- Planta y capa: `esVisible`/`esEditable` son la única puerta; cada objeto lleva `pl` y `cp`; los puntos de un cable pueden llevar `pl`/`cp` y `es`/`ed` (D21).
+- R9: todo campo nuevo se registra en `ESPEC` de `esquema.js` (si no, se pierde al abrir) y se cubre con la prueba de ida y vuelta. Formato v2 (`ESQ.leer` / `ESQ.serializar`).
+- Render en capas: `render()` (completo, síncrono), `renderObjetos()` (`#c`, lo que exporta el PNG), `renderTmp()` (`#g-tmp`), `repintarMovimiento()` al mover el ratón. Mover el ratón sin arrastrar no debe reconstruir nada (ni el inspector).
+- Campos y acciones por tipo se registran en `TR.acc.registrarCampo` / `TR.acc.registrar` (`acciones.js`); las fases siguientes agregan sus entradas ahí (y a `TR.acc.sinColor` para la mesa de la F6). El color del cable no se puede cambiar (D16).
+- Teclado (`controles.js`): G, F, H, M, R, Enter, Esc, Supr/Retroceso, Ctrl+Z/Y, Ctrl+C/X/V; con el menú contextual abierto solo flechas, Enter, Esc y Tab.
+- Clic derecho (`interaccion.js`): con herramienta u operación en curso cancela o termina; sin ellas abre el menú contextual.
+
+**Pruebas (`js/pruebas.js`, `?pruebas=1`, botón «Ejecutar pruebas»):** 60 casos (31 de F0 a F2B, 17 de la F3 y 12 del cable por escaleras). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar. Para pruebas nuevas, seguir ese patrón y no dejar pasos en el historial del usuario.
+- **Aviso importante:** la prueba «el dibujo es idéntico a la referencia» usa una referencia guardada en el `localStorage` del navegador (clave `topologias_ref_f0`). En otro navegador, otra cuenta o tras limpiar datos **no existe y esa prueba fallará por eso**, no por un error del código. Se genera con «Guardar referencia de dibujo» usando una versión del código cuyo dibujo se considere correcto (idealmente la anterior a un cambio); no sobrescribir la del usuario sin avisarle. «Medir rendimiento» compara contra una base de la F0 (render ~49,9 ms, mover sin arrastrar ~43,9 ms con 3000 objetos).
+- Las pruebas con ratón y teclado simulados (Playwright) y las de Chrome sin interfaz **no sustituyen** la verificación manual. No se probó en Firefox, Safari ni en pantallas táctiles.
+
+**Limitaciones y detalles a recordar:** D15 (escaleras con color desvanecido) NO está implementado; el reflejo de la planta de abajo usa opacidad fija .6. El cable que atraviesa plantas usa opacidad .35 para la otra mitad. Bajar por una escalera exige otra igual justo debajo (mismo tipo, lugar, tamaño y giro). Los cables viejos partidos con la antigua flecha son dos objetos sin vínculo (se vinculan al migrar en la F7). El doble clic detectado a mano (la página se redibuja en cada clic y el `dblclick` nativo se pierde).
+
+**Herramienta opcional:** `CLAUDE.md` en la carpeta del proyecto describe un grafo de conocimiento (`graphify-out/`); si existe, se consulta con `graphify query` antes de leer código y se actualiza con `graphify update .` tras modificar código. Si no existe, se trabaja leyendo los archivos.
