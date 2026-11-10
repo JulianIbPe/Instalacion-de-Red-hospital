@@ -1,3 +1,9 @@
+## Proyecto
+
+- Al empezar cada sesión, leé `SEGUIMIENTO.md` (sección 0 primero) antes de trabajar. Los archivos ya están en esta carpeta: no hace falta pedir el `.zip` (paso 1 de la sección 0).
+- **Una fase por vez, nunca sin permiso:** no des por terminada una fase ni empieces la siguiente sin que el usuario lo confirme explícitamente. Al terminar el trabajo de una fase, informá qué se hizo y qué falta probar, y esperá. Lo mismo antes de escribir código de una fase nueva: presentá el diseño y esperá confirmación.
+- Al terminar cada avance, actualizá `SEGUIMIENTO.md` según su regla de mantenimiento.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
