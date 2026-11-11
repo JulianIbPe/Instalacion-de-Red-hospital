@@ -59,7 +59,7 @@ $('#plantas').onclick = e => {
   else if (a == 'rp') { const n = prompt('Nombre de la planta:', p.nombre); if (n && n.trim() && n.trim() != p.nombre) { push(); p.nombre = n.trim(); } }
   else if (a == 'dp') {
     if (S.plantas.length < 2) { alert('El edificio debe tener al menos una planta.'); return; }
-    const k = cuentaEn(p.id), cr = cablesQueCruzan(p.id); if (!confirm(`¿Borrar «${p.nombre}»${k ? ' y sus ' + k + ' objetos' : ''}?` + (cr ? `\n${cr} cable(s) atraviesan esta planta: se quitarán solo sus puntos de aquí y el resto de cada cable se conserva.` : ''))) return;
+    const k = cuentaEn(p.id), cr = cablesQueCruzan(p.id); if (!confirm(`¿Borrar «${p.nombre}»${k ? ' y sus ' + k + ' objetos' : ''}?` + (cr ? `\n${cr} cable(s) atraviesan esta planta y se borrarán completos, en todas las plantas.` : ''))) return;
     push(); podarCables(p.id); S.objs = S.objs.filter(o => o.pl != p.id); S.plantas = S.plantas.filter(x => x.id != p.id); normalizar(); limpiarSel();
   }
   else if (a == 'sc') { p.ca = idc; S.capaAct = idc; tmp = null; }
@@ -69,7 +69,7 @@ $('#plantas').onclick = e => {
   else if (a == 'rc') { const c = cap(idc), n = prompt('Nombre de la capa:', c.nombre); if (n && n.trim() && n.trim() != c.nombre) { push(); c.nombre = n.trim(); } }
   else if (a == 'dc') {
     if (p.capas.length < 2) { alert('Cada planta debe tener al menos una capa.'); return; }
-    const c = cap(idc), k = cuentaEn(p.id, c.id), cr = cablesQueCruzan(p.id, c.id); if (k && !confirm(`La capa «${c.nombre}» tiene ${k} objetos y se borrarán. ¿Continuar?` + (cr ? `\n${cr} cable(s) atraviesan esta capa: se quitarán solo sus puntos de aquí y el resto de cada cable se conserva.` : ''))) return;
+    const c = cap(idc), k = cuentaEn(p.id, c.id), cr = cablesQueCruzan(p.id, c.id); if (k && !confirm(`La capa «${c.nombre}» tiene ${k} objetos y se borrarán. ¿Continuar?` + (cr ? `\n${cr} cable(s) atraviesan esta capa y se borrarán completos, en todas las plantas.` : ''))) return;
     push(); podarCables(p.id, c.id); S.objs = S.objs.filter(o => !(o.pl == p.id && o.cp == c.id)); p.capas = p.capas.filter(x => x.id != c.id); normalizar(); limpiarSel();
   }
   else if (a == 'nc') { push(); const id = 'c' + (++S.cn); p.capas.push({ id, nombre: 'Capa ' + (p.capas.length + 1), visible: true, bloqueada: false }); p.ca = id; S.capaAct = id; }   // la capa nueva queda arriba de todas

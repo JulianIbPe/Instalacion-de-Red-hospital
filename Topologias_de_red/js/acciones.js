@@ -6,7 +6,7 @@
 //   · solo se actúa sobre objetos editables (capa visible y no bloqueada);
 //   · el portapapeles (copiar, cortar, pegar) es estado de interfaz: no entra en S ni en el historial;
 //   · D16: el color de un cable no se puede cambiar (las paredes sí); D18: la mesa (F6) se agrega a TR.acc.sinColor;
-//   · una escalera editada (posición, tamaño o giro) se valida contra la planta de abajo como al colocarla: si obstruye se rechaza, se avisa y no se guarda nada.
+//   · una escalera editada (posición, tamaño o giro) se valida contra las plantas de abajo y de arriba y la misma planta, como al colocarla: si obstruye se rechaza, se avisa y no se guarda nada.
 TR.acc = (() => {
   const LIM = ESQ.LIM, CTRL = /[\u0000-\u001f\u007f]/g, OFFSET = .5, MIN = .2;   // OFFSET = desplazamiento de una copia (m); MIN = tamaño mínimo (igual que las asas)
   const campos = [], acciones = [], sinColor = [];                                   // sinColor: predicados (o => bool) de objetos cuyo color no se puede cambiar
@@ -82,7 +82,7 @@ TR.acc = (() => {
     const b = portapapeles.map(bboxDe), cx0 = (Math.min(...b.map(q => q.x0)) + Math.max(...b.map(q => q.x1))) / 2, cy0 = (Math.min(...b.map(q => q.y0)) + Math.max(...b.map(q => q.y1))) / 2;
     const p = extra && extra.punto, dx = p ? r3(p.x - cx0) : OFFSET, dy = p ? r3(p.y - cy0) : OFFSET;
     const copias = portapapeles.map(o => { const c = copiar(o); trasladar(c, dx, dy); c.pl = S.plantaAct; c.cp = S.capaAct; return c; });
-    for (const c of copias) if (esEsc(c)) { const ob = escaleraObstruida(c); if (ob) { avisoEmergente(ob.msg); return false; } }   // misma regla que al colocar una escalera
+    for (const c of copias) if (esEsc(c)) { const ob = escaleraObstruida({ ...c, id: -1 }); if (ob) { avisoEmergente(ob.msg); return false; } }   // misma regla que al colocar una escalera
     push(); const nuevos = copias.map(c => { c.id = nid++; completarTipo(c); S.objs.push(c); return c.id; });
     fijarSeleccion(nuevos); render(); return true;
   }

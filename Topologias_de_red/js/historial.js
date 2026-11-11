@@ -29,9 +29,13 @@ function deshacer() { if (!hist.length) return; fut.push(Hist.estrategia.captura
 function rehacer() { if (!fut.length) return; hist.push(Hist.estrategia.capturar()); Hist.estrategia.aplicar(fut.pop()); Hist.recortar(); }
 function borrar() {                     // borra todo lo seleccionado (uno o varios objetos) o, si hay un lado de forma seleccionado, solo ese lado
   if (ladoSel() !== null) { borrarLado(); return; }
-  const ids = seleccionados().map(o => o.id); if (!ids.length) return; push();
+  const ids = seleccionados().map(o => o.id); if (!ids.length) return;
+  const antes = cablesSinApoyo(o => o), sinApoyo = cablesSinApoyo(o => ids.includes(o.id) ? null : o).filter(c => !antes.includes(c));   // cables que bajan y se quedarían sin la escalera de abajo
+  const cr = S.objs.filter(o => o.k == 'line' && !ids.includes(o.id) && (o.pts.some(q => ids.includes(q.es)) || sinApoyo.includes(o)));   // cables que cruzan una escalera que se borra: se borran completos (en todas las plantas)
+  if (cr.length && !confirm(`${cr.length} cable(s) atraviesan la escalera que vas a borrar y se borrarán completos, en todas las plantas. ¿Continuar?`)) return;
+  push(); cr.forEach(o => ids.push(o.id));
   S.objs.forEach(o => { if (o.k == 'puerta' && ids.includes(o.pared) && !ids.includes(o.id)) ids.push(o.id); });   // las puertas se van con su pared
   S.objs.forEach(o => o.pts && (o.pts = o.pts.map(q => ids.includes(q.ref) || ids.includes(q.rl) ? soltarPunto(q) : q)));  // los cables conectados se sueltan donde estaba el dispositivo
-  S.objs = S.objs.filter(o => !ids.includes(o.id)); soltarTrazasHuerfanas();   // si se borra una escalera, el recorrido de los cables que la cruzan queda como puntos libres
+  S.objs = S.objs.filter(o => !ids.includes(o.id)); soltarTrazasHuerfanas();   // red de seguridad: ningún punto queda apuntando a una escalera borrada
   sel = null; multi = []; render();
 }

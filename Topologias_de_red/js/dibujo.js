@@ -80,7 +80,7 @@ function renderTmp() {                    // lo temporal de la interacción (no 
   contar('tmp'); if (!capasOk()) iniciarCapas();
   asasOut = []; hitsOut = [];
   const enCurso = tmp ? (tmp.f == 'hat' ? `<defs>${patronHat(tmp)}</defs>` : '') + draw(tmp) + asasOut.join('') : '';   // la pieza o el cable que se está dibujando, con sus asas
-  capas.tmp.innerHTML = enCurso + `${cajaHtml()}${puertaPrevia()}${guiaColocar()}${nodosHtml()}${rotHtml()}${rombo()}${snapPt ? `<circle cx="${snapPt.x}" cy="${snapPt.y}" r=".17" fill="#e0a03044" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : ''}`;
+  capas.tmp.innerHTML = escalerasVecinas() + enCurso + `${cajaHtml()}${puertaPrevia()}${guiaColocar()}${nodosHtml()}${rotHtml()}${rombo()}${snapPt ? `<circle cx="${snapPt.x}" cy="${snapPt.y}" r=".17" fill="#e0a03044" stroke="#e0a030" stroke-width=".05" pointer-events="none"/>` : ''}`;
 }
 function renderPaneles() {                // botones, opciones, reglas y barra de estado (el menú izquierdo se rehace solo al cambiar de pestaña o herramienta: ver catalogo.js)
   contar('paneles');

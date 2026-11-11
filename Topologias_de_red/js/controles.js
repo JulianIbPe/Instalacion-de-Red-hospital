@@ -16,7 +16,7 @@ document.addEventListener('keydown', e => {
   else if (k == 'h' && !mod) voltearPuerta('bis');
   else if (k == 'm' && !mod) alternarMedio();
   else if (e.key == 'Enter') finishLine();
-  else if (k == 'r' && !mod) rotarSeleccion(e.shiftKey ? -90 : 90);
+  else if (k == 'r' && !mod) TR.acc.rotar(e.shiftKey ? -90 : 90);   // valida las escaleras como el menú
   else if ((e.key == 'Delete' || e.key == 'Backspace') && !enBoton) borrar();
 });
 // Color, relleno y contorno del menú izquierdo usan la misma lógica que el inspector (acciones.js). D16: los cables NO cambian de color; las paredes sí.

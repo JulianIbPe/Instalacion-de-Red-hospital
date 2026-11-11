@@ -110,6 +110,7 @@ svg.addEventListener('pointerup', e => {
   if (drag && drag.m == 'colocar' && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) terminarColocacion();   // pulsar, arrastrar y soltar también coloca
   if (drag && drag.m == 'box') { if (drag.moved) fijarSeleccion(dentroDeCaja()); else if (drag.id != null) alternar(drag.id); cajaSel = null; }
   if (drag && drag.m == 'zona') { if (tmp.w > .2 && tmp.h > .2) add(tmp); tmp = null; }
+  if (drag && drag.pu) revisarEscalerasMovidas(drag.m == 'mv' ? drag.os : drag.m == 'h' ? [drag.o] : drag.m == 'rot' ? drag.lista.map(x => x.o) : []);   // una escalera que quedó mal vuelve a su lugar (escaleras.js)
   drag = null; render();
 });
 svg.addEventListener('pointerleave', () => { prevPuerta = null; snapPt = null; renderTmp(); });

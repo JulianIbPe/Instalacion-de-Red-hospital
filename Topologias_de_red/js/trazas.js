@@ -4,7 +4,7 @@
 //   es, ed  = el punto pertenece al recorrido de la escalera con id `es`; ed = 1 (sube) o -1 (baja). Los puntos consecutivos con el mismo es+ed forman UNA corrida.
 //             Los puntos de una corrida los calcula la escalera (trazaEscalera): no se arrastran y sincronizarTrazas() los recoloca si la escalera se mueve, gira o cambia de tamaño.
 // El recorrido de una escalera se parte en dos mitades que se repiten en el punto medio: la primera es de la planta de salida y la segunda de la de llegada.
-// Cada planta ve en sólido su mitad y, translúcida, la otra mitad (como el reflejo de las escaleras). Si se borra la escalera, los puntos quedan libres (soltarTrazasHuerfanas).
+// Cada planta ve en sólido su mitad y, translúcida, la otra mitad (como el reflejo de las escaleras). Borrar la escalera, o una planta o capa que el cable atraviesa, borra el cable completo (con aviso).
 const plantaDe = (o, q) => q.pl || o.pl;                      // planta de un punto de un cable
 const capaIdDe = (o, q) => q.cp || o.cp;
 const capaPunto = (o, q) => { const p = S.plantas.find(x => x.id == plantaDe(o, q)); return p && p.capas.find(c => c.id == capaIdDe(o, q)); };
@@ -93,22 +93,23 @@ function sincronizarTrazas() {           // recoloca los puntos de cada corrida 
 function soltarTrazasHuerfanas() {       // las escaleras que ya no existen dejan sus puntos como puntos libres (conservan su lugar, planta y capa)
   S.objs.forEach(o => { if (o.k == 'line') o.pts.forEach(q => { if (q.es) { const E = byId(q.es); if (!E || !esEsc(E)) { delete q.es; delete q.ed; } } }); });
 }
+// Un cable que baja usando la escalera de ARRIBA (sus puntos de escalera llegan a una planta inferior a la de esa escalera) depende de la escalera igual que hay justo debajo.
+// ver(o) = cómo quedaría cada escalera (null si se borra); rel(U, pid) = si importa ese caso. Devuelve los cables que se quedarían sin esa escalera de abajo.
+function cablesSinApoyo(ver, rel = () => true) {
+  const idx = id => S.plantas.findIndex(p => p.id == id), escs = S.objs.filter(esEsc).map(ver).filter(Boolean);
+  return S.objs.filter(c => c.k == 'line' && c.pts.some(q => {
+    const U0 = q.es && byId(q.es); if (!U0 || !esEsc(U0)) return false; const U = ver(U0); if (!U) return false;   // si se borra la propia escalera, lo resuelve borrar()
+    const pid = plantaDe(c, q); if (idx(pid) >= idx(U.pl) || !rel(U, pid)) return false;
+    return !escs.some(o => o.pl == pid && o.id !== U.id && igualEsc(o, U));
+  }));
+}
 function soltarPunto(q) { const p = pt(q), n = { ...q, x: p.x, y: p.y }; delete n.ref; delete n.rl; delete n.ri; return n; }   // quita la unión a un objeto o nodo y conserva lo demás (planta, capa)
 
 // ---------- Borrar plantas y capas ----------
 const cuentaEn = (pid, cid) => S.objs.filter(o => (o.pl == pid && (!cid || o.cp == cid)) || (esMultiplanta(o) && o.pts.some(q => plantaDe(o, q) == pid && (!cid || capaIdDe(o, q) == cid)))).length;
-const cablesQueCruzan = (pid, cid) => S.objs.filter(o => esMultiplanta(o) && o.pts.some(q => plantaDe(o, q) == pid && (!cid || capaIdDe(o, q) == cid))).length;
-function podarCables(pid, cid) {         // de los cables que atraviesan plantas se quitan SOLO los puntos de esa planta (o capa); el resto sigue; con menos de 2 puntos el cable se borra
-  const fuera = (o, q) => plantaDe(o, q) == pid && (!cid || capaIdDe(o, q) == cid);
-  S.objs = S.objs.filter(o => {
-    if (!esMultiplanta(o) || !o.pts.some(q => fuera(o, q))) return true;
-    const quedan = o.pts.filter(q => !fuera(o, q)); if (quedan.length < 2) return false;
-    const origenFuera = fuera(o, {}), pl0 = plantaDe(o, quedan[0]), cp0 = capaIdDe(o, quedan[0]);
-    o.pts = quedan; if (origenFuera) { o.pl = pl0; o.cp = cp0; }
-    for (const [i, j] of corridas(o)) { const E = byId(o.pts[i].es); if (!E || !esEsc(E) || trazaEscalera(E, o.pts[i].ed > 0).inicio.length + trazaEscalera(E, o.pts[i].ed > 0).fin.length != j - i + 1) for (let k = i; k <= j; k++) { delete o.pts[k].es; delete o.pts[k].ed; } }   // corrida incompleta: queda como puntos libres
-    return true;
-  });
-}
+const cruzaEn = (o, pid, cid) => esMultiplanta(o) && o.pts.some(q => plantaDe(o, q) == pid && (!cid || capaIdDe(o, q) == cid));
+const cablesQueCruzan = (pid, cid) => S.objs.filter(o => cruzaEn(o, pid, cid)).length;
+function podarCables(pid, cid) { S.objs = S.objs.filter(o => !cruzaEn(o, pid, cid)); }   // los cables que atraviesan esa planta (o capa) se borran completos, en todas las plantas
 
 // ---------- Dibujo en la planta actual ----------
 function segmentosEnPlanta(o, pid) {     // polilíneas (puntos reales) de un cable que están en la planta pid y en capas visibles, sin los tramos de escalera (esos los dibuja dibujarCableMP)

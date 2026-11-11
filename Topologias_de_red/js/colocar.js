@@ -2,7 +2,7 @@
 // Escalera recta, escalera con descanso y formas con lados: los dos puntos son esquinas (extremos) opuestas. La escalera recta y la de descanso ponen sus peldaños a lo largo del lado más largo.
 // Círculo y escalera espiral: 1.er punto = centro; la distancia al 2.º punto es el radio.
 // Ambos puntos se pegan a los extremos ○ de las paredes (nodos.js) y, con ◇ Medio (tecla M), a los puntos medios (iman.js).
-// Las reglas de la planta inferior (escaleras.js) se comprueban al soltar la escalera.
+// Las reglas entre plantas (escaleras.js: abajo, misma planta y arriba) se comprueban al soltar la escalera.
 // Mientras se elige el 2.º punto, la pieza se ve en vista previa (tmp, con pa = 1.er punto y pb = punto actual).
 const usaDosPuntos = t => !!t && (t.k == 'shape' || (t.k == 'item' && esEscalera(t)));   // t.esc = 'descanso' | 'espiral' (entradas del catálogo)
 const COLOCAR_MIN = .15;                 // distancia mínima entre los dos puntos (m)

@@ -2,7 +2,7 @@
 
 Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor ni framework). Se abre `index.html` en el navegador; `index.html?pruebas=1` abre además el panel de pruebas. Los scripts se cargan en el orden de `index.html` y comparten variables globales. Todas las coordenadas del modelo están en **metros**.
 
-> **Última actualización: 11/11/2026** (limpieza del documento; sin cambios de código ni de estado de verificación).
+> **Última actualización: 11/11/2026** (sección 7 verificada; ajuste 3 de escaleras implementado: reglas con la planta de abajo, la misma y la de arriba, validación al arrastrar y contornos de las vecinas; corrección del cable que baja sin escalera abajo. **Verificado por el usuario**).
 > **Regla de mantenimiento:** al terminar una fase, o al avanzar dentro de la fase en curso, se actualiza este documento (qué se hizo, resultados reales de las pruebas, qué falta y cuál es el siguiente paso).
 
 ## 0. Resumen para retomar (leer primero)
@@ -10,6 +10,9 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 **Dónde estamos (11/11/2026):**
 - F0, F1, F2 y F3 completadas. La F3 se cerró el 01/11/2026 con la verificación manual del usuario.
 - Dos ajustes posteriores a la F3 están implementados y probados solo en Chrome sin interfaz (60 pruebas aprobadas, 0 fallidas), **sin verificación manual del usuario**: (1) menú contextual con Cortar/Copiar/Pegar/Eliminar, menú del fondo y atajos Ctrl+C/X/V; (2) cable único que atraviesa escaleras entre plantas (D21), con tres correcciones. Comprobaciones pendientes en la sección 7.
+- 11/11/2026: el usuario informó un fallo del ajuste 2 (al borrar una escalera, parte del cable quedaba translúcido). Se corrigió cambiando la regla (corrección 4, sección 7). Pruebas: 59/60 en el navegador integrado (la que falla es la del dibujo de referencia, que no existe en ese navegador). El usuario confirmó el 11/11/2026 que todo funciona: **sección 7 verificada**.
+- Antes de la F4 el usuario pidió un ajuste más de escaleras (compatibilidad con las plantas de arriba y de abajo y sin solaparse en la misma planta). Implementado el 11/11/2026 (sección 7, ajuste 3). El usuario encontró un fallo (un cable que baja seguía mostrándose al mover la escalera de abajo) y se corrigió el mismo día. Pruebas: 61/62 en el navegador integrado (la que falla es la del dibujo de referencia, que no existe en ese navegador). **Verificado por el usuario el 11/11/2026.**
+- F4: consultada la web (11/11/2026): la versión vigente de Packet Tracer es la **9.0** (9.0.0 oficial; aparece una 9.0.1 sin notas públicas). Novedades de la 9.0: equipos industriales (IR1101, IR8340, IE3400, IE9300, ISA3000, PLC, Data Historian, Cyber Observer, Supervisory Workstation) y router C8200. Diseño de la F4 presentado; **esperando confirmación** antes de escribir código.
 - F4 a F12: no iniciadas. Siguiente: **F4**, solo cuando el usuario lo confirme.
 
 **Qué hacer al retomar (en este orden):**
@@ -30,7 +33,7 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | F0 Saneamiento y pruebas | Completada (28/10/2026) |
 | F1 Renderizado en capas | Completada (28/10/2026) |
 | F2 Núcleo de datos (tipos, formato v2, recursos, historial) | Completada (31/10/2026): 31 pruebas aprobadas, dibujo idéntico a la referencia, uso manual correcto |
-| F3 Inspector y menú contextual | Completada y cerrada (01/11/2026): 46 pruebas aprobadas, dibujo idéntico, verificación manual correcta. Ajustes posteriores (menú contextual; cable por escaleras) **pendientes de verificación manual** (sección 7) |
+| F3 Inspector y menú contextual | Completada y cerrada (01/11/2026): 46 pruebas aprobadas, dibujo idéntico, verificación manual correcta. Ajustes 1 y 2 verificados por el usuario el 11/11/2026; ajuste 3 (reglas de escaleras entre plantas) verificado el 11/11/2026 |
 | F4 a F12 | No iniciadas (sección 5). Siguiente: **F4** |
 
 Pendientes menores de verificación (no bloquean): abrir un `.json` dañado y comprobar que el proyecto no cambia; deshacer justo después de abrir un archivo; uso manual de la F1 (seleccionar, mover, rotar, cables, paredes, puertas, escaleras, medir, deshacer/rehacer, guardar/abrir).
@@ -88,7 +91,7 @@ Pendientes menores de verificación (no bloquean): abrir un `.json` dañado y co
 | D18 | **Mesas:** un solo tipo de mesa, con tamaño y cantidad de puestos editables y sin cambio de color (F6) |
 | D19 | **Rellenos:** solo patrones predefinidos. Sin edición de grosor, espaciado, colores del patrón, orientación ni transparencia |
 | D20 | **Exportar el rack:** el interior de un rack se exporta a PNG solo desde dentro de su vista, con un botón propio. El PNG del plano no incluye el interior |
-| D21 | **Cable único por escaleras (01/11/2026).** Un cable que cruza plantas es UN objeto `line`. Sus puntos llevan `pl`/`cp` (planta y capa) y, si están sobre una escalera, `es`/`ed` (escalera y sentido). Los calcula la escalera: se actualizan si se mueve, gira o cambia de tamaño; si la escalera se borra, quedan como puntos libres. **Subir** solo desde una escalera de la planta actual; **bajar** solo si justo debajo hay una escalera igual (mismo tipo, lugar, tamaño y giro). Con un cable en curso, un clic sobre una escalera (también su reflejo) ofrece «Planta superior / inferior» (la inexistente, desactivada; Esc cancela; no se puede poner un punto común sobre una escalera). Cada planta muestra su mitad en sólido y la otra translúcida (opacidad .35). Borrar una planta o capa pide confirmación y quita solo sus puntos (con menos de 2 puntos el cable se borra). Copiar toma solo el tramo de la planta actual; cortar borra el cable completo. Campos en `ESPEC` (R9); `cableAOtraPlanta` desaparece |
+| D21 | **Cable único por escaleras (01/11/2026).** Un cable que cruza plantas es UN objeto `line`. Sus puntos llevan `pl`/`cp` (planta y capa) y, si están sobre una escalera, `es`/`ed` (escalera y sentido). Los calcula la escalera: se actualizan si se mueve, gira o cambia de tamaño; si la escalera se borra, el cable se borra completo (con aviso; corrección del 11/11/2026). **Subir** solo desde una escalera de la planta actual; **bajar** solo si justo debajo hay una escalera igual (mismo tipo, lugar, tamaño y giro). Con un cable en curso, un clic sobre una escalera (también su reflejo) ofrece «Planta superior / inferior» (la inexistente, desactivada; Esc cancela; no se puede poner un punto común sobre una escalera). Cada planta muestra su mitad en sólido y la otra translúcida (opacidad .35). Borrar una planta o capa que el cable atraviesa pide confirmación y borra el cable completo, en todas las plantas (11/11/2026). Copiar toma solo el tramo de la planta actual; cortar borra el cable completo. Campos en `ESPEC` (R9); `cableAOtraPlanta` desaparece |
 
 ## 4. Arquitectura y reglas de coherencia
 
@@ -235,11 +238,11 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 - Si una función requiere una decisión de diseño importante, presentar alternativas y consecuencias antes de elegir.
 - Las decisiones confirmadas el 31/10/2026 (Packet Tracer última versión con IoT, mesa sin color, color de cable bloqueado también en el menú izquierdo, exportación del rack desde su vista) están en D16 a D20 y en las fases.
 
-## 7. Verificación pendiente (ajustes posteriores a la F3)
+## 7. Ajustes posteriores a la F3 (verificados por el usuario el 11/11/2026)
 
 **Resultados automatizados (Chrome 131 sin interfaz, `index.html?pruebas=1` → «Ejecutar pruebas»):** 60 aprobadas, 0 fallidas, sin errores de página; dibujo idéntico a la referencia del código original; sin regresión de rendimiento (3000 objetos). Las pruebas con ratón y teclado simulados **no sustituyen** la comprobación manual. No se probó en Firefox, Safari ni pantallas táctiles.
 
-**Ajuste 1 — menú contextual (01/11/2026): pendiente de verificación manual.** Cambio respecto a lo aprobado: antes no había menú en el fondo vacío y existía «Duplicar»; ahora:
+**Ajuste 1 — menú contextual (01/11/2026): verificado (11/11/2026).** Cambio respecto a lo aprobado: antes no había menú en el fondo vacío y existía «Duplicar»; ahora:
 - Sobre un objeto: acciones de su tipo, Cortar, Copiar, Pegar y Eliminar. Sin «Duplicar», tampoco en el inspector.
 - En el fondo vacío (o sobre algo bloqueado): Volver atrás, Adelante y Pegar (se desactivan si no hay historial o portapapeles). Volver atrás / Adelante equivalen a Ctrl+Z / Ctrl+Y.
 - Portapapeles interno: no es el del sistema, no entra en `S` ni en el historial, y se conserva al abrir otros archivos. Copiar no guarda historial; Cortar y Pegar guardan un paso cada uno.
@@ -255,19 +258,37 @@ Comprobaciones manuales pendientes:
 6. Con una herramienta activa o un cable a medio dibujar, el clic derecho sigue terminando o cancelando, sin menú.
 7. Atajos: Ctrl+C / X / V con un objeto seleccionado y el cursor sobre el plano; no actúan con una herramienta activa; dentro de un campo del inspector siguen siendo los del navegador; Ctrl+Z / Ctrl+Y deshacen y rehacen cada corte y pegado.
 
-**Ajuste 2 — cable único por escaleras (01/11/2026): pendiente de verificación manual.** Con la herramienta de cable y un cable en curso, un clic sobre una escalera (recta, con descanso o espiral; también su reflejo) abre «Planta superior / Planta inferior». Al elegir, el cable recorre la escalera (recto: sube por un lado, da la vuelta por el descanso y baja por el otro; o en espiral), la vista pasa a esa planta y se sigue dibujando desde la salida. Es **un solo objeto**: un paso de historial al terminarlo; borrarlo borra todo el recorrido; deshacer lo restituye. Decisiones del usuario: el menú muestra siempre las dos opciones; el recorrido sigue a la escalera si se mueve, gira o cambia de tamaño, y si se borra la escalera el cable conserva ese tramo como puntos libres; copiar toma solo el tramo de la planta actual y cortar borra el cable completo.
+**Ajuste 2 — cable único por escaleras (01/11/2026): verificado (11/11/2026), tras la corrección (d).** Con la herramienta de cable y un cable en curso, un clic sobre una escalera (recta, con descanso o espiral; también su reflejo) abre «Planta superior / Planta inferior». Al elegir, el cable recorre la escalera (recto: sube por un lado, da la vuelta por el descanso y baja por el otro; o en espiral), la vista pasa a esa planta y se sigue dibujando desde la salida. Es **un solo objeto**: un paso de historial al terminarlo; borrarlo borra todo el recorrido; deshacer lo restituye. Decisiones del usuario: el menú muestra siempre las dos opciones; el recorrido sigue a la escalera si se mueve, gira o cambia de tamaño, y si se borra la escalera se borra el cable completo, con aviso previo (cambiado el 11/11/2026); copiar toma solo el tramo de la planta actual y cortar borra el cable completo.
 
-Correcciones aplicadas tras probarlo: (a) regla de bajar (D21); (b) el recorrido va a un costado de la flecha (0,13 m) y el que baja usa otro carril que el que sube; (c) en la espiral, el cable entra y sale por el cuarto abierto, en línea recta, sin atravesar la pared curva; sube por dentro del anillo de la flecha y baja por fuera. Un «ajuste 3» de las flechas del descanso se pidió y luego se **deshizo**: se conserva el comportamiento anterior.
+Correcciones aplicadas tras probarlo: (a) regla de bajar (D21); (b) el recorrido va a un costado de la flecha (0,13 m) y el que baja usa otro carril que el que sube; (c) en la espiral, el cable entra y sale por el cuarto abierto, en línea recta, sin atravesar la pared curva; sube por dentro del anillo de la flecha y baja por fuera. Un «ajuste 3» de las flechas del descanso se pidió y luego se **deshizo**: se conserva el comportamiento anterior. (d) **11/11/2026**, tras la prueba manual del usuario: al borrar una escalera los puntos libres conservaban la planta de arriba y ese tramo se veía translúcido. A pedido del usuario: borrar una escalera que cruzan cables pide confirmación y, si se acepta, borra esos cables completos (un solo paso de historial; cancelar no cambia nada). Borrar una planta o capa que un cable atraviesa también lo borra completo, en todas las plantas. Archivos: `historial.js` (`borrar`), `trazas.js` (`podarCables`, `cruzaEn`), `plantas.js` (textos del aviso), `pruebas.js` (2 pruebas actualizadas).
 
 Comprobaciones manuales pendientes:
 1. Dibujar un cable, hacer clic sobre cada tipo de escalera y elegir subir; repetir bajando (con 3 plantas). En cada planta, su mitad se ve en sólido y la otra translúcida.
 2. El cable sigue en la planta nueva desde la salida de la escalera. Esc cancela el clic sin cambiar nada.
 3. Agarrar el cable dentro de la escalera; Supr lo borra completo (en ambas plantas); Ctrl+Z lo restituye.
-4. Mover, girar y cambiar el tamaño de la escalera (asas e inspector): el recorrido la sigue. Borrar la escalera: el cable queda con sus puntos.
+4. Mover, girar y cambiar el tamaño de la escalera (asas e inspector): el recorrido la sigue. **Falló el 11/11/2026 y se corrigió (d):** borrar una escalera con cables pide confirmación; Cancelar no cambia nada; Aceptar borra la escalera y los cables completos; Ctrl+Z restituye todo.
 5. Capas ocultas o bloqueadas en cada planta; guardar, abrir y exportar PNG con un cable así; deshacer y rehacer.
-6. Borrar una planta o capa que contenga una parte del cable: aviso de confirmación y el resto se conserva. Copiar y cortar un cable que atraviesa plantas.
+6. Borrar una planta o capa que contenga una parte del cable: aviso de confirmación y el cable se borra completo, también en las otras plantas. Copiar y cortar un cable que atraviesa plantas.
 7. Cables normales, paredes, imanes y nodos siguen igual.
 8. Regla de bajar (solo con una escalera igual justo debajo; si no, la opción aparece desactivada con el motivo), carriles junto a las flechas y espiral por el cuarto abierto.
+
+**Ajuste 3 — escaleras compatibles entre plantas (11/11/2026): verificado por el usuario (11/11/2026).** Pedido del usuario antes de la F4.
+- `escaleraObstruida` (`escaleras.js`) mira la planta de abajo, la misma planta y la de arriba (no se compara consigo misma). Misma planta: dos escaleras no pueden pisarse (tocarse por el borde sí). Planta vecina: si se pisan y alguna es recta, no; si son de distinto tipo, no; con descanso o espiral del mismo tipo, solo exactamente alineadas (mismo lugar, tamaño y giro).
+- Se valida al colocar, pegar, girar (menú y tecla R, que ahora usa `TR.acc.rotar`), editar en el inspector y **al soltar** un arrastre (mover, asas o asa ↻): si queda mal, todo vuelve a como estaba, con aviso y sin paso de historial (`revisarEscalerasMovidas`).
+- Decisión del usuario: una escalera apilada se puede mover sola (no se bloquea ni arrastra a las otras); solo se rechaza si queda pisando a otra sin cumplir la regla. Los cables que la cruzan la siguen.
+- Con la herramienta de escalera activa, o mientras se arrastra una, se ven en `#g-tmp` (no sale en el PNG) los contornos punteados de las escaleras de la planta de abajo (azul, «↓») y de arriba (naranja, «↑»), con el nombre de la planta. El imán `encajarAbajo` también encaja con una igual de la planta de arriba.
+- Archivos: `escaleras.js`, `interaccion.js` (al soltar), `dibujo.js` (`renderTmp`), `controles.js` (tecla R), `acciones.js` (pegar no se compara con el original), `colocar.js` (comentario), `pruebas.js` (1 prueba nueva; la de colocar con dos puntos separa las piezas porque ya no pueden pisarse).
+- Un proyecto guardado con escaleras que ya no cumplen se abre igual; esas escaleras no se pueden mover a otro lugar inválido.
+- **Corrección (11/11/2026, tras la prueba del usuario):** un cable que baja usando la escalera de ARRIBA (con una igual justo debajo) guarda su recorrido en la escalera de arriba; al mover la de abajo, el tramo inferior quedaba dibujado donde ya no había escalera. Ahora `cablesSinApoyo` (`trazas.js`) detecta esos cables: mover o girar la escalera de arriba o la de abajo de forma que abajo ya no quede una igual se rechaza con el aviso «un cable baja por esta escalera y abajo no quedaría una escalera igual para recibirlo» (lo usa `escaleraObstruida`, así que vale al arrastrar, girar y editar en el inspector). Borrar la escalera de abajo pide confirmación y borra esos cables completos, como al borrar la de arriba.
+- No cubierto: reordenar plantas (▲ ▼ o arrastrando ⠿) cambia qué planta está debajo y no se valida contra los cables que bajan.
+
+Comprobaciones manuales pendientes:
+1. Con la herramienta de escalera en una planta del medio: se ven los contornos de arriba (naranja) y de abajo (azul).
+2. Colocar una escalera que pisa otra de la misma planta: aviso y no se coloca.
+3. Colocar en la planta de abajo una escalera debajo de una recta de arriba, o de otro tipo, o desalineada: aviso y no se coloca. Alineada con una igual (descanso o espiral): sí.
+4. Arrastrar, redimensionar con asas o girar (↻ y tecla R) una escalera apilada hasta pisar mal: al soltar vuelve a su lugar, con aviso, sin paso de historial. Llevarla a un lugar libre: queda ahí y sus cables la siguen.
+5. Pegar una escalera encima de la original: se rechaza. Exportar PNG con la herramienta activa: no salen los contornos.
+6. Mandar un cable hacia abajo por una escalera con descanso (o espiral) apilada; mover, girar o redimensionar la de abajo o la de arriba: aviso y vuelve a su lugar. Borrar la de abajo: aviso y el cable se borra completo; Ctrl+Z lo restituye.
 
 ## 8. Mapa técnico para retomar
 
@@ -286,7 +307,7 @@ Comprobaciones manuales pendientes:
 - Teclado (`controles.js`): G, F, H, M, R, Enter, Esc, Supr/Retroceso, Ctrl+Z/Y, Ctrl+C/X/V. No actúan con botón, resumen, checkbox o color enfocados, ni dentro de TEXTAREA. Con el menú contextual abierto solo flechas, Enter, Esc y Tab. Los atajos F, H, M, G y R ya estaban ocupados: los comandos nuevos van por menú contextual e inspector.
 - Clic derecho (`interaccion.js`): con herramienta u operación en curso cancela o termina; sin ellas abre el menú contextual.
 
-**Pruebas (`js/pruebas.js`, `?pruebas=1`, botón «Ejecutar pruebas»):** 60 casos (31 de F0 a F2B, 17 de la F3 y 12 del cable por escaleras). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar. Para pruebas nuevas, seguir ese patrón y no dejar pasos en el historial del usuario.
+**Pruebas (`js/pruebas.js`, `?pruebas=1`, botón «Ejecutar pruebas»):** 62 casos (31 de F0 a F2B, 17 de la F3, 13 del cable por escaleras y 1 de escaleras entre plantas). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar. Para pruebas nuevas, seguir ese patrón y no dejar pasos en el historial del usuario.
 - **Aviso importante:** la prueba «el dibujo es idéntico a la referencia» usa una referencia guardada en el `localStorage` del navegador (clave `topologias_ref_f0`). En otro navegador, otra cuenta o tras limpiar datos no existe y esa prueba fallará por eso, no por un error del código. Se genera con «Guardar referencia de dibujo» usando una versión del código cuyo dibujo se considere correcto. No sobrescribir la del usuario sin avisarle.
 - «Medir rendimiento» compara contra una base de la F0 (render ~50 ms, mover sin arrastrar ~44 ms con 3000 objetos). En la última medición del usuario (01/11/2026) el render dio 50,6 ms y mover sin arrastrar 0 ms.
 
@@ -305,4 +326,9 @@ Comprobaciones manuales pendientes:
 - 01/11/2026: ajuste 1 de la F3 (menú contextual con Cortar/Copiar/Pegar/Eliminar, menú del fondo, atajos Ctrl+C/X/V). Pendiente de verificación manual.
 - 01/11/2026: ajuste 2 de la F3 (cable único por escaleras, D21), con correcciones del mismo día. Pendiente de verificación manual. Un ajuste 3 de las flechas se deshizo.
 - 10/11/2026: documento reorganizado para continuar en otra cuenta.
+- 11/11/2026: el usuario verificó el ajuste 3 y su corrección.
+- 11/11/2026: corrección del ajuste 3: un cable que baja impide mover las escaleras que lo sostienen; borrar la de abajo borra el cable con aviso. 61/62 pruebas en el navegador integrado; pendiente de verificación manual.
+- 11/11/2026: ajuste 3 de escaleras (reglas con plantas vecinas y misma planta, validación al soltar, contornos). 60/61 pruebas en el navegador integrado; pendiente de verificación manual.
+- 11/11/2026: el usuario verificó la sección 7 completa (ajustes 1 y 2 y corrección (d)).
+- 11/11/2026: corrección 4 del ajuste 2 (borrar escalera, planta o capa borra completos los cables que la atraviesan, con aviso). 59/60 pruebas en el navegador integrado; pendiente de verificación manual.
 - 11/11/2026: documento limpiado: se quitaron repeticiones, historial de pruebas intermedias y detalles de implementación ya resueltos. No se modificó código ni el estado de verificación de ninguna comprobación.
