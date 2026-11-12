@@ -2,29 +2,38 @@
 
 Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor ni framework). Se abre `index.html` en el navegador; `index.html?pruebas=1` abre además el panel de pruebas. Los scripts se cargan en el orden de `index.html` y comparten variables globales. Todas las coordenadas del modelo están en **metros**.
 
-> **Última actualización: 11/11/2026** (sección 7 verificada; ajuste 3 de escaleras implementado: reglas con la planta de abajo, la misma y la de arriba, validación al arrastrar y contornos de las vecinas; corrección del cable que baja sin escalera abajo. **Verificado por el usuario**).
+> **Última actualización: 11/11/2026** (cierre de la sesión: escaleras verificadas; F4 diseñada y esperando los iconos que el usuario rehace en otro chat; ver sección 0).
 > **Regla de mantenimiento:** al terminar una fase, o al avanzar dentro de la fase en curso, se actualiza este documento (qué se hizo, resultados reales de las pruebas, qué falta y cuál es el siguiente paso).
 
 ## 0. Resumen para retomar (leer primero)
 
-**Dónde estamos (11/11/2026):**
-- F0, F1, F2 y F3 completadas. La F3 se cerró el 01/11/2026 con la verificación manual del usuario.
-- Dos ajustes posteriores a la F3 están implementados y probados solo en Chrome sin interfaz (60 pruebas aprobadas, 0 fallidas), **sin verificación manual del usuario**: (1) menú contextual con Cortar/Copiar/Pegar/Eliminar, menú del fondo y atajos Ctrl+C/X/V; (2) cable único que atraviesa escaleras entre plantas (D21), con tres correcciones. Comprobaciones pendientes en la sección 7.
-- 11/11/2026: el usuario informó un fallo del ajuste 2 (al borrar una escalera, parte del cable quedaba translúcido). Se corrigió cambiando la regla (corrección 4, sección 7). Pruebas: 59/60 en el navegador integrado (la que falla es la del dibujo de referencia, que no existe en ese navegador). El usuario confirmó el 11/11/2026 que todo funciona: **sección 7 verificada**.
-- Antes de la F4 el usuario pidió un ajuste más de escaleras (compatibilidad con las plantas de arriba y de abajo y sin solaparse en la misma planta). Implementado el 11/11/2026 (sección 7, ajuste 3). El usuario encontró un fallo (un cable que baja seguía mostrándose al mover la escalera de abajo) y se corrigió el mismo día. Pruebas: 61/62 en el navegador integrado (la que falla es la del dibujo de referencia, que no existe en ese navegador). **Verificado por el usuario el 11/11/2026.**
-- F4: consultada la web (11/11/2026): la versión vigente de Packet Tracer es la **9.0** (9.0.0 oficial; aparece una 9.0.1 sin notas públicas). Novedades de la 9.0: equipos industriales (IR1101, IR8340, IE3400, IE9300, ISA3000, PLC, Data Historian, Cyber Observer, Supervisory Workstation) y router C8200. Diseño de la F4 presentado; **esperando confirmación** antes de escribir código.
-- F4 a F12: no iniciadas. Siguiente: **F4**, solo cuando el usuario lo confirme.
+**Dónde estamos (11/11/2026, fin de la sesión):**
+- F0 a F3 completadas y verificadas por el usuario, incluidos todos los ajustes posteriores de la F3 (sección 7: menú contextual, cable por escaleras, reglas de escaleras entre plantas y las correcciones de la revisión thermo del commit `cda924b`). Pruebas: 62/63 en el navegador integrado; la única que falla es «el dibujo es idéntico a la referencia», porque la referencia vive en el `localStorage` del navegador del usuario (en su navegador debería pasar).
+- **Cambios sin commitear** (correcciones de la revisión thermo, verificadas por el usuario): `js/acciones.js`, `colocar.js`, `controles.js`, `escaleras.js`, `historial.js`, `interaccion.js`, `plantas.js`, `pruebas.js`, `rotacion.js`, `trazas.js` y este documento. El usuario commitea por su cuenta; preguntar antes de hacerlo.
+- **F4 diseñada, sin código.** Plan en la sección 5 (F4A: catálogo, iconos y modelos propios con «Empty»; F4B: imágenes). La lista de modelos ya la dio el usuario (sección 5).
+- **Iconos (11/11/2026): generados y aprobados por el usuario** (incluido el foco de `iot-luz.svg`). Para cambiar un dibujo se edita su SVG directamente (el script que los generó era temporal y no se guardó). Carpeta `iconos/`: 33 SVG de dibujo propio, fondo transparente, `viewBox` 96×96 (14 de red y finales, 17 IoT, `empty.svg`, `generico.svg`) y `vista-previa.png` con todos juntos. Todavía no los usa ningún código (eso es la F4A). Referencia de aspecto que dio el usuario: ilustración del aparato al estilo Packet Tracer (sin copiar el material de Cisco) y debajo dos líneas, modelo y nombre del equipo (sección 5, «Aspecto»).
 
 **Qué hacer al retomar (en este orden):**
-1. Si no están a mano, pedir al usuario la carpeta `Topologias_de_red` completa (`.zip`). No hay acceso a su navegador: nada se da por probado si no lo ejecutó él o no se ejecutó realmente.
-2. Leer las secciones 0, 1, 3, 4, 5, 6, 7 y 8.
-3. Preguntar al usuario cómo le fue con las comprobaciones de la sección 7. No asumir que pasaron. Si hay fallos, corregirlos con parches antes de la F4. Si confirma que están bien, marcarlas como verificadas en las secciones 1 y 7 y en el registro de cambios.
-4. Para la F4: consultar en la web la última versión de Packet Tracer, presentar el diseño (archivos a tocar o crear, criterios de la sección 5, pruebas) y **esperar confirmación** antes de escribir código.
-5. Al terminar cada avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
+1. Los archivos están en la carpeta del proyecto; no hace falta pedir el `.zip`. No hay acceso al navegador del usuario: nada se da por probado si no lo ejecutó él o no se ejecutó realmente.
+2. Leer las secciones 0, 1, 3, 4, 5 (F4), 6 y 8.
+3. Los iconos ya están aprobados y guardados en `iconos/` (uno por modelo de la sección 5, más `empty.svg` y `generico.svg`); no hay que pedirlos. Falta la aprobación de la tabla de tamaños (sección 5).
+4. Pedir respuesta a las **preguntas abiertas** de abajo.
+5. Con todo eso, confirmar el diseño de la F4A y **esperar la orden de empezar** antes de escribir código.
+6. Al terminar cada avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
 
-**Pendientes para la F4 (no resueltos):**
-- El portapapeles interno copia `img` y `modelo` como referencias. Si «Nuevo» vacía `R`, un objeto pegado podría apuntar a un recurso inexistente (resolverlo vaciando el portapapeles en «Nuevo»).
-- Versión exacta de Packet Tracer (consultar la web) y si el usuario aporta imágenes de sus dispositivos. Esas imágenes son material de Cisco: su uso queda bajo responsabilidad del usuario y no se incluyen en el proyecto entregado. Los iconos SVG generados son de diseño propio.
+**Decisiones del usuario para la F4 (11/11/2026):**
+- Iconos de diseño propio (no emojis, sin material de Cisco); los trae el usuario desde otro chat.
+- Modelos: solo los de la lista del usuario (sección 5), con sus puertos. No van notebook, monitor ni patch panel.
+- Cada categoría de dispositivos de red tiene un «… Empty» para crear modelos propios (nombre y puertos), que se agregan como opción de esa categoría y se pueden modificar después.
+- Precio: es **del modelo**, no de cada equipo.
+- **Catálogo (decisión del 11/11/2026, anotada, sin implementar):** los equipos actuales del menú (Router, Switch, Servidor… con emoji) **se reemplazan** por los modelos nuevos; no quedan como «Genéricos» (esto cambia el punto 2 de la F4A). Dentro de «Dispositivos» hay subsecciones (Routers, Switches, etc.) y dentro de cada una se eligen los modelos y su «Empty», que se configura a gusto y se guarda como modelo nuevo. Por resolver en el diseño de la F4A: cómo se ven los equipos sin modelo de proyectos viejos, qué pasa con «Cámara IP» y «Rack» (no tienen modelo nuevo; el rack se necesita en la F8) y si las secciones de finales e IoT también llevan «Empty».
+- Pendiente técnico de la F4A: «Nuevo» vacía el portapapeles interno (si no, lo pegado podría apuntar a imágenes o modelos que ya no existen).
+
+**Preguntas abiertas para el usuario (sin responder):**
+1. Modelos propios: propuesta = guardarlos **dentro del proyecto** (`.json`) aunque no haya equipos colocados de ese modelo. Alternativa: en el navegador, para todos los proyectos (se pierden al cambiar de computadora o borrar datos).
+2. Tipos de puerto del diálogo «Empty»: propuesta = FastEthernet, GigabitEthernet, Serial, Fibra, Consola/RS-232, USB, Coaxial, Inalámbrico, Bluetooth, 3G/4G y «Nombre libre» (un puerto con el nombre que se quiera, como «Internet»). ¿Agregar o sacar alguno?
+3. Tamaño predeterminado en el plano: el usuario pidió medidas reales promedio (11/11/2026). Falta que apruebe la tabla de la sección 5 y decida qué hacer con los equipos muy chicos.
+4. Orden de empezar la F4A.
 
 ## 1. Estado de las fases
 
@@ -87,7 +96,7 @@ Pendientes menores de verificación (no bloquean): abrir un `.json` dañado y co
 | D14 | **Tipo estable** (`tipo`, `sub`) en cada objeto (hecho) |
 | D15 | **Escaleras con color desvanecido:** NO implementado (el reflejo de abajo usa opacidad fija .6). Se hará solo al final |
 | D16 | **Color del cable:** no se puede cambiar desde ningún lugar (superposición, menú contextual ni selector del menú izquierdo). Cada cable usa siempre el color de su tipo. Los archivos antiguos conservan el color con que se guardaron. Las paredes siguen siendo coloreables |
-| D17 | **Catálogo de dispositivos:** todos los dispositivos de la última versión de Packet Tracer, definidos como datos (modelos con plantilla de puertos), no como código. Los componentes IoT se incluyen: si el usuario aporta imágenes se usan; si no, iconos SVG propios |
+| D17 | **Catálogo de dispositivos (redefinida el 11/11/2026):** los modelos los indica el usuario (solo los que quiere, con sus puertos), definidos como datos (modelos con plantilla de puertos), no como código. Iconos SVG de diseño propio por categoría; sin imágenes de Cisco salvo que el usuario las importe en su proyecto. El precio es del modelo |
 | D18 | **Mesas:** un solo tipo de mesa, con tamaño y cantidad de puestos editables y sin cambio de color (F6) |
 | D19 | **Rellenos:** solo patrones predefinidos. Sin edición de grosor, espaciado, colores del patrón, orientación ni transparencia |
 | D20 | **Exportar el rack:** el interior de un rack se exporta a PNG solo desde dentro de su vista, con un botón propio. El PNG del plano no incluye el interior |
@@ -131,7 +140,7 @@ Cada fase deja la aplicación usable y no elimina funciones. Cada fase que añad
 
 | Fase | Contenido | Depende de |
 |---|---|---|
-| F4 | Catálogo (Packet Tracer), imágenes y modelos | F2, F3 |
+| F4 | Catálogo, imágenes y modelos (F4A catálogo, iconos y modelos propios; F4B imágenes) | F2, F3 |
 | F5 | Rellenos y zonas | F2 |
 | F6 | Jerarquía y mesas | F2, F3, F4 |
 | F7 | Puertos, conexiones y redes | F4, F6 |
@@ -143,15 +152,59 @@ Cada fase deja la aplicación usable y no elimina funciones. Cada fase que añad
 
 Los filtros van en la F10 porque usan redes, cables y conexiones (existen desde la F7) y no deben alterar el presupuesto. Los racks van después de los puertos porque su modal permite elegir y conectar puertos. Las mesas van después del catálogo porque necesitan los equipos que se colocan encima.
 
-### F4 — Catálogo (Packet Tracer), imágenes y modelos
-Archivos: `catalogo.js`, `dibujo.js`, `archivos.js`, `recursos.js`, `inspector.js`.
-1. Catálogo con todos los dispositivos de la última versión de Packet Tracer (routers, switches, hubs, inalámbricos, seguridad, PCs, laptops, servidores, impresoras, teléfonos, tablets, smartphones, nube/WAN, componentes, etc.), por categorías y subcategorías, con búsqueda. Además: notebook, monitor y patch panel si no vienen en esa lista. Incluye los componentes IoT. Imágenes de Packet Tracer solo si el usuario las aporta (se importan como imágenes del proyecto); lo demás usa un icono SVG propio.
-2. Cada dispositivo es un modelo de `R` con plantilla (dimensiones, icono o imagen, grupos de puertos); el catálogo actual sigue funcionando.
-3. Datos por dispositivo: fabricante, modelo, descripción, precio unitario, moneda y cantidad (se editan aquí; se calculan en la F9).
-4. Importar PNG/JPEG/WebP (sin SVG), con tope de tamaño; un dispositivo usa imagen o icono; se pueden editar posición, tamaño, rotación, nombre y propiedades.
-5. Alta, edición y baja de modelos con aviso de cuántas instancias se afectan; actualizar instancias es explícito, confirmado y deshacible.
-6. El PNG exportado muestra las imágenes; guardar y abrir conserva imágenes y modelos; ningún snapshot contiene `data:image`.
-7. El menú no se reconstruye al mover el ratón; con cientos de modelos sigue siendo ágil.
+### F4 — Catálogo, imágenes y modelos (plan del 11/11/2026, en dos partes)
+Referencia: Packet Tracer 9.0. Decisiones del usuario en la sección 0. Antes de empezar: el usuario aprueba los iconos y entrega la lista de modelos con sus puertos.
+
+**Lista de modelos del usuario (11/11/2026).** Puertos como grupos `{g, n, tipo, vel, pref}`: `tipo` = medio de conexión (utp, coaxial, inalámbrico, bluetooth, celular, serial, usb), `vel` = velocidad, `pref` = nombre que se ve.
+- **Dispositivos de red** (cada categoría tiene además su «Empty», ver abajo):
+  - Routers: Router 2911 (3 GigabitEthernet).
+  - Switches: Switch 2960-24TT (24 FastEthernet + 2 GigabitEthernet).
+  - Multilayer switches: Multilayer Switch 3560-24PS (24 FastEthernet + 2 GigabitEthernet).
+  - Inalámbricos: Access Point-PT (1 puerto «Port0», UTP); Home Router-PT-AC (1 puerto «Internet», UTP, + 4 GigabitEthernet).
+  - Seguridad: ISA-3000 (1 puerto «Management1/1», UTP, + 4 GigabitEthernet).
+- **Dispositivos finales:** PC-PT (1 RS-232, 2 USB, 1 FastEthernet); Laptop (igual que la PC); Server-PT (1 FastEthernet); IP Phone (puertos «Switch» y «PC», UTP); Printer-PT (1 FastEthernet); TV-PT (1 puerto «Port0», coaxial); TabletPC-PT (Wireless0, 3G/4G Cell1, Bluetooth); SmartPhone-PT (igual que la tablet).
+- **IoT** (todos con Wireless0 y Bluetooth): aire acondicionado, electrodoméstico (se dibuja como cafetera), humidificador, ventilador, caldera, termostato, luz, sirena, parlante Bluetooth, detector de CO₂, detector de CO, monitor de humedad, monitor de humedad y temperatura, monitor de temperatura, detector de humo, detector de movimiento, Smart TV. (El desagüe se quitó el 11/11/2026 a pedido del usuario.)
+- No van: notebook, monitor, patch panel ni modelos que el usuario no indicó.
+- **Aspecto (referencia del usuario, 11/11/2026):** cada equipo se dibuja como una ilustración del aparato (no un cuadrado con símbolo), al estilo de Packet Tracer pero con dibujos de diseño propio (sin copiar los de Cisco). **Los iconos los rehace el usuario en otro chat y los trae**; `js/iconos.js` contendrá esos dibujos. Debajo, dos líneas: el modelo (p. ej. «2911») y el nombre del equipo, que se asigna solo con un contador por tipo («Router1», «Switch4», «IoT21») y se puede editar. Tamaños predeterminados distintos por modelo (p. ej. el aire acondicionado más grande).
+
+**Tamaño predeterminado de cada modelo (pedido del 11/11/2026; valores propuestos, pendientes de aprobación).** Medidas reales promedio en metros, `w × h` como los equipos actuales (hoy todos 0,8 × 0,8). Regla: lo que apoya en piso, mesa o rack usa su planta (ancho × fondo); lo que va en pared o techo usa la cara que se ve (ancho × alto). El icono se dibuja dentro de ese rectángulo sin deformarse. Editable por equipo.
+
+| Modelo | w × h (m) | Modelo | w × h (m) |
+|---|---|---|---|
+| Router 2911 | 0,44 × 0,30 | Humidificador | 0,20 × 0,20 |
+| Switch 2960-24TT | 0,45 × 0,24 | Ventilador (de techo) | 1,20 × 1,20 |
+| Multilayer 3560-24PS | 0,45 × 0,30 | Caldera (radiador) | 0,80 × 0,60 |
+| Access Point-PT | 0,22 × 0,22 | Termostato | 0,12 × 0,09 |
+| Home Router-PT-AC | 0,23 × 0,16 | Luz (foco) | 0,06 × 0,11 |
+| ISA-3000 | 0,11 × 0,13 | Sirena | 0,10 × 0,15 |
+| PC-PT (con monitor) | 0,50 × 0,45 | Parlante Bluetooth | 0,10 × 0,18 |
+| Laptop | 0,36 × 0,25 | Detector de CO₂ / CO / humo | 0,12 × 0,12 |
+| Server-PT (torre) | 0,22 × 0,50 | Monitores de humedad / temperatura | 0,12 × 0,09 |
+| Printer-PT | 0,42 × 0,38 | Detector de movimiento | 0,07 × 0,11 |
+| IP Phone 7960 | 0,27 × 0,21 | TV-PT y Smart TV (50″) | 1,10 × 0,65 |
+| TabletPC-PT | 0,25 × 0,17 | Aire acondicionado (de ventana) | 0,60 × 0,40 |
+| SmartPhone-PT | 0,07 × 0,15 | Electrodoméstico (cafetera) | 0,20 × 0,25 |
+
+«Empty»: 0,44 × 0,30 (equipo de rack). «Genérico»: sigue en 0,8 × 0,8 para que los proyectos viejos se vean igual. **Aviso:** a escala real los equipos chicos (teléfono, detectores, foco) miden menos de 15 cm y en un edificio entero casi no se ven sin acercar; las dos líneas de texto de abajo necesitan un tamaño mínimo propio (a decidir en el diseño de la F4A).
+
+**«Empty» por categoría de red (pedido del 11/11/2026).** Cada categoría de dispositivos de red (routers, switches, multilayer, inalámbricos, seguridad) tiene siempre un «… Empty». Al pulsarlo se abre un diálogo para poner nombre y grupos de puertos (cantidad, tipo, nombre); al guardar, el modelo nuevo aparece como opción más en esa categoría y se puede modificar después. Si ya hay equipos colocados de ese modelo, guardar cambios los actualiza en un solo paso que se puede deshacer (por dentro: versión nueva del modelo y cambio de `o.modelo` en `S`).
+
+**F4A — Catálogo, iconos, modelos propios.** Archivos nuevos `js/catalogo-pt.js` (solo datos: la lista de arriba), `js/iconos.js` (los iconos que trae el usuario) y `js/modelos.js` + `css/modelos.css` (diálogo de los «Empty»). Se tocan `catalogo.js`, `dibujo.js`, `inspector.js`, `recursos.js`, `esquema.js`, `archivos.js`, `index.html`, `pruebas.js`.
+1. Al colocar un equipo del catálogo, su plantilla se copia una sola vez a `R.modelos` (`m1`, `m2`…) y el objeto guarda `modelo`: el proyecto queda completo aunque el catálogo cambie.
+2. Pestaña «Dispositivos» con buscador (con retardo), categorías desplegables y lista; se reconstruye solo al buscar, cambiar de categoría o crear un modelo, nunca al mover el ratón. ~~Los equipos actuales quedan como «Genéricos»~~ → el usuario decidió reemplazarlos por los modelos nuevos (sección 0); falta definir cómo se ven los proyectos viejos.
+3. Dibujo: un equipo con modelo usa el icono de su modelo con su nombre corto; sin modelo, como hasta ahora.
+4. «Empty» y modelos propios según lo de arriba (alta y edición; la baja avisa cuántos equipos lo usan).
+5. Datos del **modelo**: fabricante, descripción, precio unitario y moneda; se ven y editan en la sección «Modelo» del inspector. La cantidad la cuenta la F9.
+6. Campos nuevos en `ESPEC` (R9): en el modelo `desc`, `precio`, `moneda`, `orig` (clave en el catálogo o «propio»).
+7. «Nuevo» vacía el portapapeles interno.
+8. Pruebas: cada modelo del catálogo pasa `ESQ.leer`; colocar copia el modelo una sola vez y ningún snapshot contiene `data:image`; crear, editar y borrar un modelo propio (con equipos colocados: un paso deshacible); ida y vuelta de archivo; un proyecto viejo se dibuja idéntico; el menú no se reconstruye al mover el ratón.
+
+**F4B — Imágenes.** Se tocan `inspector.js`, `dibujo.js`, `recursos.js`, `archivos.js`, `modelos.js`, `pruebas.js`.
+1. Importar PNG/JPEG/WebP (sin SVG) con los límites de `R`; se asigna a un modelo o a un equipo. Cada equipo muestra su imagen o, si no tiene, su icono.
+2. El PNG exportado muestra las imágenes; guardar y abrir conserva imágenes y modelos; ningún snapshot contiene `data:image`.
+3. Pruebas de imágenes en archivo y PNG.
+
+Fuera de la F4: los tipos de conexión de Packet Tracer (consola, cruzado, serial DCE/DTE, USB…) van con los cables en la F7; los puertos se definen aquí pero se conectan en la F7.
 
 ### F5 — Rellenos y zonas
 Archivos: `dibujo.js`, `controles.js`, `index.html`, `colocar.js`, `interaccion.js`, `nodos.js`, `iman.js`; nuevo `zonas.js`.
@@ -280,7 +333,27 @@ Comprobaciones manuales pendientes:
 - Archivos: `escaleras.js`, `interaccion.js` (al soltar), `dibujo.js` (`renderTmp`), `controles.js` (tecla R), `acciones.js` (pegar no se compara con el original), `colocar.js` (comentario), `pruebas.js` (1 prueba nueva; la de colocar con dos puntos separa las piezas porque ya no pueden pisarse).
 - Un proyecto guardado con escaleras que ya no cumplen se abre igual; esas escaleras no se pueden mover a otro lugar inválido.
 - **Corrección (11/11/2026, tras la prueba del usuario):** un cable que baja usando la escalera de ARRIBA (con una igual justo debajo) guarda su recorrido en la escalera de arriba; al mover la de abajo, el tramo inferior quedaba dibujado donde ya no había escalera. Ahora `cablesSinApoyo` (`trazas.js`) detecta esos cables: mover o girar la escalera de arriba o la de abajo de forma que abajo ya no quede una igual se rechaza con el aviso «un cable baja por esta escalera y abajo no quedaría una escalera igual para recibirlo» (lo usa `escaleraObstruida`, así que vale al arrastrar, girar y editar en el inspector). Borrar la escalera de abajo pide confirmación y borra esos cables completos, como al borrar la de arriba.
-- No cubierto: reordenar plantas (▲ ▼ o arrastrando ⠿) cambia qué planta está debajo y no se valida contra los cables que bajan.
+- ~~No cubierto: reordenar plantas~~ → resuelto en las correcciones de la revisión (abajo).
+
+**Correcciones de la revisión thermo del commit `cda924b` (11/11/2026): verificadas por el usuario (11/11/2026).**
+- Durante un arrastre no actúa ninguna tecla (antes R o Supr agregaban pasos en medio y el «volver atrás» restauraba un estado equivocado).
+- Una sola regla de qué cables se borran enteros: `cablesAfectados` (`trazas.js`), usada al borrar objetos, plantas y capas. Cubre el caso de borrar una capa que tiene la escalera de abajo mientras los puntos del cable están en otra capa.
+- Los cables que ya estaban sin escalera abajo (archivos viejos) ya no bloquean mover otras escaleras: solo cuenta lo que el cambio rompe (`pierdenApoyo`).
+- `escaleraObstruida(t, ver, verAntes)` valida el estado FINAL: girar o editar varias escaleras juntas las compara ya cambiadas (antes, R rechazaba giros válidos). Separada en `superpuesta` y `apoyoPerdido`.
+- Arrastres: `arrastrar()` guarda qué objetos cambian, copia previa de sus escaleras y el rehacer; `soltarArrastre()` revisa al soltar **y al cancelar el puntero**; `descartarPaso()` (`historial.js`) vuelve atrás sin perder el rehacer. Límite conocido: si el historial está lleno (100 pasos), el paso más viejo descartado al empezar el arrastre no se recupera.
+- Cortar con la confirmación cancelada no toca el portapapeles; `borrar()` devuelve si borró.
+- **Reordenar plantas (▲ ▼ o ⠿) o borrar una del medio** se valida (`cambioDePlantas`): si deja juntas escaleras incompatibles o un cable que baja sin escalera igual abajo, se rechaza con aviso y sin paso de historial. Las capas se reordenan sin validar (no cambian vecinas).
+- Menores: `encajarAbajo` → `encajarVecina`; helper `puntosPoly`; pegar ya no usa `id: -1`; pruebas con `conConfirm` y `arrastreSim` (simula el arrastre real).
+- Decisión del usuario: una escalera apilada con un cable que baja no se puede mover sin borrar antes el cable (un cable no puede bajar si no tiene por dónde).
+- Pruebas: 63 casos, 62 aprobados (falla solo el dibujo de referencia, ausente en ese navegador). Además, un arrastre real con eventos de puntero: inválido → vuelve con aviso; a un lugar libre → se mueve con un paso de historial.
+
+Comprobaciones manuales pendientes:
+1. Arrastrar una escalera y, sin soltar, apretar R, Supr o Ctrl+Z: no hacen nada.
+2. Girar con R dos escaleras rectas una al lado de la otra: se giran juntas.
+3. Borrar una capa que solo tiene la escalera de abajo de un cable que baja: aviso y el cable se borra entero.
+4. Cortar una escalera con cables y cancelar: no se borra y el portapapeles sigue con lo de antes.
+5. Hacer Ctrl+Z, después un arrastre inválido: Ctrl+Y sigue rehaciendo.
+6. Reordenar plantas o borrar una del medio de modo que queden juntas escaleras incompatibles: aviso y no cambia nada. Sin conflicto: se reordena normal.
 
 Comprobaciones manuales pendientes:
 1. Con la herramienta de escalera en una planta del medio: se ven los contornos de arriba (naranja) y de abajo (azul).
@@ -307,7 +380,7 @@ Comprobaciones manuales pendientes:
 - Teclado (`controles.js`): G, F, H, M, R, Enter, Esc, Supr/Retroceso, Ctrl+Z/Y, Ctrl+C/X/V. No actúan con botón, resumen, checkbox o color enfocados, ni dentro de TEXTAREA. Con el menú contextual abierto solo flechas, Enter, Esc y Tab. Los atajos F, H, M, G y R ya estaban ocupados: los comandos nuevos van por menú contextual e inspector.
 - Clic derecho (`interaccion.js`): con herramienta u operación en curso cancela o termina; sin ellas abre el menú contextual.
 
-**Pruebas (`js/pruebas.js`, `?pruebas=1`, botón «Ejecutar pruebas»):** 62 casos (31 de F0 a F2B, 17 de la F3, 13 del cable por escaleras y 1 de escaleras entre plantas). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar. Para pruebas nuevas, seguir ese patrón y no dejar pasos en el historial del usuario.
+**Pruebas (`js/pruebas.js`, `?pruebas=1`, botón «Ejecutar pruebas»):** 63 casos (31 de F0 a F2B, 17 de la F3, 13 del cable por escaleras, 1 de escaleras entre plantas y 1 de la revisión del 11/11/2026). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar. Para pruebas nuevas, seguir ese patrón y no dejar pasos en el historial del usuario.
 - **Aviso importante:** la prueba «el dibujo es idéntico a la referencia» usa una referencia guardada en el `localStorage` del navegador (clave `topologias_ref_f0`). En otro navegador, otra cuenta o tras limpiar datos no existe y esa prueba fallará por eso, no por un error del código. Se genera con «Guardar referencia de dibujo» usando una versión del código cuyo dibujo se considere correcto. No sobrescribir la del usuario sin avisarle.
 - «Medir rendimiento» compara contra una base de la F0 (render ~50 ms, mover sin arrastrar ~44 ms con 3000 objetos). En la última medición del usuario (01/11/2026) el render dio 50,6 ms y mover sin arrastrar 0 ms.
 
@@ -326,7 +399,13 @@ Comprobaciones manuales pendientes:
 - 01/11/2026: ajuste 1 de la F3 (menú contextual con Cortar/Copiar/Pegar/Eliminar, menú del fondo, atajos Ctrl+C/X/V). Pendiente de verificación manual.
 - 01/11/2026: ajuste 2 de la F3 (cable único por escaleras, D21), con correcciones del mismo día. Pendiente de verificación manual. Un ajuste 3 de las flechas se deshizo.
 - 10/11/2026: documento reorganizado para continuar en otra cuenta.
-- 11/11/2026: el usuario verificó el ajuste 3 y su corrección.
+- 11/11/2026: el usuario aprobó los iconos de `iconos/`. Decisión anotada: los equipos actuales del menú se reemplazan por los modelos nuevos, con subsecciones y «Empty» (sección 0).
+- 11/11/2026: `iot-luz.svg` redibujado como foco; tabla de tamaños reales por modelo agregada a la sección 5 (propuesta, sin código).
+- 11/11/2026: iconos generados en `iconos/` (33 SVG + vista previa) a partir de una captura de referencia del usuario; revisados solo en una captura de Edge sin interfaz. Pendiente: aprobación del usuario. Sin cambios de código.
+- 11/11/2026 (cierre de sesión): el usuario rehará los iconos en otro chat; los diseños mostrados en esta sesión no se guardan. Sección 0 reescrita para continuar en otro chat.
+- 11/11/2026: el usuario entregó la lista de modelos y pidió un «Empty» por categoría de red; plan de la F4 ajustado (el editor de modelos pasa a la F4A) e iconos nuevos presentados.
+- 11/11/2026: revisión thermo del commit `cda924b` y sus correcciones (más validar reordenar y borrar plantas). 62/63 pruebas; verificadas por el usuario el mismo día.
+- 11/11/2026: el usuario verificó el ajuste 3 y su corrección. Decisiones de la F4 (iconos propios, lista de modelos del usuario, precio por modelo) y plan F4A/F4B escritos; diseños de iconos presentados.
 - 11/11/2026: corrección del ajuste 3: un cable que baja impide mover las escaleras que lo sostienen; borrar la de abajo borra el cable con aviso. 61/62 pruebas en el navegador integrado; pendiente de verificación manual.
 - 11/11/2026: ajuste 3 de escaleras (reglas con plantas vecinas y misma planta, validación al soltar, contornos). 60/61 pruebas en el navegador integrado; pendiente de verificación manual.
 - 11/11/2026: el usuario verificó la sección 7 completa (ajustes 1 y 2 y corrección (d)).
