@@ -185,7 +185,7 @@ Referencia: Packet Tracer 9.0. Decisiones del usuario en la sección 0. Antes de
 | TabletPC-PT | 0,25 × 0,17 | Aire acondicionado (de ventana) | 0,60 × 0,40 |
 | SmartPhone-PT | 0,07 × 0,15 | Electrodoméstico (cafetera) | 0,20 × 0,25 |
 
-«Empty»: 0,44 × 0,30 (equipo de rack). «Genérico»: sigue en 0,8 × 0,8 para que los proyectos viejos se vean igual. **Aviso:** a escala real los equipos chicos (teléfono, detectores, foco) miden menos de 15 cm y en un edificio entero casi no se ven sin acercar; las dos líneas de texto de abajo necesitan un tamaño mínimo propio (a decidir en el diseño de la F4A).
+«Empty»: 0,44 × 0,30 (equipo de rack). Rack (`iconos/rack.svg`, agregado y aprobado el 11/11/2026; no figura en `vista-previa.png`): hoy mide 0,8 × 1; la planta real de un rack de piso es 0,60 × 1,00. «Genérico»: sigue en 0,8 × 0,8 para que los proyectos viejos se vean igual. **Aviso:** a escala real los equipos chicos (teléfono, detectores, foco) miden menos de 15 cm y en un edificio entero casi no se ven sin acercar; las dos líneas de texto de abajo necesitan un tamaño mínimo propio (a decidir en el diseño de la F4A).
 
 **«Empty» por categoría de red (pedido del 11/11/2026).** Cada categoría de dispositivos de red (routers, switches, multilayer, inalámbricos, seguridad) tiene siempre un «… Empty». Al pulsarlo se abre un diálogo para poner nombre y grupos de puertos (cantidad, tipo, nombre); al guardar, el modelo nuevo aparece como opción más en esa categoría y se puede modificar después. Si ya hay equipos colocados de ese modelo, guardar cambios los actualiza en un solo paso que se puede deshacer (por dentro: versión nueva del modelo y cambio de `o.modelo` en `S`).
 
@@ -399,7 +399,8 @@ Comprobaciones manuales pendientes:
 - 01/11/2026: ajuste 1 de la F3 (menú contextual con Cortar/Copiar/Pegar/Eliminar, menú del fondo, atajos Ctrl+C/X/V). Pendiente de verificación manual.
 - 01/11/2026: ajuste 2 de la F3 (cable único por escaleras, D21), con correcciones del mismo día. Pendiente de verificación manual. Un ajuste 3 de las flechas se deshizo.
 - 10/11/2026: documento reorganizado para continuar en otra cuenta.
-- 11/11/2026: el usuario aprobó los iconos de `iconos/`. Decisión anotada: los equipos actuales del menú se reemplazan por los modelos nuevos, con subsecciones y «Empty» (sección 0).
+- 11/11/2026: icono del rack agregado (`iconos/rack.svg`) y aprobado por el usuario.
+- 11/11/2026: el usuario aprobó los iconos de `iconos/` (commit `5e5599d`). Decisión anotada: los equipos actuales del menú se reemplazan por los modelos nuevos, con subsecciones y «Empty» (sección 0).
 - 11/11/2026: `iot-luz.svg` redibujado como foco; tabla de tamaños reales por modelo agregada a la sección 5 (propuesta, sin código).
 - 11/11/2026: iconos generados en `iconos/` (33 SVG + vista previa) a partir de una captura de referencia del usuario; revisados solo en una captura de Edge sin interfaz. Pendiente: aprobación del usuario. Sin cambios de código.
 - 11/11/2026 (cierre de sesión): el usuario rehará los iconos en otro chat; los diseños mostrados en esta sesión no se guardan. Sección 0 reescrita para continuar en otro chat.
