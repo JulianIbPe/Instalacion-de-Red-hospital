@@ -22,7 +22,7 @@ function ajustarColocacion(t, b) {       // recalcula la pieza en vista previa s
 function terminarColocacion() {          // confirma la pieza en vista previa (si los puntos no están casi juntos)
   const t = tmp; if (!t || !t.pa || !t.pb || Math.hypot(t.pb.x - t.pa.x, t.pb.y - t.pa.y) < COLOCAR_MIN) return false;
   if (t.k == 'item') {                   // reglas de la escalera de la planta de abajo (ver escaleras.js)
-    encajarAbajo(t);
+    encajarVecina(t);
     const ob = escaleraObstruida(t);
     if (ob) { tmp = null; drag = null; avisoMsg = '⚠ ' + ob.msg; avisoEmergente(ob.msg); return false; }
   }

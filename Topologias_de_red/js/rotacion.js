@@ -30,13 +30,13 @@ function rotarDesde(o, g, ang, c) {      // deja en o el resultado de girar la c
   }
 }
 const copiar = o => JSON.parse(JSON.stringify(o));
-function rotarSeleccion(deg) {           // giro rápido (tecla R)
+function rotarSeleccion(deg) {           // giro de 90° (lo llama TR.acc.rotar, que antes valida las escaleras)
   const os = seleccionados(), g = geoSel(); if (!g) return; push();
   os.forEach(o => rotarDesde(o, copiar(o), deg, g.c)); render();
 }
 function iniciarRot() {                  // se pulsó el asa ↻
   const g = geoSel(); if (!g) return;
-  drag = { m: 'rot', c: g.c, h0: { x: g.c.x, y: g.top - .8 }, delta: 0, pu: false, lista: seleccionados().map(o => ({ o, g: copiar(o) })) };
+  arrastrar({ m: 'rot', c: g.c, h0: { x: g.c.x, y: g.top - .8 }, delta: 0, pu: false, lista: seleccionados().map(o => ({ o, g: copiar(o) })) });
 }
 function moverRot(e) {                   // el ángulo sale de la posición del cursor respecto al centro (a pasos de 15° con grilla, de 1° sin ella)
   const d = drag, r = rawW(e); let a = Math.atan2(r.y - d.c.y, r.x - d.c.x) * 180 / Math.PI + 90; if (a > 180) a -= 360;

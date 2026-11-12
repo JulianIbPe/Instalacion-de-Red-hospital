@@ -55,12 +55,12 @@ $('#plantas').onclick = e => {
   const nObjs = f => S.objs.filter(f).length;
   if (a == 'np') { push(); const id = 'p' + (++S.pn), cid = 'c' + (++S.cn); S.plantas.push({ id, nombre: 'Planta ' + (S.plantas.length + 1), ca: cid, capas: [{ id: cid, nombre: 'Base', visible: true, bloqueada: false }] }); S.plantaAct = id; S.capaAct = cid; limpiarSel(); }
   else if (a == 'sp') { const q = S.plantas.find(x => x.id == b.dataset.p); S.plantaAct = q.id; S.capaAct = (q.capas.find(x => x.id == q.ca) || q.capas[0]).id; limpiarSel(); }
-  else if (a == 'mp') { const i = S.plantas.indexOf(p), j = i + d; if (j >= 0 && j < S.plantas.length) { push(); intercambiar(S.plantas, i, j); } }   // subir / bajar la planta en la jerarquía
+  else if (a == 'mp') { const i = S.plantas.indexOf(p), j = i + d; if (j >= 0 && j < S.plantas.length) cambioDePlantas(() => intercambiar(S.plantas, i, j)); }   // subir / bajar la planta en la jerarquía (se valida: escaleras.js)
   else if (a == 'rp') { const n = prompt('Nombre de la planta:', p.nombre); if (n && n.trim() && n.trim() != p.nombre) { push(); p.nombre = n.trim(); } }
   else if (a == 'dp') {
     if (S.plantas.length < 2) { alert('El edificio debe tener al menos una planta.'); return; }
     const k = cuentaEn(p.id), cr = cablesQueCruzan(p.id); if (!confirm(`¿Borrar «${p.nombre}»${k ? ' y sus ' + k + ' objetos' : ''}?` + (cr ? `\n${cr} cable(s) atraviesan esta planta y se borrarán completos, en todas las plantas.` : ''))) return;
-    push(); podarCables(p.id); S.objs = S.objs.filter(o => o.pl != p.id); S.plantas = S.plantas.filter(x => x.id != p.id); normalizar(); limpiarSel();
+    cambioDePlantas(() => { podarCables(p.id); S.objs = S.objs.filter(o => o.pl != p.id); S.plantas = S.plantas.filter(x => x.id != p.id); normalizar(); limpiarSel(); });   // las plantas de arriba y abajo quedan juntas: se valida
   }
   else if (a == 'sc') { p.ca = idc; S.capaAct = idc; tmp = null; }
   else if (a == 'mc') { const i = p.capas.findIndex(x => x.id == idc), j = i + d; if (j >= 0 && j < p.capas.length) { push(); intercambiar(p.capas, i, j); } }   // subir / bajar la capa: cambia qué se dibuja encima
@@ -97,7 +97,7 @@ function finArrastre() {
   const arr = d.tipo == 'p' ? S.plantas : plantaActual().capas, vis = [...arr].reverse(), yo = vis.find(x => x.id == d.id);
   if (yo) {
     const otros = vis.filter(x => x !== yo); otros.splice(d.ins, 0, yo); const nuevo = otros.reverse();
-    if (nuevo.some((x, i) => x !== arr[i])) { push(); arr.splice(0, arr.length, ...nuevo); }
+    if (nuevo.some((x, i) => x !== arr[i])) { const cambiar = () => arr.splice(0, arr.length, ...nuevo); if (d.tipo == 'p') cambioDePlantas(cambiar); else { push(); cambiar(); } }   // reordenar plantas se valida (escaleras.js); las capas no cambian vecinas
   }
   panel(); render();
 }

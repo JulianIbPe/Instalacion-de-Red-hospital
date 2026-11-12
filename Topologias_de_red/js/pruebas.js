@@ -398,6 +398,8 @@ const TRP = (() => {
   // Los eventos de puntero que llegan a svg usan setPointerCapture: con un pointerId inventado fallaría, por eso se reemplaza un momento por una función vacía.
   const sinCaptura = fn => { svg.setPointerCapture = () => {}; try { return fn(); } finally { delete svg.setPointerCapture; } };
   const ptr = (el, tipo, x, y, extra = {}) => el.dispatchEvent(new PointerEvent(tipo, { clientX: x, clientY: y, button: 0, bubbles: true, cancelable: true, pointerId: 1, ...extra }));
+  const conConfirm = (resp, fn) => { const cf = window.confirm; let n = 0; window.confirm = () => (n++, resp); try { fn(); } finally { window.confirm = cf; } return n; };   // responde el confirm() y cuenta cuántas veces se preguntó
+  const arrastreSim = (d, cambio, fin = 'pointerup') => { arrastrar(d); push(); drag.pu = 1; cambio(); ptr(svg, fin, 0, 0); };   // arrastre como el de interaccion.js: guarda el paso, cambia y suelta (o cancela)
   const enObj = id => document.querySelector('#c [data-id="' + id + '"]');
   const derecho = el => sinCaptura(() => { ptr(el, 'pointerdown', 300, 200, { button: 2, buttons: 2 }); ptr(svg, 'pointerup', 300, 200, { button: 2 }); });
   const campoInsp = c => document.querySelector('#insp [data-campo="' + c + '"]');
@@ -461,10 +463,11 @@ const TRP = (() => {
       ser(escaleraObstruida(ne('espiral', 15, 14, 1.8, 1.8)), null, 'alineada con la de arriba sí');
       afirmar(/debajo de una del mismo tipo/.test((escaleraObstruida(ne('descanso', 15, 14, 1.8, 1.8)) || {}).msg), 'otro tipo arriba');
       // mover la escalera con descanso de abajo (apilada con la 5 de arriba): si queda pisándola sin alinear, vuelve atrás sin paso de historial
-      const E = byId(2), h = hist.length; sel = 2; multi = []; push(); E.x = 6.5; ser(revisarEscalerasMovidas([E]), true, 'debía rechazar'); ser(byId(2).x, 6, 'volvió a su lugar'); ser(hist.length, h, 'sin paso de historial'); ser(sel, 2, 'conserva la selección');
-      push(); byId(2).y = 12; ser(revisarEscalerasMovidas([byId(2)]), false, 'lejos de las otras sí se puede mover'); ser(byId(2).y, 12); deshacer();
+      // escaleras del proyecto: 1 recta, 2 con descanso (apilada con la 5 de la planta 2), 3 espiral, 6 recta girada
+      const h = hist.length; sel = 2; multi = []; arrastreSim({ m: 'mv', os: [byId(2)] }, () => { byId(2).x = 6.5; }); ser(byId(2).x, 6, 'volvió a su lugar'); ser(hist.length, h, 'sin paso de historial'); ser(sel, 2, 'conserva la selección');
+      arrastreSim({ m: 'mv', os: [byId(2)] }, () => { byId(2).y = 12; }); ser(byId(2).y, 12, 'lejos de las otras sí se puede mover'); ser(hist.length, h + 1); deshacer();
       sel = 2; render(); ser(TR.acc.rotar(90), false, 'girarla la desalinea con la de arriba'); ser(byId(2).rot || 0, 0);
-      const P = TR.acc.portapapeles, pp0 = [...P]; try { sel = 1; render(); TR.acc.ejecutar('copiar'); ser(TR.acc.ejecutar('pegar', { punto: { x: 3, y: 3 } }), false, 'pegar encima de la original'); } finally { P.splice(0, P.length, ...pp0); }
+      const P = TR.acc.portapapeles, pp0 = [...P]; try { sel = 1; render(); TR.acc.ejecutar('copiar'); ser(P.length, 1, 'copió'); ser(TR.acc.ejecutar('pegar', { punto: { x: 3, y: 3 } }), false, 'pegar encima de la original'); afirmar(/se superpone/.test($('#toast').textContent), 'motivo del rechazo: ' + $('#toast').textContent); } finally { P.splice(0, P.length, ...pp0); }
       sel = null; ser(escalerasVecinas(), '', 'sin herramienta no se ven'); tool = { k: 'item', n: 'Escalera', tipo: 'escalera' }; afirmar(/↑ Planta 2/.test(escalerasVecinas()), 'en la planta 1 se ven las de arriba');
       irA('p2'); afirmar(/↓ Planta 1/.test(escalerasVecinas()), 'en la planta 2 se ven las de abajo'); tool = null;
     });
@@ -735,11 +738,9 @@ const TRP = (() => {
       const o = cruzar(1, true), E = byId(1), p0 = { x: o.pts[2].x, y: o.pts[2].y }, h = hist.length;
       E.x += 2; E.y += 1; render(); igual([o.pts[2].x, o.pts[2].y], [r3(p0.x + 2), r3(p0.y + 1)], 'el recorrido no siguió a la escalera'); ser(o.pts.length, 10);
       E.rot = 90; render(); const g = trazaEscalera(E, true), t = [...g.inicio, ...g.fin]; igual(o.pts.slice(2, 8).map(q => [q.x, q.y]), t.map(q => [q.x, q.y]), 'el recorrido no giró con la escalera');
-      tool = null; tmp = null; S.plantaAct = 'p2'; S.capaAct = 'c2'; const cf = window.confirm; let preg = 0;
-      try {
-        window.confirm = () => (preg++, false); sel = 1; render(); const h1 = hist.length; borrar(); ser(preg, 1, 'debía pedir confirmación'); afirmar(byId(1) && byId(o.id), 'cancelar no debe borrar nada'); ser(hist.length, h1, 'cancelar no guarda historial');
-        window.confirm = () => true; sel = 1; render(); borrar(); ser(byId(1), undefined, 'la escalera debe borrarse'); ser(byId(o.id), undefined, 'el cable que la cruza debe borrarse completo'); ser(hist.length, h1 + 1, 'un solo paso');
-      } finally { window.confirm = cf; }
+      tool = null; tmp = null; S.plantaAct = 'p2'; S.capaAct = 'c2'; const h1 = hist.length;
+      ser(conConfirm(false, () => { sel = 1; render(); ser(borrar(), false, 'cancelado'); }), 1, 'debía pedir confirmación'); afirmar(byId(1) && byId(o.id), 'cancelar no debe borrar nada'); ser(hist.length, h1, 'cancelar no guarda historial');
+      conConfirm(true, () => { sel = 1; render(); borrar(); }); ser(byId(1), undefined, 'la escalera debe borrarse'); ser(byId(o.id), undefined, 'el cable que la cruza debe borrarse completo'); ser(hist.length, h1 + 1, 'un solo paso');
       deshacer(); afirmar(byId(1) && byId(o.id).pts.some(q => q.es), 'deshacer no restituyó la escalera con su recorrido');
     });
   });
@@ -769,9 +770,41 @@ const TRP = (() => {
       afirmar(/baja por esta escalera/.test(msg({ ...byId(11), x: 16 })), 'mover la de abajo debía rechazarse: ' + msg({ ...byId(11), x: 16 }));
       afirmar(/baja por esta escalera/.test(msg({ ...byId(1), x: 16 })), 'mover la de arriba debía rechazarse');
       ser(msg({ ...byId(13), x: 16 }), '', 'otra escalera sin cables sí se mueve');
-      S.plantaAct = 'p1'; S.capaAct = 'c1'; sel = 11; multi = []; render(); const h = hist.length; push(); byId(11).x = 16; ser(revisarEscalerasMovidas([byId(11)]), true, 'al soltar vuelve atrás'); ser(byId(11).x, 6); ser(hist.length, h);
-      const cf = window.confirm; let preg = 0; try { window.confirm = () => (preg++, true); sel = 11; render(); borrar(); } finally { window.confirm = cf; }
-      ser(preg, 1, 'debía avisar'); ser(byId(o.id), undefined, 'el cable que bajaba por ahí se borra'); afirmar(byId(1), 'la de arriba sigue');
+      // 1 = con descanso en la planta 2; 11 = su igual justo debajo (planta 1), por donde llega el cable que baja
+      S.plantaAct = 'p1'; S.capaAct = 'c1'; sel = 11; multi = []; render(); const h = hist.length; arrastreSim({ m: 'mv', os: [byId(11)] }, () => { byId(11).x = 16; }); ser(byId(11).x, 6, 'al soltar vuelve atrás'); ser(hist.length, h);
+      ser(conConfirm(true, () => { sel = 11; render(); borrar(); }), 1, 'debía avisar'); ser(byId(o.id), undefined, 'el cable que bajaba por ahí se borra'); afirmar(byId(1), 'la de arriba sigue');
+    });
+  });
+  prueba('Revisión del 11/11/2026: teclas durante un arrastre, giro y asas al soltar o cancelar, rehacer, giro conjunto, cables ya sin apoyo, borrar capa, cortar cancelado y orden de plantas', () => {
+    conProyecto(fEscaleras().estado, () => {
+      irA('p1'); tool = null; tmp = null; sel = 1; multi = []; render(); const h = hist.length;
+      arrastrar({ m: 'mv', os: [byId(1)] }); tecla(svg, 'r'); tecla(svg, 'Delete'); tecla(svg, 'z'); ser(hist.length, h, 'ninguna tecla actúa durante un arrastre'); afirmar(byId(1) && !byId(1).rot, 'R y Supr no actuaron'); drag = null;
+      sel = 2; render(); iniciarRot(); push(); drag.pu = true; rotarDesde(byId(2), drag.lista[0].g, 90, drag.c); ptr(svg, 'pointerup', 0, 0); ser(byId(2).rot || 0, 0, 'el asa ↻ vuelve atrás al soltar'); ser(hist.length, h);
+      arrastreSim({ m: 'h', o: byId(2), h: 'e' }, () => { byId(2).w = 2.2; }, 'pointercancel'); ser(byId(2).w, 1.6, 'las asas vuelven atrás si se cancela el puntero'); ser(drag, null);
+      push(); S.edificio.w = 25; deshacer(); ser(fut.length, 1, 'hay un paso para rehacer'); sel = 2; render(); arrastreSim({ m: 'mv', os: [byId(2)] }, () => { byId(2).x = 6.5; }); ser(fut.length, 1, 'un arrastre rechazado conserva el rehacer');
+    });
+    conProyecto(base({}, [esc(1, '', 1.2, 2.8, 5, 5), esc(2, '', 1.2, 2.8, 7, 5)]), () => {   // dos rectas lado a lado: giradas juntas no se pisan, aunque cada una girada sí pisaría a la otra sin girar
+      tool = null; multi = [1, 2]; sel = null; render(); ser(TR.acc.rotar(90), true, 'girar dos escaleras juntas'); ser(byId(1).rot, 90);
+    });
+    conProyecto(fCruce(), () => {
+      cruzar(1, false); tool = null; tmp = null; byId(11).x = 16;   // como un archivo viejo: el cable que baja por 1 ya no tiene la 11 debajo
+      ser(escaleraObstruida({ ...byId(13), y: 10 }), null, 'un cable que ya estaba sin apoyo no bloquea otras escaleras'); ser(escaleraObstruida({ ...byId(11), x: 20 }), null, 'ni a la propia');
+    });
+    conProyecto(fCruce(), () => {
+      const o = cruzar(1, false); tool = null; tmp = null; S.plantas[0].capas.push(capa('c9', 'Escaleras')); byId(11).cp = 'c9';   // la escalera de abajo en otra capa que los puntos del cable
+      ser(cablesQueCruzan('p1', 'c9'), 1, 'borrar la capa de la escalera afecta al cable'); podarCables('p1', 'c9'); ser(byId(o.id), undefined, 'el cable se borra entero');
+    });
+    conProyecto(fCruce(), () => {
+      cruzar(1, true); tool = null; tmp = null; S.plantaAct = 'p2'; S.capaAct = 'c2'; const P = TR.acc.portapapeles, pp0 = [...P];
+      try { P.splice(0, P.length, { k: 'texto', x: 0, y: 0, label: 'previo' }); conConfirm(false, () => { sel = 1; render(); ser(TR.acc.ejecutar('cortar'), false, 'cortar cancelado'); }); ser(P.length, 1); ser(P[0].label, 'previo', 'el portapapeles queda como estaba'); afirmar(byId(1)); }
+      finally { P.splice(0, P.length, ...pp0); }
+    });
+    const tres = fEscaleras().estado; tres.plantas.push({ id: 'p3', nombre: 'Planta 3', ca: 'c3', capas: [capa('c3', 'Base')] }); tres.objs.push(esc(20, '', 1.2, 2.8, 3, 3, { pl: 'p3', cp: 'c3' }));   // recta en la planta 3 justo encima de la recta 1 de la planta 1
+    conProyecto(tres, () => {
+      tool = null; const orden = () => S.plantas.map(p => p.id).join(), h = hist.length;
+      ser(cambioDePlantas(() => intercambiar(S.plantas, 1, 2)), false, 'reordenar junta dos rectas superpuestas'); ser(orden(), 'p1,p2,p3'); ser(hist.length, h, 'sin paso de historial');
+      ser(cambioDePlantas(() => { S.objs = S.objs.filter(o => o.pl != 'p2'); S.plantas = S.plantas.filter(x => x.id != 'p2'); normalizar(); }), false, 'borrar la planta del medio también'); ser(orden(), 'p1,p2,p3'); afirmar(byId(5), 'la planta 2 sigue con sus objetos');
+      S.objs = S.objs.filter(o => o.id != 20); ser(cambioDePlantas(() => intercambiar(S.plantas, 1, 2)), true, 'sin conflicto sí se reordena'); ser(orden(), 'p1,p3,p2');
     });
   });
   prueba('Cable por escalera: borrar una planta o capa que el cable atraviesa borra el cable completo (con aviso previo)', () => {

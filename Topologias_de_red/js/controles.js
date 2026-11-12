@@ -3,6 +3,7 @@ document.addEventListener('keydown', e => {
   if (!dlg.hidden) { if (e.key == 'Escape') cerrarDlg(); return; }   // con el aviso abierto, solo Esc (cancelar)
   if (TR.ctx && TR.ctx.abierto()) { TR.ctx.tecla(e); return; }       // con el menú contextual abierto: solo flechas, Enter, Esc y Tab (ver contexto.js)
   if (['SELECT', 'TEXTAREA'].includes(e.target.tagName) || e.target.isContentEditable || (e.target.tagName == 'INPUT' && !['checkbox', 'color'].includes(e.target.type))) return;
+  if (drag) return;                                                     // durante un arrastre no actúa ninguna tecla (R, Supr, Ctrl+Z… agregarían pasos en medio del arrastre)
   const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
   const enBoton = ['BUTTON', 'SUMMARY', 'INPUT'].includes(e.target.tagName);   // con un botón, un resumen o un checkbox/color enfocado, Supr y Retroceso no borran objetos (se evita borrar sin querer)
   if (mod && k == 'z' && !e.shiftKey) { e.preventDefault(); deshacer(); }

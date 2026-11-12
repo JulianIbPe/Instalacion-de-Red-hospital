@@ -46,15 +46,22 @@ TR.acc = (() => {
     const cambian = os.filter(o => !igual(def.leer(o), v)); if (!cambian.length) return { ok: true, sinCambio: true };
     const cand = cambian.map(o => { const c = copiar(o); def.poner(c, v); return c; });
     if (def.valida && cand.some(c => !def.valida(c, v))) return { ok: false, motivo: 'valor no válido' };
-    if (def.geo) for (const c of cand) if (esEsc(c)) { const ob = escaleraObstruida(c); if (ob) { avisoEmergente(ob.msg); return { ok: false, motivo: ob.msg }; } }
+    if (def.geo) { const ob = escalerasFinales(cand); if (ob) { avisoEmergente(ob.msg); return { ok: false, motivo: ob.msg }; } }
     if (!gesto || !gesto.p) push(); if (gesto) gesto.p = true;
     cambian.forEach(o => def.poner(o, v)); render(); return { ok: true };
   }
 
   // ---------- Acciones ----------
-  function rotar(deg) {                          // como la tecla R, pero una escalera que quedaría obstruyendo la de abajo rechaza TODO el giro
+  // Valida las escaleras de `cand` (copias ya cambiadas, con su id) en el estado FINAL: cada una se compara con las demás también cambiadas (como el asa ↻ al soltar).
+  function escalerasFinales(cand) {
+    const nuevas = new Map(cand.filter(esEsc).map(c => [c.id, c])), ver = o => nuevas.get(o.id) || o;
+    for (const c of nuevas.values()) { const ob = escaleraObstruida(c, ver); if (ob) return ob; }
+    return null;
+  }
+  function rotar(deg) {                          // tecla R y menú: una escalera que quedaría mal rechaza TODO el giro
     const os = seleccionados(), g = geoSel(); if (!g || !os.length) return false;
-    for (const o of os) if (esEsc(o)) { const c = copiar(o); rotarDesde(c, copiar(o), deg, g.c); const ob = escaleraObstruida(c); if (ob) { avisoEmergente(ob.msg); return false; } }
+    const ob = escalerasFinales(os.filter(esEsc).map(o => { const c = copiar(o); rotarDesde(c, copiar(o), deg, g.c); return c; }));
+    if (ob) { avisoEmergente(ob.msg); return false; }
     rotarSeleccion(deg); return true;
   }
   // ---------- Portapapeles (estado de interfaz: fuera de S y del historial) ----------
@@ -70,7 +77,10 @@ TR.acc = (() => {
     });
     return portapapeles.length > 0;
   }
-  function cortar() { return copiarSel() && eliminar(); }          // copia y borra lo seleccionado (el borrado es un solo paso de historial)
+  function cortar() {                            // copia y borra lo seleccionado (un solo paso de historial); si se cancela el borrado, el portapapeles queda como estaba
+    const antes = [...portapapeles]; if (!copiarSel()) return false;
+    if (eliminar()) return true; portapapeles.splice(0, portapapeles.length, ...antes); return false;
+  }
   function trasladar(c, dx, dy) {
     if (c.k == 'line') c.pts = c.pts.map(q => ({ x: r3(q.x + dx), y: r3(q.y + dy) }));
     else if (c.k == 'medida') { c.a = { x: r3(c.a.x + dx), y: r3(c.a.y + dy) }; c.b = { x: r3(c.b.x + dx), y: r3(c.b.y + dy) }; }
@@ -82,11 +92,11 @@ TR.acc = (() => {
     const b = portapapeles.map(bboxDe), cx0 = (Math.min(...b.map(q => q.x0)) + Math.max(...b.map(q => q.x1))) / 2, cy0 = (Math.min(...b.map(q => q.y0)) + Math.max(...b.map(q => q.y1))) / 2;
     const p = extra && extra.punto, dx = p ? r3(p.x - cx0) : OFFSET, dy = p ? r3(p.y - cy0) : OFFSET;
     const copias = portapapeles.map(o => { const c = copiar(o); trasladar(c, dx, dy); c.pl = S.plantaAct; c.cp = S.capaAct; return c; });
-    for (const c of copias) if (esEsc(c)) { const ob = escaleraObstruida({ ...c, id: -1 }); if (ob) { avisoEmergente(ob.msg); return false; } }   // misma regla que al colocar una escalera
+    for (const c of copias) if (esEsc(c)) { const ob = escaleraObstruida(c); if (ob) { avisoEmergente(ob.msg); return false; } }   // misma regla que al colocar una escalera
     push(); const nuevos = copias.map(c => { c.id = nid++; completarTipo(c); S.objs.push(c); return c.id; });
     fijarSeleccion(nuevos); render(); return true;
   }
-  function eliminar() { selEdge = null; borrar(); return true; }   // el objeto completo (un lado de forma seleccionado se borra con Supr)
+  function eliminar() { selEdge = null; return borrar(); }   // el objeto completo (un lado de forma seleccionado se borra con Supr)
   const enfocar = id => () => { TR.insp.enfocar(id); return true; };
   const idsDe = os => os.map(o => o.id);
   const unoCon = id => os => os.length == 1 && campo(id).aplica(os[0]);

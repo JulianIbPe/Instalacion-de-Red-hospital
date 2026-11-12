@@ -1,6 +1,13 @@
 // ---------- Interacción ----------
 const col = () => $('#col').value, fil = () => $('#fill').value, lin = () => $('#lstyle').value;
 const add = o => (push(), o.id = nid++, o.pl = o.pl === undefined ? S.plantaAct : o.pl, o.cp = o.cp === undefined ? S.capaAct : o.cp, completarTipo(o), S.objs.push(o), o);   // un cable que ya trae su planta y capa (donde se empezó a dibujar) las conserva aunque termine en otra planta
+function arrastrar(d) {                  // arrastre que modifica objetos (mover, asas, girar): guarda qué objetos cambia, copia de sus escaleras y el rehacer, para poder volver atrás al soltar
+  d.os = d.os || (d.o ? [d.o] : d.lista ? d.lista.map(x => x.o) : []); d.antes = d.os.filter(o => o && esEsc(o)).map(copiar); d.fut = fut.slice(); return drag = d;
+}
+function soltarArrastre() {              // fin de un arrastre (soltar o puntero cancelado): una escalera que quedó en un lugar no válido descarta el paso del arrastre
+  if (drag && drag.pu && drag.antes && revisarEscalerasMovidas(drag.os, drag.antes)) descartarPaso(drag.fut);
+  drag = null; render();
+}
 function finishLine() {
   if (!tmp || tmp.k != 'line') return; const q = tmp.pts, a = q[q.length - 1], b = q[q.length - 2];
   if (b && Math.hypot(a.x - b.x, a.y - b.y) < .05 && !a.ref && !a.es) q.pop();
@@ -32,11 +39,11 @@ svg.addEventListener('pointerdown', e => {
     const hh = e.target.closest('[data-h]'), t = e.target.closest('[data-id]'), ed = e.target.closest('[data-e]'), prevEdge = selEdge; selEdge = null;
     // Mayús + clic izquierdo: si no se arrastra, añade/quita el objeto de la selección; si se arrastra, dibuja un rectángulo de selección
     const gr = e.target.closest('[data-grab]');   // hoja de una puerta: se agarra directamente para girarla
-    if (gr && t && !e.shiftKey) { const dd = byId(+t.dataset.id); if (dd && dd.k == 'puerta') { sel = dd.id; multi = []; drag = { m: 'h', o: dd, h: 'gi', p0: p }; render(); return; } }
+    if (gr && t && !e.shiftKey) { const dd = byId(+t.dataset.id); if (dd && dd.k == 'puerta') { sel = dd.id; multi = []; arrastrar({ m: 'h', o: dd, h: 'gi', p0: p }); render(); return; } }
     if (e.shiftKey) { const r = rawW(e); drag = { m: 'box', id: t ? +t.dataset.id : null, sx: e.clientX, sy: e.clientY, x0: r.x, y0: r.y, moved: false }; return; }
-    if (hh && byId(sel)) { selEdge = prevEdge; drag = { m: 'h', o: byId(sel), h: hh.dataset.h, p0: p }; }
+    if (hh && byId(sel)) { selEdge = prevEdge; arrastrar({ m: 'h', o: byId(sel), h: hh.dataset.h, p0: p }); }
     else if (t && ed && +t.dataset.id === sel && !multi.length) { selEdge = { id: sel, i: +ed.dataset.e }; drag = { m: 'lado', o: byId(sel), i: selEdge.i, last: p }; }   // clic en un lado de la forma ya seleccionada
-    else if (t) { const id = +t.dataset.id; if (!multi.includes(id)) { sel = id; multi = []; } drag = { m: 'mv', os: seleccionados(), last: p, p0: p }; }
+    else if (t) { const id = +t.dataset.id; if (!multi.includes(id)) { sel = id; multi = []; } arrastrar({ m: 'mv', os: seleccionados(), last: p, p0: p }); }
     else { sel = null; multi = []; drag = { m: 'pan', sx: e.clientX, sy: e.clientY, ox: V.ox, oy: V.oy }; }
     render(); return;
   }
@@ -110,9 +117,9 @@ svg.addEventListener('pointerup', e => {
   if (drag && drag.m == 'colocar' && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 8) terminarColocacion();   // pulsar, arrastrar y soltar también coloca
   if (drag && drag.m == 'box') { if (drag.moved) fijarSeleccion(dentroDeCaja()); else if (drag.id != null) alternar(drag.id); cajaSel = null; }
   if (drag && drag.m == 'zona') { if (tmp.w > .2 && tmp.h > .2) add(tmp); tmp = null; }
-  if (drag && drag.pu) revisarEscalerasMovidas(drag.m == 'mv' ? drag.os : drag.m == 'h' ? [drag.o] : drag.m == 'rot' ? drag.lista.map(x => x.o) : []);   // una escalera que quedó mal vuelve a su lugar (escaleras.js)
-  drag = null; render();
+  soltarArrastre();
 });
+svg.addEventListener('pointercancel', soltarArrastre);   // toque o lápiz cancelado: misma revisión que al soltar
 svg.addEventListener('pointerleave', () => { prevPuerta = null; snapPt = null; renderTmp(); });
 svg.addEventListener('contextmenu', e => e.preventDefault());
 svg.addEventListener('wheel', e => {

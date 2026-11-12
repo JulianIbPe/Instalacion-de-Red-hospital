@@ -117,7 +117,7 @@ function cablesFantasma() {
       const b = bboxDe(e), cs = cables.filter(({ o: c, ls }) => { const P = ls.flat(), x0 = Math.min(...P.map(v => v.x)), x1 = Math.max(...P.map(v => v.x)), y0 = Math.min(...P.map(v => v.y)), y1 = Math.max(...P.map(v => v.y)), m = c.w / 2; return x0 - m <= b.x1 && x1 + m >= b.x0 && y0 - m <= b.y1 && y1 + m >= b.y0; });
       if (!cs.length) return;
       const cid = 'cf' + e.id;
-      h += `<clipPath id="${cid}"><polygon points="${polyEsc(e).map(v => v.x + ',' + v.y).join(' ')}"/></clipPath><g clip-path="url(#${cid})" opacity=".5" pointer-events="none">`
+      h += `<clipPath id="${cid}"><polygon points="${puntosPoly(e)}"/></clipPath><g clip-path="url(#${cid})" opacity=".5" pointer-events="none">`
         + cs.map(({ o: c, ls }) => ls.map(L => `<polyline points="${L.map(v => v.x + ',' + v.y).join(' ')}" fill="none" stroke="${c.c}" stroke-width="${c.w}" stroke-dasharray="${c.d}" stroke-linecap="round" stroke-linejoin="round"/>`).join('')).join('') + '</g>';
     });
   });
@@ -139,41 +139,60 @@ function solapanPoly(A, B) {             // dos rectángulos (eje de separación
   }
   return true;
 }
-function encajarAbajo(t) {               // imán: una escalera con descanso/espiral casi encima (o debajo) de una igual de la planta vecina se ajusta exactamente a ella
+const puntosPoly = o => polyEsc(o).map(v => v.x + ',' + v.y).join(' ');
+function encajarVecina(t) {              // imán: una escalera con descanso/espiral casi encima (o debajo) de una igual de la planta vecina se ajusta exactamente a ella
   if (tipoEsc(t) == 'recta') return;
   const i = S.plantas.findIndex(p => p.id == S.plantaAct), vec = [S.plantas[i - 1], S.plantas[i + 1]].filter(Boolean).map(q => q.id);
   const o = S.objs.find(o => esEsc(o) && o.id !== t.id && vec.includes(o.pl) && tipoEsc(o) == tipoEsc(t) && Math.hypot(o.x - t.x, o.y - t.y) < .3
     && Math.abs(Math.max(o.w, o.h) - Math.max(t.w, t.h)) < .3 && Math.abs(Math.min(o.w, o.h) - Math.min(t.w, t.h)) < .3);
   if (o) { t.x = o.x; t.y = o.y; t.w = o.w; t.h = o.h; t.rot = o.rot || 0; }
 }
-function escaleraObstruida(t) {          // null si se puede colocar; si no, {o, planta, msg} con el motivo. t puede ser una escalera ya colocada (no se compara consigo misma)
+// Validación de una escalera en su estado FINAL. t = la escalera como quedaría (sin id = escalera nueva). ver(o) = cómo quedan las demás (otras escaleras que
+// cambian en la misma acción, p. ej. al girar varias juntas); verAntes(o) = cómo estaban antes (solo hace falta si S ya se modificó, como al soltar un arrastre).
+// Devuelve null si se puede; si no, {o, planta, msg}.
+const escaleraObstruida = (t, ver = o => o, verAntes = o => o) => superpuesta(t, ver) || apoyoPerdido(t, ver, verAntes);
+const VECINA = { [-1]: { donde: 'planta inferior', hay: 'debajo', Hay: 'Debajo', ir: 'sobre', pos: 'encima' }, 1: { donde: 'planta superior', hay: 'arriba', Hay: 'Arriba', ir: 'debajo de', pos: 'debajo' } };
+function superpuesta(t, ver = o => o) {  // reglas de superposición con la planta de abajo, la misma y la de arriba
   const i = S.plantas.findIndex(p => p.id == (t.pl || S.plantaAct)), P = polyEsc(t), tt = tipoEsc(t);
   for (const d of [-1, 0, 1]) {          // primero la planta de abajo (mensajes de siempre), luego la misma y la de arriba
     const q = S.plantas[i + d]; if (!q) continue;
-    const donde = d < 0 ? 'planta inferior' : 'planta superior', pos = d < 0 ? 'debajo' : 'arriba';
-    for (const o of S.objs) {
-      if (!(esEsc(o) && o.id !== t.id && o.pl == q.id && solapanPoly(P, polyEsc(o)))) continue;
-      const to = tipoEsc(o), r = { o, planta: q };
+    for (const o0 of S.objs) {
+      const o = ver(o0); if (!(esEsc(o0) && o0.id !== t.id && o.pl == q.id && solapanPoly(P, polyEsc(o)))) continue;
+      const to = tipoEsc(o), r = { o: o0, planta: q }, v = VECINA[d];
       if (d == 0) return { ...r, msg: 'No se puede colocar la escalera aquí: se superpone con otra escalera de «' + q.nombre + '»' };
-      if (tt == 'recta' || to == 'recta' && d > 0) return { ...r, msg: 'No se puede colocar la escalera aquí: obstruye la escalera de «' + q.nombre + '» (' + donde + ')' };
-      if (to != tt) return { ...r, msg: 'No se puede colocar la escalera ' + NOMBRE_ESC[tt] + ' aquí: ' + pos + ' hay una escalera ' + NOMBRE_ESC[to] + ' en «' + q.nombre + '». Solo puede ir ' + (d < 0 ? 'sobre' : 'debajo de') + ' una del mismo tipo' };
-      if (!igualEsc(t, o)) return { ...r, msg: pos[0].toUpperCase() + pos.slice(1) + ' hay una escalera ' + NOMBRE_ESC[tt] + ' en «' + q.nombre + '»: debe colocarse exactamente ' + (d < 0 ? 'encima' : 'debajo') + ' (mismo lugar y tamaño)' };
+      // una recta arriba nunca deja nada debajo; si la recta es la de abajo y esta no, cae en «distinto tipo» (con su propio mensaje)
+      if (tt == 'recta' || (d > 0 && to == 'recta')) return { ...r, msg: 'No se puede colocar la escalera aquí: obstruye la escalera de «' + q.nombre + '» (' + v.donde + ')' };
+      if (to != tt) return { ...r, msg: 'No se puede colocar la escalera ' + NOMBRE_ESC[tt] + ' aquí: ' + v.hay + ' hay una escalera ' + NOMBRE_ESC[to] + ' en «' + q.nombre + '». Solo puede ir ' + v.ir + ' una del mismo tipo' };
+      if (!igualEsc(t, o)) return { ...r, msg: v.Hay + ' hay una escalera ' + NOMBRE_ESC[tt] + ' en «' + q.nombre + '»: debe colocarse exactamente ' + v.pos + ' (mismo lugar y tamaño)' };
     }
   }
-  if (byId(t.id) && cablesSinApoyo(o => o.id === t.id ? t : o, (U, pid) => U.id === t.id || pid == t.pl).length)   // una escalera ya colocada que deja sin escalera abajo a un cable que baja
-    return { o: t, planta: S.plantas[i - 1] || null, msg: 'No se puede: un cable baja por esta escalera y abajo no quedaría una escalera igual para recibirlo' };
   return null;
 }
-function revisarEscalerasMovidas(os) {   // al soltar un arrastre (mover, asas o giro): si una escalera quedó en un lugar no válido, todo vuelve a como estaba, sin paso de historial
-  for (const o of os) if (esEsc(o)) { const ob = escaleraObstruida(o); if (ob) { const s = sel, m = multi; Hist.estrategia.aplicar(hist.pop()); sel = s; multi = m; avisoEmergente(ob.msg); return true; } }
+function apoyoPerdido(t, ver, verAntes) { // una escalera ya colocada que deja sin escalera igual abajo a un cable que baja (los que ya estaban así no cuentan)
+  if (!byId(t.id)) return null;
+  return pierdenApoyo(verAntes, o => o.id === t.id ? t : ver(o)).length ? { o: t, planta: null, msg: 'No se puede: un cable baja por esta escalera y abajo no quedaría una escalera igual para recibirlo' } : null;
+}
+function revisarEscalerasMovidas(os, antes = []) {   // tras cambiar escaleras en S (soltar un arrastre): si alguna quedó en un lugar no válido, se descarta el paso con aviso. antes = copias previas
+  const previa = new Map(antes.map(o => [o.id, o])), verAntes = o => previa.get(o.id) || o;
+  for (const o of os) if (o && esEsc(o)) { const ob = escaleraObstruida(o, x => x, verAntes); if (ob) { avisoEmergente(ob.msg); return true; } }
   return false;
 }
+function conflictosEscaleras() {         // claves de lo que hoy no cumple las reglas: escaleras incompatibles y cables que bajan sin escalera igual abajo
+  return new Map([...S.objs.filter(esEsc).map(o => { const r = superpuesta(o); return r && ['e' + o.id, r.msg]; }).filter(Boolean),
+    ...cablesSinApoyo(o => o).map(c => ['c' + c.id, 'un cable que baja por una escalera quedaría sin una escalera igual abajo'])]);
+}
+function cambioDePlantas(fn) {           // reordenar o borrar plantas cambia qué plantas son vecinas: si deja algo que antes cumplía sin cumplir, se descarta con aviso
+  const antes = conflictosEscaleras(); push(); fn();
+  const nuevo = [...conflictosEscaleras()].find(([k]) => !antes.has(k));
+  if (nuevo) { descartarPaso(); avisoEmergente('No se puede: las escaleras de las plantas que quedarían juntas no son compatibles (' + nuevo[1] + ')'); return false; }
+  return true;
+}
 function escalerasVecinas() {            // con la herramienta de escalera, o al arrastrar una, se ven los contornos de las escaleras de la planta de arriba y la de abajo
-  const d = drag, mueve = d && d.pu && (d.m == 'mv' ? d.os : d.m == 'h' ? [d.o] : d.m == 'rot' ? d.lista.map(x => x.o) : []).some(o => o && esEsc(o));
+  const mueve = drag && drag.pu && (drag.os || []).some(o => o && esEsc(o));
   if (!(tool && esEscalera(tool)) && !mueve) return '';
   const i = S.plantas.findIndex(p => p.id == S.plantaAct);
   return [[-1, '#2e86de', '↓ '], [1, '#e67e22', '↑ ']].map(([k, col, fl]) => { const q = S.plantas[i + k]; if (!q) return '';
-    return S.objs.filter(o => esEsc(o) && o.pl == q.id).map(o => `<polygon points="${polyEsc(o).map(v => v.x + ',' + v.y).join(' ')}" fill="${col}14" stroke="${col}" stroke-width=".05" stroke-dasharray=".18 .12" pointer-events="none"/>` + T(o.x, o.y, fl + q.nombre)).join(''); }).join('');
+    return S.objs.filter(o => esEsc(o) && o.pl == q.id).map(o => `<polygon points="${puntosPoly(o)}" fill="${col}14" stroke="${col}" stroke-width=".05" stroke-dasharray=".18 .12" pointer-events="none"/>` + T(o.x, o.y, fl + q.nombre)).join(''); }).join('');
 }
 function avisoEmergente(msg) {           // cartel visible en el centro del área de trabajo durante unos segundos
   let el = $('#toast'); if (!el) { el = document.createElement('div'); el.id = 'toast'; el.setAttribute('role', 'alert'); el.style.cssText = 'position:absolute;left:50%;top:40px;transform:translateX(-50%);z-index:5;max-width:min(460px,90%);padding:12px 16px;border-radius:10px;background:#b52b27;color:#fff;font-size:14px;box-shadow:0 6px 22px rgba(20,35,43,.35);pointer-events:none'; $('#work').appendChild(el); }
