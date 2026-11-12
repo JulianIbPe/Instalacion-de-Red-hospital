@@ -13,11 +13,16 @@ function draw(o) {
   } else if (o.k == 'shape') {
     h = dibujarForma(o, id, on, hd);
   } else if (o.k == 'item') {
-    if (esEscalera(o)) h = dibujarEscalera(o, id, on, hd); else {   // las tres escaleras (recta, con descanso, espiral) son 'Escalera' con distinto o.t
-    h = `<g ${id} transform="translate(${o.x} ${o.y}) rotate(${o.rot || 0})"><rect x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}" rx=".08" fill="#fff" stroke="#34495e" stroke-width=".04"/><text font-size="${Math.min(o.w, o.h) * .65}" text-anchor="middle" dominant-baseline="central">${o.ic}</text></g>`;
+    const m = modeloDe(o);
+    if (esEscalera(o)) h = dibujarEscalera(o, id, on, hd);          // las tres escaleras (recta, con descanso, espiral) son 'Escalera' con distinto o.t
+    else if (m) {                                                   // F4A: equipo con modelo = su icono sin recuadro (el rect transparente solo recibe los clics) y debajo dos líneas: modelo y nombre del equipo
+      h = `<g ${id} transform="translate(${o.x} ${o.y}) rotate(${o.rot || 0})"><rect x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}" fill="transparent"/><use href="#ic-${iconoDe(m)}" x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}"/></g>`;
+      const y = bboxDe(o).y1 + .3; h += T(o.x, y, m.corto || m.nombre); if (o.label) h += T(o.x, y + .32, o.label);
+    } else {
+    h = `<g ${id} transform="translate(${o.x} ${o.y}) rotate(${o.rot || 0})"><rect x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}" rx=".08" fill="#fff" stroke="#34495e" stroke-width=".04"/><text font-size="${Math.min(o.w, o.h) * .65}" text-anchor="middle" dominant-baseline="central">${o.ic || ''}</text></g>`;
     if (o.label) h += T(o.x, bboxDe(o).y1 + .3, o.label);
-    if (on) h += `<rect x="${o.x - o.w / 2 - .1}" y="${o.y - o.h / 2 - .1}" width="${o.w + .2}" height="${o.h + .2}" fill="none" stroke="#e0a030" stroke-dasharray=".15 .1" stroke-width=".04" transform="rotate(${o.rot || 0} ${o.x} ${o.y})" pointer-events="none"/>`;
     }
+    if (on && !esEscalera(o)) h += `<rect x="${o.x - o.w / 2 - .1}" y="${o.y - o.h / 2 - .1}" width="${o.w + .2}" height="${o.h + .2}" fill="none" stroke="#e0a030" stroke-dasharray=".15 .1" stroke-width=".04" transform="rotate(${o.rot || 0} ${o.x} ${o.y})" pointer-events="none"/>`;
   } else if (o.k == 'line' && esMultiplanta(o)) {
     h = dibujarCableMP(o, id, on, hd);        // cable que atraviesa plantas por escaleras (trazas.js)
   } else if (o.k == 'line') {
@@ -37,6 +42,8 @@ function draw(o) {
   }
   return h;
 }
+const modeloDe = o => o.modelo ? R.modelos[o.modelo] : undefined;       // plantilla del equipo (recursos.js), si tiene
+const iconoDe = m => Object.hasOwn(ICONOS, m.orig || '') ? m.orig : m.orig == 'propio' ? (CATS.find(c => c.id == m.cat) || {}).ic || 'empty' : 'generico';   // clave de su dibujo en iconos.js; un modelo propio usa el icono de su categoría
 const ORD = { zona: 0, shape: 1, line: 2, puerta: 2.5, item: 3, texto: 4, medida: 5 };
 let asasOut = [], hitsOut = [];           // asas de edición de lo seleccionado y zonas de clic de los cables dentro de escaleras (se agregan después de todos los objetos, para quedar por encima)
 
@@ -72,7 +79,8 @@ function renderObjetos() {                // objetos del proyecto (lo que se exp
   asasOut = []; hitsOut = [];
   // Orden de dibujo: primero por jerarquía de capa (las capas altas se pintan encima) y, dentro de una misma capa, por tipo de objeto (ORD)
   const E = S.edificio, all = [...S.objs].filter(esVisible).sort((a, b) => rangoCapa(a) - rangoCapa(b) || ORD[a.k] - ORD[b.k]);
-  const pats = all.filter(o => o.f == 'hat').map(patronHat).join('');
+  const pats = all.filter(o => o.f == 'hat').map(patronHat).join('')   // cada icono usado se define una sola vez dentro de #c (así el PNG exportado lo incluye) y los equipos lo reutilizan con <use>
+    + [...new Set(all.map(modeloDe).filter(Boolean).map(iconoDe))].map(k => `<symbol id="ic-${k}" viewBox="0 0 96 96">${ICONOS[k]}</symbol>`).join('');
   const edif = `<rect x="0" y="0" width="${E.w}" height="${E.h}" fill="none" stroke="#17262c" stroke-width=".08" stroke-dasharray=".4 .2"/>` + T(E.w / 2, -.25, E.w + ' m', .4) + `<text x="-.3" y="${E.h / 2}" font-size=".4" text-anchor="middle" transform="rotate(-90 -.3 ${E.h / 2})" fill="#17262c" font-family="Segoe UI,Arial,sans-serif">${E.h} m</text>`;
   capas.c.innerHTML = `<defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map(o => { const g = draw(o) + resaltar(o); return esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}${hitsOut.join('')}${asasOut.join('')}`;
 }
@@ -85,7 +93,7 @@ function renderTmp() {                    // lo temporal de la interacción (no 
 function renderPaneles() {                // botones, opciones, reglas y barra de estado (el menú izquierdo se rehace solo al cambiar de pestaña o herramienta: ver catalogo.js)
   contar('paneles');
   $('#bundo').disabled = !hist.length; $('#bredo').disabled = !fut.length; $('#bdel').disabled = !seleccionados().length;
-  sincronizarOpciones();
+  sincronizarOpciones(); menuSiCambio();
   if (TR.insp) TR.insp.refrescar();         // Fase 3: el inspector solo rehace su DOM si cambia la selección (ver inspector.js); nunca se llama al mover el ratón
   rulers(); status();
 }

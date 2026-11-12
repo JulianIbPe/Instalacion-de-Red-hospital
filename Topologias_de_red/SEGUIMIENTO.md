@@ -2,24 +2,24 @@
 
 Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor ni framework). Se abre `index.html` en el navegador; `index.html?pruebas=1` abre además el panel de pruebas. Los scripts se cargan en el orden de `index.html` y comparten variables globales. Todas las coordenadas del modelo están en **metros**.
 
-> **Última actualización: 11/11/2026** (cierre de la sesión: escaleras verificadas; F4 diseñada y esperando los iconos que el usuario rehace en otro chat; ver sección 0).
+> **Última actualización: 11/11/2026** (F4A implementada, pendiente de la verificación manual del usuario; ver sección 0).
 > **Regla de mantenimiento:** al terminar una fase, o al avanzar dentro de la fase en curso, se actualiza este documento (qué se hizo, resultados reales de las pruebas, qué falta y cuál es el siguiente paso).
 
 ## 0. Resumen para retomar (leer primero)
 
 **Dónde estamos (11/11/2026, fin de la sesión):**
 - F0 a F3 completadas y verificadas por el usuario, incluidos todos los ajustes posteriores de la F3 (sección 7: menú contextual, cable por escaleras, reglas de escaleras entre plantas y las correcciones de la revisión thermo del commit `cda924b`). Pruebas: 62/63 en el navegador integrado; la única que falla es «el dibujo es idéntico a la referencia», porque la referencia vive en el `localStorage` del navegador del usuario (en su navegador debería pasar).
-- **Cambios sin commitear** (correcciones de la revisión thermo, verificadas por el usuario): `js/acciones.js`, `colocar.js`, `controles.js`, `escaleras.js`, `historial.js`, `interaccion.js`, `plantas.js`, `pruebas.js`, `rotacion.js`, `trazas.js` y este documento. El usuario commitea por su cuenta; preguntar antes de hacerlo.
-- **F4 diseñada, sin código.** Plan en la sección 5 (F4A: catálogo, iconos y modelos propios con «Empty»; F4B: imágenes). La lista de modelos ya la dio el usuario (sección 5).
-- **Iconos (11/11/2026): generados y aprobados por el usuario** (incluido el foco de `iot-luz.svg`). Para cambiar un dibujo se edita su SVG directamente (el script que los generó era temporal y no se guardó). Carpeta `iconos/`: 33 SVG de dibujo propio, fondo transparente, `viewBox` 96×96 (14 de red y finales, 17 IoT, `empty.svg`, `generico.svg`) y `vista-previa.png` con todos juntos. Todavía no los usa ningún código (eso es la F4A). Referencia de aspecto que dio el usuario: ilustración del aparato al estilo Packet Tracer (sin copiar el material de Cisco) y debajo dos líneas, modelo y nombre del equipo (sección 5, «Aspecto»).
+- **F4A implementada (11/11/2026), SIN verificar por el usuario y sin commitear** (rama `branch_branch`). El usuario commitea por su cuenta; preguntar antes de hacerlo. Detalle, resultados y lista de comprobaciones manuales en «F4A — implementado» (sección 5). **No empezar la F4B sin que el usuario confirme la F4A.**
+- Cambio pedido por el usuario al aprobar el diseño: el equipo con modelo se dibuja **sin recuadro** (solo el icono; un rectángulo transparente recibe los clics).
+- El usuario agregó `iconos/rack.svg` (commit `665d4bd`) después de responder que el Rack quedaba «como está hoy»: se interpretó que lo quiere con icono. El Rack del menú es ahora un modelo del catálogo (`tipo: 'rack'`, 0,8 × 1 m, sin puertos) que se dibuja con ese icono; los racks de proyectos viejos siguen con su emoji. **Confirmado por el usuario (12/11/2026).**
+- **Iconos (11/11/2026): generados y aprobados por el usuario** (incluido el foco de `iot-luz.svg`). Carpeta `iconos/`: 34 SVG de dibujo propio, fondo transparente, `viewBox` 96×96 (14 de red y finales, 17 IoT, `rack.svg`, `empty.svg`, `generico.svg`) y `vista-previa.png`. **Para cambiar un dibujo:** editar su SVG y correr `node iconos/generar.js` desde `Topologias_de_red` (regenera `js/iconos.js`, que es lo que usa la página; el PNG exportado no puede cargar archivos externos). Referencia de aspecto que dio el usuario: ilustración del aparato al estilo Packet Tracer (sin copiar el material de Cisco) y debajo dos líneas, modelo y nombre del equipo (sección 5, «Aspecto»).
 
 **Qué hacer al retomar (en este orden):**
 1. Los archivos están en la carpeta del proyecto; no hace falta pedir el `.zip`. No hay acceso al navegador del usuario: nada se da por probado si no lo ejecutó él o no se ejecutó realmente.
 2. Leer las secciones 0, 1, 3, 4, 5 (F4), 6 y 8.
-3. Los iconos ya están aprobados y guardados en `iconos/` (uno por modelo de la sección 5, más `empty.svg` y `generico.svg`); no hay que pedirlos. Falta la aprobación de la tabla de tamaños (sección 5).
-4. Pedir respuesta a las **preguntas abiertas** de abajo.
-5. Con todo eso, confirmar el diseño de la F4A y **esperar la orden de empezar** antes de escribir código.
-6. Al terminar cada avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
+3. Preguntar al usuario el resultado de las comprobaciones manuales de la F4A (sección 5) y corregir lo que falle. Recomendarle `/thermos` antes de commitear.
+4. Solo con la F4A confirmada: presentar el diseño de la F4B (imágenes) y **esperar la orden de empezar**.
+5. Al terminar cada avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
 
 **Decisiones del usuario para la F4 (11/11/2026):**
 - Iconos de diseño propio (no emojis, sin material de Cisco); los trae el usuario desde otro chat.
@@ -29,11 +29,13 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 - **Catálogo (decisión del 11/11/2026, anotada, sin implementar):** los equipos actuales del menú (Router, Switch, Servidor… con emoji) **se reemplazan** por los modelos nuevos; no quedan como «Genéricos» (esto cambia el punto 2 de la F4A). Dentro de «Dispositivos» hay subsecciones (Routers, Switches, etc.) y dentro de cada una se eligen los modelos y su «Empty», que se configura a gusto y se guarda como modelo nuevo. Por resolver en el diseño de la F4A: cómo se ven los equipos sin modelo de proyectos viejos, qué pasa con «Cámara IP» y «Rack» (no tienen modelo nuevo; el rack se necesita en la F8) y si las secciones de finales e IoT también llevan «Empty».
 - Pendiente técnico de la F4A: «Nuevo» vacía el portapapeles interno (si no, lo pegado podría apuntar a imágenes o modelos que ya no existen).
 
-**Preguntas abiertas para el usuario (sin responder):**
-1. Modelos propios: propuesta = guardarlos **dentro del proyecto** (`.json`) aunque no haya equipos colocados de ese modelo. Alternativa: en el navegador, para todos los proyectos (se pierden al cambiar de computadora o borrar datos).
-2. Tipos de puerto del diálogo «Empty»: propuesta = FastEthernet, GigabitEthernet, Serial, Fibra, Consola/RS-232, USB, Coaxial, Inalámbrico, Bluetooth, 3G/4G y «Nombre libre» (un puerto con el nombre que se quiera, como «Internet»). ¿Agregar o sacar alguno?
-3. Tamaño predeterminado en el plano: el usuario pidió medidas reales promedio (11/11/2026). Falta que apruebe la tabla de la sección 5 y decida qué hacer con los equipos muy chicos.
-4. Orden de empezar la F4A.
+**Preguntas respondidas por el usuario (11/11/2026, segunda sesión):**
+1. Modelos propios: se guardan **dentro del proyecto** (`.json`) aunque no haya equipos colocados de ese modelo. Ojo: hoy `R.paraGuardar` descarta los modelos sin uso; hay que conservar los de `orig: 'propio'`.
+2. Tipos de puerto del diálogo «Empty»: FastEthernet, GigabitEthernet, Serial, Fibra, Consola/RS-232, USB, Coaxial, Inalámbrico, Bluetooth, 3G/4G y «Nombre libre». Aprobada tal cual.
+3. Tamaños: tabla de la sección 5 **aprobada**, con mínimo: ningún equipo nace con su lado mayor menor a 0,30 m (se agranda manteniendo la proporción; editable por equipo).
+4. Menú viejo: **se quita «Cámara IP»**; el **Rack** queda en una subsección «Otros» como está hoy. Los equipos sin modelo de proyectos viejos se dibujan igual que ahora (emoji). Finales e IoT no llevan «Empty».
+
+**Pendiente:** verificación manual de la F4A por el usuario; confirmar el tamaño del texto bajo los equipos (0,28 m fijo: queda grande al lado de un equipo de 0,30 m).
 
 ## 1. Estado de las fases
 
@@ -43,7 +45,8 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | F1 Renderizado en capas | Completada (28/10/2026) |
 | F2 Núcleo de datos (tipos, formato v2, recursos, historial) | Completada (31/10/2026): 31 pruebas aprobadas, dibujo idéntico a la referencia, uso manual correcto |
 | F3 Inspector y menú contextual | Completada y cerrada (01/11/2026): 46 pruebas aprobadas, dibujo idéntico, verificación manual correcta. Ajustes 1 y 2 verificados por el usuario el 11/11/2026; ajuste 3 (reglas de escaleras entre plantas) verificado el 11/11/2026 |
-| F4 a F12 | No iniciadas (sección 5). Siguiente: **F4** |
+| F4 Catálogo, imágenes y modelos | **F4A implementada (11/11/2026), pendiente de verificación manual del usuario.** F4B (imágenes) no iniciada |
+| F5 a F12 | No iniciadas (sección 5) |
 
 Pendientes menores de verificación (no bloquean): abrir un `.json` dañado y comprobar que el proyecto no cambia; deshacer justo después de abrir un archivo; uso manual de la F1 (seleccionar, mover, rotar, cables, paredes, puertas, escaleras, medir, deshacer/rehacer, guardar/abrir).
 
@@ -62,7 +65,10 @@ Pendientes menores de verificación (no bloquean): abrir un `.json` dañado y co
 | `js/tipos.js` | Tipo estable por objeto: `tipo` (pared, cable, dispositivo, rack, escalera, ascensor, ventana, puerta, forma, zona, texto, medida) y `sub` (`router`, `utp6`, `circulo`…). `derivarTipo` es el único lugar donde un nombre visible se traduce a tipo. Predicados `esPared`, `esCable`, `esEscalera`, `esAscensor`, `esCirculo`, `claveLinea`. Escaleras: variante en `o.t` (sin `t` = recta, `descanso`, `espiral`) |
 | `js/recursos.js` | Almacén `R` fuera de `S` y del historial: `R.imgs` (id por hash; PNG/JPEG/WebP validados por sus bytes; 5 MB por imagen, 50 MB por proyecto, 8 000 px por lado, 40 M de píxeles) y `R.modelos` (plantillas versionadas). Solo el almacén; la interfaz llega en la F4 |
 | `js/esquema.js` | Formato v2: `ESQ.leer` (valida con lista blanca, sanea y migra v1 → v2 sin tocar `S` ni `R`) y `ESQ.serializar` (rechaza lo que luego no se podría abrir). Todo campo nuevo se registra en `ESPEC` (R9) |
-| `js/catalogo.js` | Catálogo del menú izquierdo (`CAT`), `SH` (vértices de formas por subtipo), `menu()`, `setTool()` |
+| `js/iconos.js` | `ICONOS`: dibujos de los modelos. **Generado** por `iconos/generar.js` a partir de `iconos/*.svg`; no editar a mano |
+| `js/catalogo-pt.js` | Solo datos: `CATS` (subsecciones de «Dispositivos») y `PT` (plantillas de los modelos: `orig`, `corto`, `pre`, tamaño, puertos) |
+| `js/catalogo.js` | Catálogo del menú izquierdo (`CAT`), `SH` (vértices de formas por subtipo), `menu()`, `setTool()`. Pestaña «Dispositivos»: buscador y subsecciones (`listaDisp`); `menuSiCambio()` rehace el menú si cambió `S.propios` |
+| `js/modelos.js` | `TR.mod`: `equipo()` (objeto nuevo con su modelo y nombre con contador), diálogo de modelos propios (`<dialog id="dlg-mod">`: `abrir`, `guardar`, `borrarModelo`), sección «Modelo» del inspector (`seccion`, `fijarDato`). CSS en `css/modelos.css` |
 | `js/dibujo.js` | `draw()` por objeto y render en capas: `#vp` > `#g-grilla`, `#c` (objetos; lo que exporta el PNG), `#g-tmp` (lo temporal). `render()`, `repintarMovimiento()`, `status()` |
 | `js/historial.js` | Deshacer, rehacer, borrar. Interfaz `Hist` con estrategia intercambiable (snapshots de `S`, tope de 100 pasos y 50 M de caracteres, sin duplicar pasos idénticos) |
 | `js/archivos.js` | Guardar y abrir `.json` v2 (`abrirTexto` no toca nada si el archivo es inválido y restaura el proyecto ante un fallo), exportar PNG (`construirSvgExport`), «Nuevo» |
@@ -198,6 +204,30 @@ Referencia: Packet Tracer 9.0. Decisiones del usuario en la sección 0. Antes de
 6. Campos nuevos en `ESPEC` (R9): en el modelo `desc`, `precio`, `moneda`, `orig` (clave en el catálogo o «propio»).
 7. «Nuevo» vacía el portapapeles interno.
 8. Pruebas: cada modelo del catálogo pasa `ESQ.leer`; colocar copia el modelo una sola vez y ningún snapshot contiene `data:image`; crear, editar y borrar un modelo propio (con equipos colocados: un paso deshacible); ida y vuelta de archivo; un proyecto viejo se dibuja idéntico; el menú no se reconstruye al mover el ratón.
+
+**F4A — implementado (11/11/2026; pendiente de verificación manual).**
+- **Datos:** `S.propios` = ids de los modelos propios que ofrece el menú (dentro del proyecto y del historial; se guardan aunque no tengan equipos). Las plantillas de `R.modelos` no cambian de estructura: modificar nombre o puertos crea otra (`v + 1`, `base`) y pasa a ella los equipos colocados, en un paso. Campos nuevos del modelo en `ESPEC`: `orig`, `corto`, `pre`, `desc`, `precio`, `moneda`. Un equipo con modelo guarda `modelo`, `tipo`, `sub` y su nombre automático en `label`.
+- **Menú:** subsecciones Routers, Switches, Multilayer, Inalámbricos, Seguridad, Finales, IoT (plegada al empezar) y Otros (Rack). Buscador sin retardo (son ~35 entradas). Los modelos propios llevan un ✎ para modificarlos o borrarlos.
+- **Dibujo:** icono sin recuadro (`<symbol>` definido una vez dentro de `#c` + `<use>`), debajo modelo (`corto`) y nombre. Equipos sin modelo: igual que antes.
+- **Inspector:** sección «Modelo» (fabricante, descripción, precio, moneda ARS/USD/EUR). **Límite conocido:** esos cuatro datos se escriben directo en la plantilla y Ctrl+Z no los revierte.
+- **Otros límites:** borrar un modelo propio lo quita del menú pero los equipos colocados lo conservan; un modelo propio usa el icono de su categoría (`ic` en `CATS`: router 2911, switch 2960, multilayer 3560, access point, ISA-3000; pedido del usuario el 12/11/2026; las imágenes propias llegan en la F4B); pegar un equipo copia su nombre («Router1» repetido).
+- **Revisión thermo (12/11/2026) y correcciones aplicadas a pedido del usuario** (sin hallazgos críticos ni altos de bugs):
+  1. `idCatalogo` busca la plantilla solo entre los modelos que usa el proyecto (antes tomaba la de otro archivo abierto en la sesión, con su precio). Consecuencia: si se borran todos los equipos de un modelo del catálogo, el siguiente nace de una copia nueva, sin el precio cargado antes.
+  2. `menuSiCambio` suelta la herramienta si su modelo propio ya no está en `S.propios` (deshacer, borrar o abrir otro archivo).
+  3. El diálogo no se abre ni guarda ni borra para un modelo que ya no es propio; la firma del inspector incluye si el modelo es propio (el botón «Editar modelo…» aparece y desaparece solo).
+  4. Archivos manipulados: una plantilla sin tamaño, sin puertos o con otro `tipo` da un equipo normal (`equipo()` usa 0,44 × 0,30 y solo admite `dispositivo` o `rack`); un modelo propio de una categoría inexistente no entra en `propios`; un `orig` como `constructor` usa el icono genérico.
+  5. Una sola definición de qué es válido: `ESQ.campoModelo(k, v)`, `ESQ.CTRL` y `ESQ.LIM.corto`; `modelos.js` y `acciones.js` ya no repiten esas reglas. `guardar` valida los puertos con el esquema.
+  6. `TR.mod` ya no exporta lo que nadie usa. Además: el buscador no distingue acentos.
+  - **Hallazgos NO aplicados (para el arranque de la F4B, decisión del usuario):** sacar `dibujarEquipo` de `draw()`; mover `modeloDe`/`iconoDe` fuera de `dibujo.js`; llevar los manejadores de la sección «Modelo» a `inspector.js`; partir `pruebas.js` (≈1000 líneas) y hacer sus pruebas menos dependientes de ids fijos y del orden de `PT`; foco del teclado al cerrar el diálogo; conservar el `g` de cada grupo de puertos al editar (importa en la F7).
+- **Pruebas automatizadas (navegador integrado, `?pruebas=1`): 70 de 71** (8 de la F4A, todas aprobadas; falla solo la de la referencia, ausente en ese navegador). Además: el dibujo de los 6 proyectos de prueba dio la misma huella que el código del commit anterior (comparado en el mismo navegador), y el SVG de la exportación PNG cargó y pintó el icono. No se probó en Firefox ni Safari, ni el arrastre con ratón real.
+- **Comprobaciones manuales para el usuario:**
+  1. `?pruebas=1` → «Ejecutar pruebas»: 71 de 71 (en su navegador la referencia existe).
+  2. Abrir un proyecto viejo: se ve igual que antes.
+  3. Colocar equipos de cada subsección: icono sin recuadro, dos líneas debajo, nombres «Router1», «Router2»… Seleccionar, mover, rotar, copiar/pegar, unir un cable a un equipo.
+  4. Buscar en el menú; plegar y desplegar subsecciones.
+  5. «Router Empty»: crear un modelo, colocarlo, modificarlo con ✎ (los colocados cambian) y Ctrl+Z; borrarlo con equipos colocados (aviso).
+  6. Inspector: cargar precio y moneda; seleccionar otro equipo del mismo modelo y ver los mismos datos.
+  7. Guardar, «Nuevo», abrir: vuelven equipos, modelos propios (también los que no tienen equipos) y precios. Exportar PNG: salen los iconos.
 
 **F4B — Imágenes.** Se tocan `inspector.js`, `dibujo.js`, `recursos.js`, `archivos.js`, `modelos.js`, `pruebas.js`.
 1. Importar PNG/JPEG/WebP (sin SVG) con los límites de `R`; se asigna a un modelo o a un equipo. Cada equipo muestra su imagen o, si no tiene, su icono.
@@ -365,7 +395,7 @@ Comprobaciones manuales pendientes:
 
 ## 8. Mapa técnico para retomar
 
-**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `inspector` → `contexto` → `archivos` → `main` (siempre el último). `pruebas.js` se carga solo con `?pruebas=1`. CSS: `base`, `barra`, `menu`, `lienzo`, `plantas`, `dialogo`, `inspector`, `contexto`.
+**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `iconos` → `catalogo-pt` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `inspector` → `modelos` → `contexto` → `archivos` → `main` (siempre el último). `pruebas.js` se carga solo con `?pruebas=1`. CSS: `base`, `barra`, `menu`, `lienzo`, `plantas`, `dialogo`, `inspector`, `contexto`, `modelos`.
 
 **Estado global (`estado.js`):** `S` (proyecto; entra al historial), `V` (vista: `ox`, `oy`, `z` px/m), `sel`, `multi`, `selEdge`, `tool`, `tmp`, `drag`, `nid`, `curP`. `R` (recursos, `recursos.js`) está fuera de `S`. Namespace `TR` (`eventos.js`): `TR.stats`, `TR.ui`, `TR.acc`, `TR.insp`, `TR.ctx`. El código nuevo usa `TR`: las letras `I`, `L`, `T`, `S`, `V` ya están ocupadas.
 
@@ -380,7 +410,7 @@ Comprobaciones manuales pendientes:
 - Teclado (`controles.js`): G, F, H, M, R, Enter, Esc, Supr/Retroceso, Ctrl+Z/Y, Ctrl+C/X/V. No actúan con botón, resumen, checkbox o color enfocados, ni dentro de TEXTAREA. Con el menú contextual abierto solo flechas, Enter, Esc y Tab. Los atajos F, H, M, G y R ya estaban ocupados: los comandos nuevos van por menú contextual e inspector.
 - Clic derecho (`interaccion.js`): con herramienta u operación en curso cancela o termina; sin ellas abre el menú contextual.
 
-**Pruebas (`js/pruebas.js`, `?pruebas=1`, botón «Ejecutar pruebas»):** 63 casos (31 de F0 a F2B, 17 de la F3, 13 del cable por escaleras, 1 de escaleras entre plantas y 1 de la revisión del 11/11/2026). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar. Para pruebas nuevas, seguir ese patrón y no dejar pasos en el historial del usuario.
+**Pruebas (`js/pruebas.js`, `?pruebas=1`, botón «Ejecutar pruebas»):** 71 casos (31 de F0 a F2B, 17 de la F3, 13 del cable por escaleras, 1 de escaleras entre plantas, 1 de la revisión del 11/11/2026 y 8 de la F4A; estas usan `f4(fn)`: recursos vacíos, proyecto vacío y menú en «Dispositivos»). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar. Para pruebas nuevas, seguir ese patrón y no dejar pasos en el historial del usuario.
 - **Aviso importante:** la prueba «el dibujo es idéntico a la referencia» usa una referencia guardada en el `localStorage` del navegador (clave `topologias_ref_f0`). En otro navegador, otra cuenta o tras limpiar datos no existe y esa prueba fallará por eso, no por un error del código. Se genera con «Guardar referencia de dibujo» usando una versión del código cuyo dibujo se considere correcto. No sobrescribir la del usuario sin avisarle.
 - «Medir rendimiento» compara contra una base de la F0 (render ~50 ms, mover sin arrastrar ~44 ms con 3000 objetos). En la última medición del usuario (01/11/2026) el render dio 50,6 ms y mover sin arrastrar 0 ms.
 
@@ -393,6 +423,8 @@ Comprobaciones manuales pendientes:
 
 ## 9. Registro de cambios
 
+- 12/11/2026: modelos propios con el icono de su categoría; Rack con icono confirmado. Revisión thermo de la F4A y 6 correcciones aplicadas (sección 5): 70/71 pruebas en el navegador integrado; pendiente de verificación manual.
+- 11/11/2026: el usuario respondió las preguntas abiertas de la F4, pidió dibujar los equipos sin recuadro y dio la orden. **F4A implementada**: 69/70 pruebas en el navegador integrado; pendiente de verificación manual.
 - 27–28/10/2026: auditoría, decisiones D1–D15, fases F0 y F1 completadas; F2A entregada y verificada.
 - 31/10/2026: F2B aplicada y verificada (31 pruebas, dibujo idéntico); F2 completada. Decisiones confirmadas por el usuario (ver sección 6).
 - 01/11/2026: F3 diseñada, implementada y verificada por el usuario (46/46, dibujo idéntico, uso manual correcto); **cerrada**.

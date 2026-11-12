@@ -56,7 +56,7 @@ svg.addEventListener('pointerdown', e => {
   if (usaDosPuntos(tool)) { snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e)); if (snapPt) p = { x: snapPt.x, y: snapPt.y }; }   // escalera y formas: se pegan a los extremos de las paredes o, con ◇ Medio, a los puntos medios
   else if (medioOn && tool.k != 'medida' && tool.k != 'line') { snapPt = null; snapMedio = false; imanMedio(rawW(e)); if (snapMedio) p = { x: snapPt.x, y: snapPt.y }; }   // colocar justo en el punto medio
   if (usaDosPuntos(tool)) clicDosPuntos(p, e);               // escalera y formas: dos puntos (ver colocar.js)
-  else if (tool.k == 'item') add({ k: 'item', n: tool.n, ic: tool.ic, w: tool.w, h: tool.h, x: p.x, y: p.y, label: '' });
+  else if (tool.k == 'item') add(tool.pt || tool.mid ? TR.mod.equipo(tool, p) : { k: 'item', n: tool.n, ic: tool.ic, w: tool.w, h: tool.h, x: p.x, y: p.y, label: '' });   // F4A: los equipos del catálogo y los modelos propios nacen con su modelo (modelos.js)
   else if (tool.k == 'texto') { const t = prompt('Texto:'); if (t) add({ k: 'texto', x: p.x, y: p.y, label: t }); }
   else if (tool.k == 'zona') { tmp = { k: 'zona', s: tool.s, x: p.x, y: p.y, w: 0, h: 0, c: col(), f: fil(), ls: lin(), label: '' }; drag = { m: 'zona', x0: p.x, y0: p.y }; }
   else if (tool.k == 'medida') {

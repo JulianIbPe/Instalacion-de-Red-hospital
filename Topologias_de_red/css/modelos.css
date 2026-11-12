@@ -1,0 +1,16 @@
+/* modelos.css: diálogo de modelos propios («… Empty»), ver js/modelos.js */
+#dlg-mod{width:min(540px,94vw);padding:22px;border:0;border-radius:12px;background:#fff;color:var(--texto);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#dlg-mod::backdrop{background:rgba(20,35,43,.55)}
+#dlg-mod h3{margin:0 0 12px;font-size:18px}
+#dlg-mod .dm-f{display:grid;gap:4px;margin-bottom:12px;font-size:13px}
+#dlg-mod input,#dlg-mod select{min-width:0;padding:6px 8px;border:1px solid var(--borde);border-radius:6px;background:#fff;color:var(--texto);font:inherit}
+#dlg-mod .dm-h,#dlg-mod .dm-r{display:grid;grid-template-columns:74px 1fr 1fr 32px;gap:6px;align-items:center}
+#dlg-mod .dm-h{margin-bottom:4px;color:#5d7078;font-size:12px}
+#dm-g{display:grid;gap:6px;max-height:38vh;overflow-y:auto;margin-bottom:8px}
+#dlg-mod .dm-r button,#dm-add{padding:5px 8px;border:1px solid var(--borde);border-radius:6px;background:#fff;color:var(--texto)}
+#dlg-mod .dm-r button:hover,#dm-add:hover{background:#eef2f4}
+#dm-uso{margin:10px 0 0;color:#5d7078;font-size:12.5px;line-height:1.4}
+#dm-err{min-height:1.3em;margin:8px 0;color:#b52b27;font-size:13px}
+#dlg-mod .acc{flex-direction:row;flex-wrap:wrap;justify-content:flex-end}
+#dm-del{margin-right:auto}
+#dm-del[hidden]{display:none}

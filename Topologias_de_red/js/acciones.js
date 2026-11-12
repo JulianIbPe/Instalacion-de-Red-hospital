@@ -8,7 +8,7 @@
 //   · D16: el color de un cable no se puede cambiar (las paredes sí); D18: la mesa (F6) se agrega a TR.acc.sinColor;
 //   · una escalera editada (posición, tamaño o giro) se valida contra las plantas de abajo y de arriba y la misma planta, como al colocarla: si obstruye se rechaza, se avisa y no se guarda nada.
 TR.acc = (() => {
-  const LIM = ESQ.LIM, CTRL = /[\u0000-\u001f\u007f]/g, OFFSET = .5, MIN = .2;   // OFFSET = desplazamiento de una copia (m); MIN = tamaño mínimo (igual que las asas)
+  const LIM = ESQ.LIM, CTRL = ESQ.CTRL, OFFSET = .5, MIN = .2;   // OFFSET = desplazamiento de una copia (m); MIN = tamaño mínimo (igual que las asas)
   const campos = [], acciones = [], sinColor = [];                                   // sinColor: predicados (o => bool) de objetos cuyo color no se puede cambiar
   const colorable = o => !!o.c && !esCable(o) && !sinColor.some(f => f(o));
   const rellenable = o => o.k == 'shape' || o.k == 'zona';

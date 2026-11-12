@@ -12,7 +12,7 @@ $('#save').onclick = guardarJson;
 
 // ---------- Archivo nuevo ----------
 function nuevoArchivo() {                       // vacía todo y deja la página como al abrirla (la unidad de medición se conserva)
-  hist.length = 0; fut.length = 0; R.vaciar();
+  hist.length = 0; fut.length = 0; R.vaciar(); TR.acc.portapapeles.length = 0;   // el portapapeles podría apuntar a modelos o imágenes que ya no existen
   S = estadoInicial(S.unidad); nid = 1; panel(); V = { ox: 40, oy: 40, z: 50 };
   $('#bw').value = 20; $('#bh').value = 12; setTool(null);   // setTool también limpia la selección y vuelve a dibujar
 }

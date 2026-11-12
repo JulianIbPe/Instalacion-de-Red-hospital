@@ -1,8 +1,9 @@
 // ===== recursos.js: almacén de recursos pesados (imágenes y plantillas de modelo), separado del estado S y del historial (Fase 2) =====
 // R.imgs    { id: {mime, data (data URI), w, h, bytes, nombre} }. El id sale del CONTENIDO (hash): la misma imagen nunca se guarda dos veces y,
 //           al abrir otro proyecto, las imágenes se unen sin renumerar (por eso deshacer sigue funcionando tras abrir).
-// R.modelos { id: {nombre, marca, cat, tipo, sub, w, h, ic, img, uAlto, uTotal, puertos:[{g, n, tipo, vel, pref}], v, base} }. Las plantillas están versionadas:
-//           editar una crea una versión nueva (nunca se altera en silencio lo ya colocado). Aquí solo está el almacén; la edición llega en la Fase 4.
+// R.modelos { id: {nombre, marca, cat, tipo, sub, w, h, ic, img, uAlto, uTotal, puertos:[{g, n, tipo, vel, pref}], v, base, orig, corto, pre, desc, precio, moneda} }.
+//           Las plantillas están versionadas: editar nombre o puertos crea una versión nueva (nunca se altera en silencio lo ya colocado); ver modelos.js (F4A).
+//           orig = clave en catalogo-pt.js o 'propio'. Los modelos propios que ofrece el menú están en S.propios (dentro del proyecto y del historial).
 // Los objetos de S solo guardan referencias (o.img = id de imagen, o.modelo = id de modelo): los snapshots del historial nunca contienen imágenes.
 // Límites iniciales (ajustables en R.limites): 5 MB por imagen, 50 MB de imágenes por proyecto, 8000 px por lado, 40 millones de píxeles.
 // Los límites se aplican igual al importar, pegar, guardar y abrir.
@@ -59,6 +60,7 @@ const R = {
   limites: { imagen: 5 * MB, total: 50 * MB, lado: 8000, pixeles: 40e6 },
   totalBytes() { return totalBytesDe(this.imgs); },
   vaciar() { this.imgs = {}; this.modelos = {}; this.nm = 0; },
+  agregarModelo(m) { let id; do { id = 'm' + (++this.nm); } while (this.modelos[id]); this.modelos[id] = m; return id; },   // las plantillas no se modifican en su estructura: editar puertos o nombre crea otra (modelos.js)
   agregarImagen(uri, nombre = '') {       // importar o pegar: valida formato real, dimensiones y límites; no duplica una imagen repetida
     const v = validarImagen(uri, this.limites); if (!v.ok) return v;
     const id = idImagen(uri), ya = this.imgs[id];
@@ -70,6 +72,7 @@ const R = {
   referenciadas(estado) {                 // ids de imágenes y de modelos que usa el proyecto (los modelos usados también aportan su imagen)
     const mod = new Set(), img = new Set();
     (estado.objs || []).forEach(o => { if (o.modelo) mod.add(o.modelo); if (o.img) img.add(o.img); });
+    (estado.propios || []).forEach(m => mod.add(m));   // los modelos propios del proyecto se guardan aunque no tengan equipos colocados
     mod.forEach(m => { const x = this.modelos[m]; if (x && x.img) img.add(x.img); });
     return { img, mod };
   },
@@ -94,5 +97,5 @@ const R = {
     if (!opc.simular) { nuevos.forEach(([id, im]) => { this.imgs[id] = { ...im }; }); Object.assign(this.modelos, modelos); this.nm = Math.max(nm, this.nm, ...Object.keys(this.modelos).map(k => +k.slice(1) || 0)); }
     return { ok: true, mapa };
   },
-  remapEstado(estado, mapa) { (estado.objs || []).forEach(o => { if (o.modelo && mapa[o.modelo]) o.modelo = mapa[o.modelo]; }); }
+  remapEstado(estado, mapa) { (estado.objs || []).forEach(o => { if (o.modelo && mapa[o.modelo]) o.modelo = mapa[o.modelo]; }); if (estado.propios) estado.propios = estado.propios.map(m => mapa[m] || m); }
 };

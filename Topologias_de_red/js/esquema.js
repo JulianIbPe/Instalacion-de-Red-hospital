@@ -9,7 +9,7 @@
 // REGLA R9: todo campo nuevo de un objeto debe añadirse aquí (ESPEC); si no, se omite al abrir. La prueba de ida y vuelta lo detecta.
 const ESQ = (() => {
   const VERSION = 2, FORMATO = 'topologias-de-red';
-  const LIM = { objetos: 100000, puntos: 10000, texto: 500, nombre: 100, coord: 1e5, plantas: 200, capas: 200, modelos: 500, grupos: 32 };
+  const LIM = { objetos: 100000, puntos: 10000, texto: 500, nombre: 100, coord: 1e5, plantas: 200, capas: 200, modelos: 500, grupos: 32, corto: 20 };   // corto = largo de los nombres cortos (modelo bajo el equipo, prefijo, nombre de puerto)
   const INV = Symbol('inválido');
   const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
   const RE_ID = /^[A-Za-z0-9_-]{1,32}$/, RE_COLOR = /^#[0-9a-fA-F]{3,8}$/, RE_DASH = /^[0-9. ]{0,40}$/, RE_ETQ = /^[a-z0-9-]{1,32}$/, RE_IMG = /^i_[0-9a-f]{8,14}$/, RE_MOD = /^m\d{1,9}$/;
@@ -52,7 +52,8 @@ const ESQ = (() => {
     puerta: { req: ['pared', 'si', 's', 'w', 'lado', 'hojas', 'bis'], f: { pared: idNum, si: entero(0, LIM.puntos), s: numero(0, 1e5), w: numero(0.01, 1e3), lado: en([1, -1]), hojas: en([1, 2]), bis: en(['izq', 'der']) } }
   };
   const MODELO = { nombre: texto(LIM.nombre), marca: texto(LIM.nombre), cat: etq, tipo: v => own(TIPOS, v) ? v : INV, sub: etq, w: numero(0.01, 100), h: numero(0.01, 100), ic: icono, img: patron(RE_IMG), uAlto: entero(1, 60), uTotal: entero(1, 60), v: entero(1, 1e6), base: patron(RE_MOD),
-    puertos: lista((g, c) => { if (!g || typeof g != 'object') return INV; const r = {}; for (const [k, f] of [['g', patron(/^g\d{1,3}$/, 8)], ['n', entero(1, 512)], ['tipo', etq], ['vel', texto(10)], ['pref', texto(20)]]) { if (g[k] === undefined) continue; const v = f(g[k], c); if (v === INV) return INV; r[k] = v; } return r.g && r.n ? r : INV; }, 0, LIM.grupos) };
+    orig: etq, corto: texto(LIM.corto), pre: texto(LIM.corto), desc: texto(LIM.texto), precio: numero(0, 1e12), moneda: patron(/^[A-Z]{3}$/, 3),   // F4A: orig = clave en catalogo-pt.js o 'propio'; el precio es del modelo
+    puertos: lista((g, c) => { if (!g || typeof g != 'object') return INV; const r = {}; for (const [k, f] of [['g', patron(/^g\d{1,3}$/, 8)], ['n', entero(1, 512)], ['tipo', etq], ['vel', texto(10)], ['pref', texto(LIM.corto)]]) { if (g[k] === undefined) continue; const v = f(g[k], c); if (v === INV) return INV; r[k] = v; } return r.g && r.n ? r : INV; }, 0, LIM.grupos) };
 
   function sanearObjeto(c, o, i) {
     if (!o || typeof o != 'object' || Array.isArray(o)) return error(c, `objeto ${i + 1}: no es un objeto`);
@@ -93,7 +94,7 @@ const ESQ = (() => {
   }
   function sanearEstado(c, d) {
     if (!d || typeof d != 'object' || Array.isArray(d)) return error(c, 'El archivo no contiene un proyecto');
-    for (const k of Object.keys(d)) if (!['version', 'formato', 'edificio', 'unidad', 'plantas', 'plantaAct', 'capaAct', 'pn', 'cn', 'objs'].includes(k)) aviso(c, 'campos desconocidos omitidos');
+    for (const k of Object.keys(d)) if (!['version', 'formato', 'edificio', 'unidad', 'plantas', 'plantaAct', 'capaAct', 'pn', 'cn', 'objs', 'propios'].includes(k)) aviso(c, 'campos desconocidos omitidos');
     if (!Array.isArray(d.objs)) return error(c, 'Falta la lista de objetos («objs»)');
     if (d.objs.length > LIM.objetos) return error(c, `El proyecto tiene ${d.objs.length} objetos; el máximo es ${LIM.objetos}`);
     const r = {};
@@ -115,6 +116,7 @@ const ESQ = (() => {
       if (plantasOk && q.pl !== undefined) { const caps = plantasOk.get(q.pl); if (!caps) { delete q.pl; delete q.cp; aviso(c, 'uniones a objetos inexistentes soltadas'); } else if (q.cp !== undefined && !caps.has(q.cp)) { delete q.cp; aviso(c, 'uniones a objetos inexistentes soltadas'); } }
     }); });
     r.objs = objs.filter(o => { if (o.k != 'puerta') return true; const w = porId.get(o.pared); if (w && w.k == 'line') return true; aviso(c, 'puertas sin pared omitidas'); return false; });
+    if (d.propios !== undefined) { const v = lista(patron(RE_MOD), 0, LIM.modelos)(d.propios, c); if (v === INV) aviso(c, 'valores inválidos omitidos'); else if (v.length) r.propios = [...new Set(v)]; }   // F4A: modelos propios que ofrece el menú
     return r;
   }
   function sanearRecursos(c, rec) {
@@ -159,6 +161,8 @@ const ESQ = (() => {
       if (o.modelo && !recursos.modelos[o.modelo]) { delete o.modelo; aviso(c, 'referencias a modelos inexistentes omitidas'); }
       completarTipo(o);                   // migración v1 → v2: los objetos antiguos reciben su tipo estable
     });
+    // un modelo propio debe existir y ser de una categoría con «Empty» (catalogo-pt.js); si no, el menú no podría mostrarlo
+    if (estado.propios) { const n = estado.propios.length; estado.propios = estado.propios.filter(m => recursos.modelos[m] && CATS.some(k => k.uno && k.id == recursos.modelos[m].cat)); if (estado.propios.length != n) aviso(c, 'referencias a modelos inexistentes omitidas'); if (!estado.propios.length) delete estado.propios; }
     return { ok: true, version, estado, recursos, avisos: [...c.av].map(([m, n]) => n > 1 ? `${m} (${n})` : m) };
   }
   function serializar(estado, rec = R) {  // texto de un archivo v2; se rechaza lo que luego no se podría volver a abrir
@@ -169,5 +173,6 @@ const ESQ = (() => {
     if (!chk.ok) return { ok: false, error: 'El proyecto actual no se puede guardar porque no pasaría la validación al abrirlo:\n' + chk.errores.slice(0, 5).join('\n') };
     return { ok: true, texto: txt, avisos: chk.avisos };
   }
-  return { VERSION, FORMATO, leer, serializar, sanearEstado, sanearRecursos, LIM };
+  const campoModelo = (k, v) => { const r = own(MODELO, k) ? MODELO[k](v, { av: new Map() }) : INV; return r === INV ? undefined : r; };   // valor saneado de un campo de modelo, o undefined si no vale (lo usa modelos.js: una sola definición de qué es válido)
+  return { VERSION, FORMATO, leer, serializar, sanearEstado, sanearRecursos, LIM, CTRL, campoModelo };
 })();
