@@ -72,5 +72,6 @@ $('#png').onclick = () => {
   const img = new Image(); img.onload = () => {
     const cv = document.createElement('canvas'); cv.width = w * k; cv.height = h * k; cv.getContext('2d').drawImage(img, 0, 0);
     cv.toBlob(bl => download(URL.createObjectURL(bl), 'topologia.png'));
-  }; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+  }; img.onerror = () => alert('No se pudo exportar el PNG. Si el proyecto tiene imágenes muy pesadas, probá con imágenes más livianas.');
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
 };

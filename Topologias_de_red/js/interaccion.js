@@ -105,7 +105,7 @@ svg.addEventListener('pointermove', e => {
       const o = d.o; if (!d.pu && (p.x != d.p0.x || p.y != d.p0.y || o.k == 'puerta')) { push(); d.pu = 1; }
       if (o.k == 'zona') redimZona(o, p);
       else if (o.k == 'puerta') redimPuerta(o, d.h, rawW(e));
-      else if (o.k == 'item' && esEscalera(o)) redimensionarRot(o, d.h, p);
+      else if (o.k == 'item') (esImagen(o) ? redimProporcional : redimensionarRot)(o, d.h, p, d.ar ||= o.w / o.h);   // escaleras e imágenes sueltas (las esquinas de una imagen conservan la proporción que tenía al empezar el arrastre)
       else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else redimensionarRot(o, d.h, p); }
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
       else { const it = itemAt(e), v = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p, antes = o.pts[d.h]; if (antes.pl) { v.pl = antes.pl; v.cp = antes.cp; } o.pts[d.h] = v; }   // el punto conserva su planta y capa

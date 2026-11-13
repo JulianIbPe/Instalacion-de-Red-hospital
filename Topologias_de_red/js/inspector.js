@@ -7,14 +7,14 @@
 // · Cada campo queda atado a los ids de la última construcción (no a la selección actual).
 TR.insp = (() => {
   const raiz = $('#insp'), cuerpo = $('#insp-cuerpo'), btn = $('#binsp');
-  const SECCIONES = [['objeto', 'Objeto'], ['modelo', 'Modelo'], ['geo', 'Posición y tamaño'], ['apar', 'Apariencia'], ['acc', 'Acciones']];
-  const TIPO_NOM = { pared: 'Pared', cable: 'Cable', dispositivo: 'Dispositivo', rack: 'Rack', escalera: 'Escalera', ascensor: 'Ascensor', ventana: 'Ventana', puerta: 'Puerta', forma: 'Forma', zona: 'Zona', texto: 'Texto', medida: 'Medida' };
-  const abiertas = { objeto: true, modelo: true, geo: true, apar: true, acc: true };   // estado de las secciones contraíbles (de interfaz: fuera de S y del historial)
+  const SECCIONES = [['objeto', 'Objeto'], ['modelo', 'Modelo'], ['imagen', 'Imagen'], ['geo', 'Posición y tamaño'], ['apar', 'Apariencia'], ['acc', 'Acciones']];
+  const TIPO_NOM = { pared: 'Pared', cable: 'Cable', dispositivo: 'Dispositivo', rack: 'Rack', escalera: 'Escalera', ascensor: 'Ascensor', ventana: 'Ventana', imagen: 'Imagen', puerta: 'Puerta', forma: 'Forma', zona: 'Zona', texto: 'Texto', medida: 'Medida' };
+  const abiertas = { objeto: true, modelo: true, imagen: true, geo: true, apar: true, acc: true };   // estado de las secciones contraíbles (de interfaz: fuera de S y del historial)
   const gestoC = { p: false };                                            // un solo paso de historial por gesto del selector de color
   let firma = null, ids = [], visible = window.innerWidth > 760;
   const fmtNum = v => String(+Number(v).toFixed(3));
   const tipoTxt = os => { if (os.length > 1) return os.length + ' objetos'; const o = os[0], s = subDe(o); return (TIPO_NOM[tipoDe(o)] || tipoDe(o)) + (s && s != 'otro' ? ' · ' + s : ''); };
-  const firmaDe = os => os.map(o => o.id + ':' + o.k + ':' + tipoDe(o) + '/' + (subDe(o) || '') + ':' + (o.modelo || '') + (o.modelo && TR.mod.esPropio(o.modelo) ? '*' : '')).join('|');   // '*': modelo propio (ofrece «Editar modelo…»)
+  const firmaDe = os => os.map(o => o.id + ':' + o.k + ':' + tipoDe(o) + '/' + (subDe(o) || '') + ':' + (o.modelo || '') + (o.modelo && TR.mod.esPropio(o.modelo) ? '*' : '') + ':' + (o.img || '') + '/' + ((modeloDe(o) || {}).img || '')).join('|');   // '*': modelo propio (ofrece «Editar modelo…»); las imágenes activan o desactivan los «Quitar» de la sección «Imagen»
   const aplicables = (def, os) => os.filter(def.aplica);
   function textoDe(def, os) {                                             // valor común como texto ('' si no hay o si difieren)
     const vs = aplicables(def, os).map(def.leer); if (!vs.length || !vs.every(v => v === vs[0])) return '';
@@ -36,6 +36,7 @@ TR.insp = (() => {
       let c = '';
       if (sid == 'objeto') c += `<div class="fila"><span>Tipo</span><b>${esc(tipoTxt(os))}</b></div>`;
       if (sid == 'modelo') c += TR.mod.seccion(os);                       // F4A: datos del modelo (modelos.js); no son campos del objeto
+      if (sid == 'imagen') c += TR.img.seccion(os);                       // F4B: imagen del equipo y de su modelo (imagenes.js)
       if (sid == 'acc') c += '<div class="botones">' + TR.acc.paraInspector(os).map(a => `<button data-acc="${a.id}"${a.habil ? '' : ' disabled'}>${esc(a.texto)}</button>`).join('') + '</div>';
       else c += TR.acc.campos.filter(d => d.sec == sid && (uno || d.multi) && os.some(d.aplica)).map(d => fila(d, os)).join('');
       if (sid == 'apar' && os.some(esCable)) c += '<p class="nota">El color de un cable lo define su tipo y no se puede cambiar.</p>';

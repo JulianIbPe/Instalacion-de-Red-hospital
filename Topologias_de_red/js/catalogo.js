@@ -15,7 +15,7 @@ const CAT = {
   'Eléctrico': [I('Lámpara', '💡', .5, .5), I('Enchufe', '🔌', .4, .4), I('Interruptor', '🎚️', .4, .4), I('UPS', '🔋'), I('Tablero', '⚡', .6, .8), L('Cable de energía', '#e74c3c', .05, '.3 .08')],
   // Las escaleras nuevas llevan esc ('descanso' | 'espiral'): al colocarlas se guardan como {n:'Escalera', t: esc} (ver colocar.js)
   'Edificio': [L('Pared', '#444444', .2), { k: 'puerta', n: 'Puerta' }, I('Ventana', '🪟', 1.2, .4), I('Escalera', '🪜', 1.2, 2.8), { ...I('Escalera con descanso', '🪜', 1.6, 2.8), esc: 'descanso' }, { ...I('Escalera espiral', '🪜', 1.8, 1.8), esc: 'espiral' }, I('Ascensor', '🛗', 1.5, 1.5)],
-  'Marcar': [{ k: 'zona', n: 'Zona rectangular', s: 'r' }, { k: 'zona', n: 'Zona elíptica', s: 'e' }, { k: 'texto', n: 'Texto libre' }]
+  'Marcar': [{ k: 'zona', n: 'Zona rectangular', s: 'r' }, { k: 'zona', n: 'Zona elíptica', s: 'e' }, { k: 'texto', n: 'Texto libre' }, { n: 'Imagen…', ic: '🖼️', accion: () => TR.img.elegir(TR.img.colocar) }]   // una entrada con `accion` no es una herramienta: al pulsarla se ejecuta («Imagen…» abre el selector de archivos y coloca la imagen, imagenes.js)
 };
 let tab = 'Dispositivos';
 const TI = { Dispositivos: '🖥️', Cables: '🔗', Formas: '🔷', 'Eléctrico': '⚡', Edificio: '🏢', Marcar: '🏷️' };
@@ -62,7 +62,7 @@ $('#items').onclick = e => {
   if (d.empty) TR.mod.abrir(d.empty);                                   // «… Empty»: diálogo de modelo propio (modelos.js)
   else if (d.ed) TR.mod.abrir(null, d.ed);
   else if (d.m) setTool(tool && tool.mid == d.m ? null : { k: 'item', mid: d.m });   // modelo propio: nombre y tamaño se leen del modelo al colocar
-  else if (d.i) { const t = CAT[tab][d.i]; setTool(tool === t ? null : t); }           // volver a pulsar el objeto ya elegido lo suelta y activa Seleccionar
+  else if (d.i) { const t = CAT[tab][d.i]; if (t.accion) return t.accion(); setTool(tool === t ? null : t); }           // volver a pulsar el objeto ya elegido lo suelta y activa Seleccionar
 };
 $('#items').addEventListener('input', e => { if (e.target.id == 'busca') { busca = e.target.value; $('#lista-disp').innerHTML = listaDisp(); } });   // buscar rehace solo la lista (el campo conserva el foco)
 $('#items').addEventListener('toggle', e => { const c = e.target.dataset && e.target.dataset.cat; if (c && !busca.trim()) catAbierta[c] = e.target.open; }, true);

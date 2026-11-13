@@ -5,7 +5,7 @@
 // sub  = variante estable (p. ej. 'router', 'utp6', 'circulo'). Las escaleras mantienen su variante en o.t (sin t = recta, 'descanso', 'espiral').
 // derivarTipo() es el ÚNICO lugar donde los nombres visibles se traducen a tipos (objetos de proyectos antiguos y piezas aún sin tipo).
 const TIPOS = {
-  pared: { k: 'line' }, cable: { k: 'line' }, dispositivo: { k: 'item' }, rack: { k: 'item' }, escalera: { k: 'item' }, ascensor: { k: 'item' }, ventana: { k: 'item' },
+  pared: { k: 'line' }, cable: { k: 'line' }, dispositivo: { k: 'item' }, rack: { k: 'item' }, escalera: { k: 'item' }, ascensor: { k: 'item' }, ventana: { k: 'item' }, imagen: { k: 'item' },   // imagen = imagen suelta en el plano (F4B)
   puerta: { k: 'puerta' }, forma: { k: 'shape' }, zona: { k: 'zona' }, texto: { k: 'texto' }, medida: { k: 'medida' }
 };
 const SUB_CABLE = { 'UTP Cat6': 'utp6', 'Fibra óptica': 'fibra', 'Coaxial': 'coaxial', 'Serial': 'serial', 'Inalámbrico': 'inalambrico', 'Cable de energía': 'energia' };
@@ -38,6 +38,7 @@ const esPared = o => tipoDe(o) == 'pared';
 const esCable = o => tipoDe(o) == 'cable';
 const esEscalera = o => tipoDe(o) == 'escalera';
 const esAscensor = o => tipoDe(o) == 'ascensor';
+const esImagen = o => tipoDe(o) == 'imagen';     // imagen suelta en el plano (imagenes.js)
 const esCirculo = o => o.k == 'shape' && subDe(o) == 'circulo';
 const claveLinea = o => esPared(o) ? 'pared' : subDe(o);   // las líneas del mismo tipo comparten nodos (ver nodos.js)
 function normalizarTipos() { S.objs.forEach(completarTipo); }

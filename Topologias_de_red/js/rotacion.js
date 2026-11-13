@@ -61,3 +61,9 @@ function redimensionarRot(o, h, p) {     // como redimensionar, pero en el siste
   const ox = o.x, oy = o.y; redimensionar(o, h, rotP(p, { x: ox, y: oy }, -o.rot));
   const s = rotP({ x: o.x - ox, y: o.y - oy }, { x: 0, y: 0 }, o.rot); o.x = r3(ox + s.x); o.y = r3(oy + s.y);
 }
+function redimProporcional(o, h, p, ar = o.w / o.h) {   // imagen suelta: las asas de esquina conservan la proporción ar (ancho / alto) con la esquina opuesta fija; las de los costados estiran
+  const [fx, fy] = ASAS[h]; if (!fx || !fy || !(ar > 0 && isFinite(ar))) return redimensionarRot(o, h, p);   // costado, o tamaño sin proporción válida (ancho o alto 0 en un archivo)
+  const g = { x: o.x, y: o.y, w: o.w, h: o.h };
+  redimensionarRot(o, h, p); const w = Math.max(o.w, o.h * ar), al = w / ar; Object.assign(o, g);   // tamaño que pide el cursor, llevado a la proporción; se vuelve a redimensionar hacia la esquina que da ese tamaño
+  redimensionarRot(o, h, rotP({ x: g.x + fx * (w - g.w / 2), y: g.y + fy * (al - g.h / 2) }, g, o.rot || 0));
+}
