@@ -43,7 +43,7 @@ const ESQ = (() => {
 
   const COMUNES = { pl: idTxt, cp: idTxt, tipo: v => own(TIPOS, v) ? v : INV, sub: etq };
   const ESPEC = {
-    item: { req: ['x', 'y', 'w', 'h'], f: { n: texto(LIM.nombre), ic: icono, x: coord, y: coord, w: dim, h: dim, rot: ang, label: texto(LIM.texto), c: color, t: en(['descanso', 'espiral']), img: patron(RE_IMG), modelo: patron(RE_MOD) } },
+    item: { req: ['x', 'y', 'w', 'h'], f: { n: texto(LIM.nombre), ic: icono, x: coord, y: coord, w: dim, h: dim, rot: ang, label: texto(LIM.texto), c: color, t: en(['descanso', 'espiral']), img: patron(RE_IMG), modelo: patron(RE_MOD), puestos: entero(1, 50), parent: idNum, puesto: entero(0, 49), lrot: ang } },   // F6: mesa (puestos) y equipo sobre una mesa (parent, puesto, lrot)
     line: { req: ['pts'], def: { c: '#444444', w: 0.06 }, f: { n: texto(LIM.nombre), c: color, w: numero(0.001, 50), d: dash, pts: lista(punto, 1, LIM.puntos), label: texto(LIM.texto) } },
     shape: { req: ['x', 'y', 'w', 'h'], f: { n: texto(LIM.nombre), x: coord, y: coord, w: dim, h: dim, rot: ang, c: color, f: patron(/^[a-z0-9-]{1,16}$/, 16), ls: en(['con', 'par', 'dis', 'pun', 'mix']), label: texto(LIM.texto), u: lista(vertice, 3, 1000), hid: lista(entero(0, 1000), 0, 1000) } },
     zona: { req: ['s', 'x', 'y', 'w', 'h'], f: { s: en(['r', 'e']), n: texto(LIM.nombre), x: coord, y: coord, w: dim, h: dim, rot: ang, c: color, f: patron(/^[a-z0-9-]{1,16}$/, 16), ls: en(['con', 'par', 'dis', 'pun', 'mix']), label: texto(LIM.texto) } },

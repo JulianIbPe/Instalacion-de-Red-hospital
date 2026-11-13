@@ -8,7 +8,7 @@
 TR.insp = (() => {
   const raiz = $('#insp'), cuerpo = $('#insp-cuerpo'), btn = $('#binsp');
   const SECCIONES = [['objeto', 'Objeto'], ['modelo', 'Modelo'], ['imagen', 'Imagen'], ['geo', 'Posición y tamaño'], ['apar', 'Apariencia'], ['acc', 'Acciones']];
-  const TIPO_NOM = { pared: 'Pared', cable: 'Cable', dispositivo: 'Dispositivo', rack: 'Rack', escalera: 'Escalera', ascensor: 'Ascensor', ventana: 'Ventana', imagen: 'Imagen', puerta: 'Puerta', forma: 'Forma', zona: 'Zona', texto: 'Texto', medida: 'Medida' };
+  const TIPO_NOM = { pared: 'Pared', cable: 'Cable', dispositivo: 'Dispositivo', rack: 'Rack', escalera: 'Escalera', ascensor: 'Ascensor', ventana: 'Ventana', imagen: 'Imagen', mesa: 'Mesa', puerta: 'Puerta', forma: 'Forma', zona: 'Zona', texto: 'Texto', medida: 'Medida' };
   const abiertas = { objeto: true, modelo: true, imagen: true, geo: true, apar: true, acc: true };   // estado de las secciones contraíbles (de interfaz: fuera de S y del historial)
   const gestoC = { p: false };                                            // un solo paso de historial por gesto del selector de color
   let firma = null, ids = [], visible = window.innerWidth > 760;

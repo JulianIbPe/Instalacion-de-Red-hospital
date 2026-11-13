@@ -87,6 +87,7 @@
 <script src="js/interaccion.js"></script>
 <script src="js/controles.js"></script>
 <script src="js/acciones.js"></script>
+<script src="js/jerarquia.js"></script>
 <script src="js/inspector.js"></script>
 <script src="js/modelos.js"></script>
 <script src="js/imagenes.js"></script>
@@ -99,7 +100,7 @@ if (typeof menu !== 'function') document.body.innerHTML = '<div style="padding:3
 </script>
 <script>
 // Pruebas de desarrollo: solo se cargan al abrir index.html?pruebas=1 (no afectan al uso normal)
-if (/[?&]pruebas(=|&|$)/.test(location.search) && typeof menu === 'function') ['js/pruebas.js', 'js/pruebas-f4.js'].forEach(src => { const s = document.createElement('script'); s.src = src; s.async = false; document.body.appendChild(s); });   // async = false: se ejecutan en este orden
+if (/[?&]pruebas(=|&|$)/.test(location.search) && typeof menu === 'function') ['js/pruebas.js', 'js/pruebas-f4.js', 'js/pruebas-f6.js'].forEach(src => { const s = document.createElement('script'); s.src = src; s.async = false; document.body.appendChild(s); });   // async = false: se ejecutan en este orden
 </script>
 </body>
 </html>

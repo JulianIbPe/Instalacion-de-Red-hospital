@@ -14,7 +14,7 @@ const CAT = {
   'Formas': Object.keys(SH).map(sub => ({ k: 'shape', n: NOMBRE_FORMA[sub], tipo: 'forma', sub })),
   'Eléctrico': [I('Lámpara', '💡', .5, .5), I('Enchufe', '🔌', .4, .4), I('Interruptor', '🎚️', .4, .4), I('UPS', '🔋'), I('Tablero', '⚡', .6, .8), L('Cable de energía', '#e74c3c', .05, '.3 .08')],
   // Las escaleras nuevas llevan esc ('descanso' | 'espiral'): al colocarlas se guardan como {n:'Escalera', t: esc} (ver colocar.js)
-  'Edificio': [L('Pared', '#444444', .2), { k: 'puerta', n: 'Puerta' }, I('Ventana', '🪟', 1.2, .4), I('Escalera', '🪜', 1.2, 2.8), { ...I('Escalera con descanso', '🪜', 1.6, 2.8), esc: 'descanso' }, { ...I('Escalera espiral', '🪜', 1.8, 1.8), esc: 'espiral' }, I('Ascensor', '🛗', 1.5, 1.5)],
+  'Edificio': [L('Pared', '#444444', .2), { k: 'puerta', n: 'Puerta' }, I('Ventana', '🪟', 1.2, .4), I('Escalera', '🪜', 1.2, 2.8), { ...I('Escalera con descanso', '🪜', 1.6, 2.8), esc: 'descanso' }, { ...I('Escalera espiral', '🪜', 1.8, 1.8), esc: 'espiral' }, I('Ascensor', '🛗', 1.5, 1.5), { ...I('Mesa', '🪑', 1.2, .7), puestos: 2 }],
   'Marcar': [{ k: 'zona', n: 'Zona rectangular', s: 'r' }, { k: 'zona', n: 'Zona elíptica', s: 'e' }, { k: 'texto', n: 'Texto libre' }, { n: 'Imagen…', ic: '🖼️', accion: () => TR.img.elegir(TR.img.colocar) }]   // una entrada con `accion` no es una herramienta: al pulsarla se ejecuta («Imagen…» abre el selector de archivos y coloca la imagen, imagenes.js)
 };
 let tab = 'Dispositivos';

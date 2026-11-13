@@ -26,11 +26,11 @@ TR.acc = (() => {
   // sec: objeto | geo | apar. parse(crudo) -> valor válido o undefined. leer(o) -> valor actual. poner(o, v) -> lo escribe. geo: toca posición, tamaño o giro (se valida con las escaleras de abajo).
   registrarCampo({ id: 'n', sec: 'objeto', et: 'Nombre', t: 'texto', max: LIM.nombre, aplica: o => ['item', 'line', 'shape', 'zona'].includes(o.k), leer: o => o.n || '', parse: txt(LIM.nombre), poner: (o, v) => { o.n = v; } });
   registrarCampo({ id: 'label', sec: 'objeto', et: os => os[0].k == 'texto' ? 'Texto' : 'Etiqueta', t: 'texto', max: LIM.texto, aplica: o => o.k != 'medida' && o.k != 'puerta', leer: o => o.label || '', parse: txt(LIM.texto), poner: (o, v) => { o.label = v; }, valida: (o, v) => o.k != 'texto' || v.trim() !== '' });
-  registrarCampo({ id: 'x', sec: 'geo', et: 'Posición x (m)', t: 'num', geo: true, aplica: o => conTam(o) || o.k == 'texto', leer: cx, parse: num(-COORD, COORD), poner: (o, v) => { o.x = o.k == 'zona' ? r3(v - o.w / 2) : v; } });
-  registrarCampo({ id: 'y', sec: 'geo', et: 'Posición y (m)', t: 'num', geo: true, aplica: o => conTam(o) || o.k == 'texto', leer: cy, parse: num(-COORD, COORD), poner: (o, v) => { o.y = o.k == 'zona' ? r3(v - o.h / 2) : v; } });
+  registrarCampo({ id: 'x', sec: 'geo', et: 'Posición x (m)', t: 'num', geo: true, aplica: o => (conTam(o) || o.k == 'texto') && o.parent == null, leer: cx, parse: num(-COORD, COORD), poner: (o, v) => { o.x = o.k == 'zona' ? r3(v - o.w / 2) : v; } });
+  registrarCampo({ id: 'y', sec: 'geo', et: 'Posición y (m)', t: 'num', geo: true, aplica: o => (conTam(o) || o.k == 'texto') && o.parent == null, leer: cy, parse: num(-COORD, COORD), poner: (o, v) => { o.y = o.k == 'zona' ? r3(v - o.h / 2) : v; } });
   registrarCampo({ id: 'w', sec: 'geo', et: 'Ancho (m)', t: 'num', geo: true, aplica: conTam, leer: o => o.w, parse: num(MIN, DIM), poner: (o, v) => { if (o.k == 'zona') { const c = o.x + o.w / 2; o.w = v; o.x = r3(c - v / 2); } else o.w = v; } });
   registrarCampo({ id: 'h', sec: 'geo', et: 'Alto (m)', t: 'num', geo: true, aplica: conTam, leer: o => o.h, parse: num(MIN, DIM), poner: (o, v) => { if (o.k == 'zona') { const c = o.y + o.h / 2; o.h = v; o.y = r3(c - v / 2); } else o.h = v; } });
-  registrarCampo({ id: 'rot', sec: 'geo', et: 'Rotación (°)', t: 'num', geo: true, aplica: o => o.k == 'item' || o.k == 'zona' || o.k == 'texto' || esCirculo(o), leer: o => o.rot || 0, parse: v => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? r3(((n % 360) + 360) % 360) : undefined; }, poner: (o, v) => { o.rot = v; } });
+  registrarCampo({ id: 'rot', sec: 'geo', et: 'Rotación (°)', t: 'num', geo: true, aplica: o => o.k == 'item' || o.k == 'zona' || o.k == 'texto' || esCirculo(o), leer: o => o.rot || 0, parse: v => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? r3(((n % 360) + 360) % 360) : undefined; }, poner: (o, v) => { o.rot = v; if (o.parent != null) { const m = byId(o.parent); o.lrot = r3((((v - (m && m.rot || 0)) % 360) + 360) % 360); } } });   // un equipo sobre una mesa guarda su giro respecto de ella
   registrarCampo({ id: 'c', sec: 'apar', et: 'Color', t: 'color', multi: true, aplica: colorable, leer: o => String(o.c).toLowerCase(), parse: v => /^#[0-9a-fA-F]{6}$/.test(String(v)) ? String(v).toLowerCase() : undefined, poner: (o, v) => { o.c = v; } });
   registrarCampo({ id: 'f', sec: 'apar', et: 'Relleno', t: 'sel', multi: true, opc: [['sol', 'Sólido'], ['hat', 'Líneas diagonales'], ['non', 'Sin relleno']], aplica: rellenable, leer: o => o.f || 'non', parse: v => ['sol', 'hat', 'non'].includes(v) ? v : undefined, poner: (o, v) => { o.f = v; } });
   registrarCampo({ id: 'ls', sec: 'apar', et: 'Contorno', t: 'sel', multi: true, opc: Object.entries(LINEAS).map(([k, d]) => [k, d[0]]), aplica: rellenable, leer: o => o.ls || 'con', parse: v => own(LINEAS, v) ? v : undefined, poner: (o, v) => { o.ls = v; } });
@@ -47,6 +47,7 @@ TR.acc = (() => {
     const cand = cambian.map(o => { const c = copiar(o); def.poner(c, v); return c; });
     if (def.valida && cand.some(c => !def.valida(c, v))) return { ok: false, motivo: 'valor no válido' };
     if (def.geo) { const ob = escalerasFinales(cand); if (ob) { avisoEmergente(ob.msg); return { ok: false, motivo: ob.msg }; } }
+    const pm = TR.jer.problema(cand); if (pm) { avisoEmergente(pm); return { ok: false, motivo: pm }; }   // F6: tamaño, giro o puestos que no entran en la mesa
     if (!gesto || !gesto.p) push(); if (gesto) gesto.p = true;
     cambian.forEach(o => def.poner(o, v)); render(); return { ok: true };
   }
@@ -59,8 +60,8 @@ TR.acc = (() => {
     return null;
   }
   function rotar(deg) {                          // tecla R y menú: una escalera que quedaría mal rechaza TODO el giro
-    const os = seleccionados(), g = geoSel(); if (!g || !os.length) return false;
-    const ob = escalerasFinales(os.filter(esEsc).map(o => { const c = copiar(o); rotarDesde(c, copiar(o), deg, g.c); return c; }));
+    const os = TR.jer.sinHijos(seleccionados()), g = geoSel(); if (!g || !os.length) return false;
+    const cand = os.map(o => { const c = copiar(o); rotarDesde(c, copiar(o), deg, g.c); return c; }), pm = TR.jer.problema(cand), ob = escalerasFinales(cand) || (pm && { msg: pm });   // F6: un equipo que girado no entra en su mesa también rechaza el giro
     if (ob) { avisoEmergente(ob.msg); return false; }
     rotarSeleccion(deg); return true;
   }
@@ -68,10 +69,11 @@ TR.acc = (() => {
   // Lo copiado queda como copias independientes (sin id, planta ni capa; las líneas con puntos libres, sin uniones ref/rl). Las puertas no se copian ni se pegan con su pared.
   const portapapeles = [];
   function copiarSel() {
-    const os = seleccionados().filter(o => o.k != 'puerta'); if (!os.length) return false;
+    let os = seleccionados().filter(o => o.k != 'puerta'); if (!os.length) return false;
+    os = os.concat(TR.jer.hijosDeIds(os.map(o => o.id)).map(byId));   // una mesa se copia con sus equipos
     portapapeles.length = 0;
     os.forEach(o => {
-      const c = copiar(o); delete c.id; delete c.pl; delete c.cp;
+      const c = copiar(o); delete c.id; delete c.pl; delete c.cp; c._id = o.id;   // _id: para volver a unir cada equipo con la copia de su mesa al pegar
       if (o.k == 'line') { const aqui = o.pts.filter(q => puntoEn(o, q) && !q.es); if (aqui.length < 2) return; c.pts = aqui.map(q => { const p = pt(q); return { x: p.x, y: p.y }; }); }   // un cable que atraviesa plantas: solo su tramo de la planta actual (cortar sí borra el cable completo)
       portapapeles.push(c);
     });
@@ -79,7 +81,7 @@ TR.acc = (() => {
   }
   function cortar() {                            // copia y borra lo seleccionado (un solo paso de historial); si se cancela el borrado, el portapapeles queda como estaba
     const antes = [...portapapeles]; if (!copiarSel()) return false;
-    if (eliminar()) return true; portapapeles.splice(0, portapapeles.length, ...antes); return false;
+    selEdge = null; if (borrar(true)) return true; portapapeles.splice(0, portapapeles.length, ...antes); return false;
   }
   function trasladar(c, dx, dy) {
     if (c.k == 'line') c.pts = c.pts.map(q => ({ x: r3(q.x + dx), y: r3(q.y + dy) }));
@@ -93,7 +95,10 @@ TR.acc = (() => {
     const p = extra && extra.punto, dx = p ? r3(p.x - cx0) : OFFSET, dy = p ? r3(p.y - cy0) : OFFSET;
     const copias = portapapeles.map(o => { const c = copiar(o); trasladar(c, dx, dy); c.pl = S.plantaAct; c.cp = S.capaAct; return c; });
     for (const c of copias) if (esEsc(c)) { const ob = escaleraObstruida(c); if (ob) { avisoEmergente(ob.msg); return false; } }   // misma regla que al colocar una escalera
+    const pm = TR.jer.mesasNuevas(copias); if (pm) { avisoEmergente(pm); return false; }   // F6: tampoco se pega una mesa encima de otra
     push(); const nuevos = copias.map(c => { c.id = nid++; completarTipo(c); S.objs.push(c); return c.id; });
+    const nueva = new Map(copias.map(c => [c._id, c.id]));
+    copias.forEach(c => { if (c.parent != null) { if (nueva.has(c.parent)) c.parent = nueva.get(c.parent); else { delete c.parent; delete c.puesto; delete c.lrot; } } delete c._id; });   // un equipo pegado sin su mesa queda suelto
     fijarSeleccion(nuevos); render(); return true;
   }
   function eliminar() { selEdge = null; return borrar(); }   // el objeto completo (un lado de forma seleccionado se borra con Supr)
@@ -104,7 +109,7 @@ TR.acc = (() => {
   registrar({ id: 'enf-n', grupo: 'editar', texto: 'Nombre…', aplica: unoCon('n'), ejecutar: enfocar('n') });
   registrar({ id: 'enf-label', grupo: 'editar', texto: os => os[0].k == 'texto' ? 'Editar texto…' : 'Etiqueta…', aplica: unoCon('label'), ejecutar: enfocar('label') });
   registrar({ id: 'enf-c', grupo: 'editar', texto: 'Color…', aplica: os => os.some(colorable), ejecutar: enfocar('c') });
-  registrar({ id: 'enf-geo', grupo: 'editar', texto: 'Posición y tamaño…', aplica: unoCon('x'), ejecutar: enfocar('x') });
+  registrar({ id: 'enf-geo', grupo: 'editar', texto: 'Posición y tamaño…', aplica: os => unoCon('x')(os) || unoCon('w')(os), ejecutar: os => enfocar(campo('x').aplica(os[0]) ? 'x' : 'w')() });   // un equipo sobre una mesa no muestra posición: se va al ancho
   for (const [v, n] of campo('f').opc) registrar({ id: 'f-' + v, grupo: 'relleno', texto: n, aplica: os => os.some(rellenable), marca: os => os.filter(rellenable).every(o => (o.f || 'non') == v), ejecutar: os => fijar(idsDe(os), 'f', v).ok });
   for (const [v, n] of campo('ls').opc) registrar({ id: 'ls-' + v, grupo: 'contorno', texto: n, aplica: os => os.some(rellenable), marca: os => os.filter(rellenable).every(o => (o.ls || 'con') == v), ejecutar: os => fijar(idsDe(os), 'ls', v).ok });
   registrar({ id: 'rotar-izq', grupo: 'transformar', donde: ['menu', 'insp'], texto: '↺ Rotar 90° (Mayús+R)', aplica: os => os.some(o => o.k != 'puerta'), ejecutar: () => rotar(-90) });

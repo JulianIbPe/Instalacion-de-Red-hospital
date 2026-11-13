@@ -27,12 +27,14 @@ function restaurar(json) {
 }
 function deshacer() { if (!hist.length) return; fut.push(Hist.estrategia.capturar()); Hist.estrategia.aplicar(hist.pop()); Hist.recortar(); }
 function rehacer() { if (!fut.length) return; hist.push(Hist.estrategia.capturar()); Hist.estrategia.aplicar(fut.pop()); Hist.recortar(); }
-function borrar() {                     // borra todo lo seleccionado (uno o varios objetos) o, si hay un lado de forma seleccionado, solo ese lado
+function borrar(cortando) {             // borra todo lo seleccionado (uno o varios objetos) o, si hay un lado de forma seleccionado, solo ese lado; cortando = los objetos quedan en el portapapeles
   if (ladoSel() !== null) { borrarLado(); return true; }
   const ids = seleccionados().map(o => o.id); if (!ids.length) return false;
   const cr = cablesAfectados(o => ids.includes(o.id));   // cables que pasan por una escalera que se borra (o bajan a ella): se borran completos, en todas las plantas (trazas.js)
   if (cr.length && !confirm(`${cr.length} cable(s) atraviesan la escalera que vas a borrar y se borrarán completos, en todas las plantas. ¿Continuar?`)) return false;
-  push(); cr.forEach(o => ids.push(o.id));
+  const hs = TR.jer.hijosDeIds(ids), nh = S.objs.filter(o => o.parent != null && ids.includes(o.parent)).length;   // R7: los equipos de una mesa se borran con ella (sus cables quedan sueltos); se pregunta aunque también estén seleccionados
+  if (nh && !cortando && !confirm(`${nh} equipo(s) sobre la(s) mesa(s) se borrarán también. ¿Continuar?`)) return false;   // al cortar no se pregunta: quedan en el portapapeles y Ctrl+Z los recupera
+  push(); cr.forEach(o => ids.push(o.id)); ids.push(...hs);
   S.objs.forEach(o => { if (o.k == 'puerta' && ids.includes(o.pared) && !ids.includes(o.id)) ids.push(o.id); });   // las puertas se van con su pared
   S.objs.forEach(o => o.pts && (o.pts = o.pts.map(q => ids.includes(q.ref) || ids.includes(q.rl) ? soltarPunto(q) : q)));  // los cables conectados se sueltan donde estaba el dispositivo
   S.objs = S.objs.filter(o => !ids.includes(o.id));

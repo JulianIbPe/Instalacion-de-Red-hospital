@@ -15,6 +15,7 @@ function draw(o) {
   } else if (o.k == 'item') {
     const m = modeloDe(o), im = imagenDe(o);
     if (esEscalera(o)) h = dibujarEscalera(o, id, on, hd);          // las tres escaleras (recta, con descanso, espiral) son 'Escalera' con distinto o.t
+    else if (esMesa(o)) h = TR.jer.dibujar(o, id);
     else if (im || m) {                                             // F4A: equipo con modelo = su icono sin recuadro (el rect transparente solo recibe los clics) y debajo dos líneas: modelo y nombre del equipo. F4B: si hay imagen (del equipo o de su modelo), va en lugar del icono, sin deformarse
       const ri = esImagen(o) && R.imgs[im];               // la imagen suelta sí se estira: llena todo su rectángulo (ver asas más abajo)
       h = `<g ${id} transform="translate(${o.x} ${o.y}) rotate(${o.rot || 0})"><rect x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}" fill="transparent"/>${ri ? `<use href="#im-${im}" width="${ri.w}" height="${ri.h}" transform="translate(${-o.w / 2} ${-o.h / 2}) scale(${o.w / ri.w} ${o.h / ri.h})"/>` : `<use href="#${im ? 'im-' + im : 'ic-' + iconoDe(m)}" x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}"/>`}</g>`;
@@ -50,7 +51,7 @@ const imagenDe = o => { const m = modeloDe(o); return [o.img, m && m.img].find(i
 // Las imágenes usadas se definen una sola vez en este <defs>, que se conserva entre redibujos (solo se rehace si cambia qué imágenes se usan): así no se vuelven a procesar al arrastrar
 const defsImg = document.createElementNS('http://www.w3.org/2000/svg', 'defs'); let claveImg = '';
 const ORD = { zona: 0, shape: 1, line: 2, puerta: 2.5, item: 3, texto: 4, medida: 5 };
-const ordDe = o => esImagen(o) ? -1 : ORD[o.k];   // la imagen suelta va debajo de todo lo de su capa (sirve de fondo: no tapa paredes ni cables ni les quita los clics)
+const ordDe = o => esImagen(o) ? -1 : esMesa(o) ? 1.5 : ORD[o.k];   // la imagen suelta va debajo de todo lo de su capa (sirve de fondo: no tapa paredes ni cables ni les quita los clics); la mesa, debajo de cables y equipos (sus equipos se ven encima)
 let asasOut = [], hitsOut = [];           // asas de edición de lo seleccionado y zonas de clic de los cables dentro de escaleras (se agregan después de todos los objetos, para quedar por encima)
 
 // ---------- Renderizado en capas (Fase 1) ----------
@@ -81,6 +82,7 @@ function renderFondo() {                  // vista (desplazamiento y zoom) y gri
 }
 function renderObjetos() {                // objetos del proyecto (lo que se exporta en el PNG)
   contar('obj'); if (!capasOk()) iniciarCapas();
+  TR.jer.sincronizar();                   // F6: los equipos de cada mesa siguen a su mesa
   sincronizarTrazas();                    // el recorrido de un cable por una escalera sigue a la escalera si ésta se movió, giró o cambió de tamaño
   asasOut = []; hitsOut = [];
   // Orden de dibujo: primero por jerarquía de capa (las capas altas se pintan encima) y, dentro de una misma capa, por tipo de objeto (ORD)

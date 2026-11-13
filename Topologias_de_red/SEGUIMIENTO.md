@@ -2,26 +2,26 @@
 
 Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor ni framework). Se abre `index.html` en el navegador; `index.html?pruebas=1` abre además el panel de pruebas. Los scripts se cargan en el orden de `index.html` y comparten variables globales. Todas las coordenadas del modelo están en **metros**.
 
-> **Última actualización: 13/11/2026** (F5 postergada por el usuario; F4B pendiente de su verificación manual; ver sección 0).
+> **Última actualización: 13/11/2026** (F6 completada y verificada por el usuario; siguiente: F7, sin empezar; ver sección 0).
 > **Regla de mantenimiento:** al terminar una fase, o al avanzar dentro de la fase en curso, se actualiza este documento (qué se hizo, resultados reales de las pruebas, qué falta y cuál es el siguiente paso).
 
 ## 0. Resumen para retomar (leer primero)
 
 **Dónde estamos (13/11/2026):**
-- F0 a F3 y F4A: completadas y verificadas por el usuario. La F4A está commiteada (`52aca0d`, rama `branch_branch`).
-- **F4B (imágenes): implementada el 12/11/2026, SIN verificar por el usuario y sin commitear.** Incluye la imagen suelta en el plano con sus 8 asas y las correcciones de la revisión thermo. Detalle y comprobaciones manuales en la sección 5.
-- **F5 (rellenos y zonas): postergada por decisión del usuario (13/11/2026).** No se hace por ahora; su plan se conserva en la sección 5. Ninguna otra fase depende de ella.
-- Pruebas: 76 de 77 en el navegador integrado. La única que falla es «el dibujo es idéntico a la referencia», porque la referencia vive en el `localStorage` del navegador del usuario (sección 8).
+- F0 a F4 completadas y verificadas por el usuario (la F4B se verificó el 13/11/2026 y está commiteada en `5a085ca`, rama `branch_branch`).
+- **F5 (rellenos y zonas): postergada por decisión del usuario (13/11/2026).** Su plan se conserva en la sección 5. Ninguna otra fase depende de ella.
+- **F6 (jerarquía y mesas): completada y verificada por el usuario (13/11/2026), sin commitear.** Detalle en la sección 5.
+- Pruebas: 84 de 85 en el navegador integrado. La única que falla es «el dibujo es idéntico a la referencia», porque la referencia vive en el `localStorage` del navegador del usuario (sección 8).
 
 **Qué hacer al retomar (en este orden):**
 1. Los archivos están en la carpeta del proyecto. No hay acceso al navegador del usuario: nada se da por probado si no lo ejecutó él o no se ejecutó realmente.
 2. Leer las secciones 0, 1, 3, 4, 6 y 8, y de la 5 la fase que toque.
-3. Preguntar al usuario el resultado de las comprobaciones manuales de la F4B y corregir lo que falle. El usuario commitea por su cuenta; preguntar antes de hacerlo.
-4. **No empezar ninguna fase sin que el usuario diga cuál sigue.** La F5 está postergada; la siguiente en el plan es la F6 (jerarquía y mesas). Antes de escribir código: presentar el diseño y esperar la orden.
+3. Preguntar al usuario si ya commiteó la F6 (lo hace él; preguntar antes de hacerlo).
+4. **No empezar ninguna fase sin que el usuario diga cuál sigue.** La F5 está postergada; la siguiente en el plan es la F7 (puertos, conexiones y redes). Antes de escribir código: presentar el diseño y esperar la orden.
 5. Al terminar cada avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
 
 **Pendiente:**
-- Verificación manual de la F4B por el usuario.
+- Commit de la F6 (lo hace el usuario). La regla de mesas superpuestas no pasó por la revisión thermo.
 - Confirmar el tamaño del texto bajo los equipos (0,28 m fijo: queda grande al lado de un equipo de 0,30 m).
 - Verificaciones menores que no bloquean: abrir un `.json` dañado y comprobar que el proyecto no cambia; deshacer justo después de abrir un archivo.
 
@@ -33,9 +33,10 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | F1 Renderizado en capas | Completada (28/10/2026) |
 | F2 Núcleo de datos (tipos, formato v2, recursos, historial) | Completada (31/10/2026) |
 | F3 Inspector y menú contextual | Completada (01/11/2026); ajustes posteriores verificados el 11/11/2026 (sección 7) |
-| F4 Catálogo, imágenes y modelos | F4A completada y verificada (12/11/2026). **F4B implementada (12/11/2026), pendiente de verificación manual del usuario** |
+| F4 Catálogo, imágenes y modelos | Completada y verificada (F4A 12/11/2026, F4B 13/11/2026) |
 | F5 Rellenos y zonas | **Postergada por el usuario (13/11/2026)** |
-| F6 a F12 | No iniciadas (sección 5) |
+| F6 Jerarquía y mesas | Completada y verificada (13/11/2026) |
+| F7 a F12 | No iniciadas (sección 5) |
 
 ## 2. Archivos del proyecto
 
@@ -46,7 +47,7 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | `iconos/` | 34 SVG de dibujo propio (`viewBox` 96×96) y `vista-previa.png`. **Para cambiar un dibujo:** editar su SVG y correr `node iconos/generar.js` desde `Topologias_de_red` (regenera `js/iconos.js`) |
 | `js/estado.js` | Estado global (`S`, `V`, `tool`, `sel`, `tmp`, `drag`…) y utilidades (`byId`, `pt`, `toW`, `fmt`, `T`, `itemAt`) |
 | `js/eventos.js` | Namespace `TR`: `TR.stats` (contadores del render) y `TR.ui`. Obligatorio: aloja `TR.acc`, `TR.insp`, `TR.ctx`, `TR.mod`, `TR.img` |
-| `js/tipos.js` | Tipo estable por objeto: `tipo` (pared, cable, dispositivo, rack, escalera, ascensor, ventana, puerta, forma, zona, texto, medida, imagen) y `sub`. `derivarTipo` es el único lugar donde un nombre visible se traduce a tipo. Predicados `esPared`, `esCable`, `esEscalera`, `esAscensor`, `esImagen`, `esCirculo`. Escaleras: variante en `o.t` (sin `t` = recta, `descanso`, `espiral`) |
+| `js/tipos.js` | Tipo estable por objeto: `tipo` (pared, cable, dispositivo, rack, escalera, ascensor, ventana, puerta, forma, zona, texto, medida, imagen, mesa) y `sub`. `derivarTipo` es el único lugar donde un nombre visible se traduce a tipo. Predicados `esPared`, `esCable`, `esEscalera`, `esAscensor`, `esImagen`, `esMesa`, `esCirculo`. Escaleras: variante en `o.t` (sin `t` = recta, `descanso`, `espiral`) |
 | `js/recursos.js` | Almacén `R` fuera de `S` y del historial: `R.imgs` (id por hash; PNG/JPEG/WebP validados por sus bytes; 5 MB por imagen, 50 MB por proyecto, 8 000 px por lado, 40 M de píxeles) y `R.modelos` (plantillas versionadas) |
 | `js/esquema.js` | Formato v2: `ESQ.leer` (valida con lista blanca, sanea y migra v1 → v2 sin tocar `S` ni `R`) y `ESQ.serializar`. Todo campo nuevo se registra en `ESPEC` (R9). `ESQ.campoModelo`, `ESQ.CTRL` y `ESQ.LIM` son la única definición de qué es válido en un modelo |
 | `js/iconos.js` | `ICONOS`: dibujos de los modelos. **Generado** por `iconos/generar.js`; no editar a mano |
@@ -66,18 +67,20 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | `js/inspector.js` | `TR.insp`: panel derecho `#insp` con secciones contraíbles. Reconstruye su DOM solo si cambia la firma de la selección; se refresca desde `renderPaneles()`, nunca al mover el ratón. Botón ⚙️ en la barra; en ≤760 px es un cajón |
 | `js/modelos.js` | `TR.mod`: `equipo()` (objeto nuevo con su modelo y nombre con contador), diálogo de modelos propios (`abrir`, `guardar`, `borrarModelo`), sección «Modelo» del inspector |
 | `js/imagenes.js` | `TR.img`: selector de archivos (`elegir`, `cargar`), `ponerEquipo` / `quitarEquipo`, `ponerModelo`, `colocar` (imagen suelta), sección «Imagen» del inspector y entradas `img-poner` / `img-quitar` del menú contextual |
+| `js/jerarquia.js` | `TR.jer` (F6): mesas y equipos anclados. `sincronizar` (lo llama `renderObjetos`), `problema` (reglas de tamaño y puestos), `mesaEn`, `anclar`, `alSoltar`, `alSoltarArrastre`, `sinHijos` (R6), `hijosDeIds` (R7), `dibujar`. Registra el campo «Puestos» y la mesa en `sinColor` |
 | `js/contexto.js` | `TR.ctx`: menú contextual `#ctx`. Teclado: flechas, Home/End, Enter, Esc, Tab |
 | `js/archivos.js` | Guardar y abrir `.json` v2 (`abrirTexto` no toca nada si el archivo es inválido), exportar PNG (`construirSvgExport`), «Nuevo» |
 | `js/main.js` | Arranque (se carga el último) |
 | `js/pruebas.js` | Solo con `?pruebas=1`: panel de pruebas, proyectos de prueba, referencia de dibujo, medición de rendimiento y pruebas de las fases 0 a 3. Expone sus utilidades en `TRP.util` |
 | `js/pruebas-f4.js` | Solo con `?pruebas=1`, después de `pruebas.js`: pruebas de la Fase 4. Cada fase nueva lleva su propio archivo de pruebas |
+| `js/pruebas-f6.js` | Solo con `?pruebas=1`, después de `pruebas-f4.js`: pruebas de la Fase 6 |
 
 ## 3. Decisiones
 
 | N.º | Decisión |
 |---|---|
 | D1 | **Conexiones lógicas ligadas a la ruta física.** `S.conex`: cada conexión guarda origen y destino `{d: dispositivo, p: puerto}` y la lista ordenada `rutas` de líneas. La línea es solo geometría; la conexión conserva su `id` aunque cambie el recorrido. Las que tienen extremos sin definir son **incompletas**. Los tramos entre plantas se unen a la conexión existente, sin duplicar |
-| D2 | **Jerarquía.** Campo `parent`. Hijos con posición absoluta sincronizada (`x`, `y`, `rot`) más posición local (`lx`, `ly`, `lrot`) para mesas, o `ru:{u,h}` para racks. El hijo hereda `pl` y `cp` del padre |
+| D2 | **Jerarquía.** Campo `parent`. Hijos con posición absoluta sincronizada (`x`, `y`, `rot`). Mesas: el hijo guarda `puesto` y `lrot`, **no** `lx`/`ly` (cambio del 13/11/2026: la posición sale del puesto, así se reparte sola al redimensionar o cambiar los puestos y nunca queda desactualizada). Racks: `ru:{u,h}`. El hijo hereda `pl` y `cp` del padre |
 | D3 | **Recursos fuera del historial.** Almacén `R` (imágenes por hash y modelos); se guarda con el proyecto; los recursos sin uso se descartan al guardar (salvo los modelos propios, que se conservan) |
 | D4 | **Historial.** Snapshots de `S` con tope en pasos y en bytes; estrategia intercambiable |
 | D5 | **Vista de rack.** Modal con su propio SVG sobre el mismo `S` (usa `push()`, deshacer/rehacer y atajos globales) |
@@ -93,7 +96,7 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | D15 | **Escaleras con color desvanecido:** NO implementado (el reflejo de abajo usa opacidad fija .6). Se hará solo al final |
 | D16 | **Color del cable:** no se puede cambiar desde ningún lugar. Cada cable usa siempre el color de su tipo. Los archivos antiguos conservan el color con que se guardaron. Las paredes siguen siendo coloreables |
 | D17 | **Catálogo de dispositivos:** solo los modelos que indica el usuario, definidos como datos (`js/catalogo-pt.js`), no como código. Iconos SVG de diseño propio, sin material de Cisco. El precio es del modelo, no de cada equipo. No van notebook, monitor ni patch panel (hecho) |
-| D18 | **Mesas:** un solo tipo de mesa, con tamaño y cantidad de puestos editables y sin cambio de color (F6) |
+| D18 | **Mesas:** un solo tipo de mesa, con tamaño y cantidad de puestos editables y sin cambio de color. Un equipo puede ser más grande que su puesto solo si entra en la mesa (largo y fondo) y la suma de los largos de sus equipos no supera el de la mesa. Borrar una mesa con equipos pide confirmación (F6, hecho) |
 | D19 | **Rellenos:** solo patrones predefinidos. Sin edición de grosor, espaciado, colores del patrón, orientación ni transparencia |
 | D20 | **Exportar el rack:** el interior de un rack se exporta a PNG solo desde dentro de su vista, con un botón propio. El PNG del plano no incluye el interior |
 | D21 | **Cable único por escaleras.** Un cable que cruza plantas es UN objeto `line`. Sus puntos llevan `pl`/`cp` (planta y capa) y, si están sobre una escalera, `es`/`ed` (escalera y sentido). Los calcula la escalera: se actualizan si se mueve, gira o cambia de tamaño. **Subir** solo desde una escalera de la planta actual; **bajar** solo si justo debajo hay una escalera igual (mismo tipo, lugar, tamaño y giro). Borrar la escalera, la planta o la capa que el cable atraviesa pide confirmación y borra el cable completo, en todas las plantas. Copiar toma solo el tramo de la planta actual; cortar borra el cable completo (hecho; detalle en la sección 7) |
@@ -103,7 +106,7 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 - **`S`** (proyecto; entra en el historial): `edificio`, `unidad`, `plantas`, `objs`, `propios` (ids de los modelos propios que ofrece el menú), y desde las fases siguientes `conex`, `redes`, `presupuesto`.
 - **`R`** (recursos; fuera del historial): `imgs` y `modelos`. Los puertos predeterminados vienen de la plantilla del modelo (grupos `{g, n, tipo, vel, pref}`); la instancia solo guarda sobrescrituras (`po`) e interfaces (`ifs`). Los ids de puerto son `grupo:índice` (p. ej. `g0:12`). Editar nombre o puertos de una plantilla crea una versión nueva (`v + 1`, `base`) y pasa a ella los equipos colocados, en un paso deshacible.
 - **Estado de interfaz** (fuera de `S` y de `R`): `V`, `sel`, `multi`, `tool`, `tmp`, `drag`, filtros `F`, estado del inspector y del menú contextual.
-- **Campos nuevos por objeto (fases siguientes):** dispositivo `po`, `ifs`, `parent`, `lx`, `ly`, `lrot`, `ru`. Conexión `{id, a:{d,p}|null, b:{d,p}|null, rutas, sub, red, etqA, etqB, holgura}`; sin ruta = conexión lógica con longitud estimada.
+- **Campos por objeto de la jerarquía:** mesa `puestos`; equipo sobre una mesa `parent`, `puesto`, `lrot` (F6). Fases siguientes: dispositivo `po`, `ifs`, `ru`. Conexión `{id, a:{d,p}|null, b:{d,p}|null, rutas, sub, red, etqA, etqB, holgura}`; sin ruta = conexión lógica con longitud estimada.
 - **Identidad:** un equipo es siempre el mismo objeto (en el plano, en una mesa o en un rack). El `ref` de un extremo de línea es solo anclaje geométrico y se sincroniza con funciones explícitas.
 
 **Reglas de coherencia**
@@ -135,9 +138,9 @@ Cada fase deja la aplicación usable y no elimina funciones. Cada fase que añad
 
 | Fase | Contenido | Depende de |
 |---|---|---|
-| F4 | Catálogo, imágenes y modelos (hecha; F4B pendiente de verificación) | F2, F3 |
+| F4 | Catálogo, imágenes y modelos (hecha) | F2, F3 |
 | F5 | Rellenos y zonas (**postergada**) | F2 |
-| F6 | Jerarquía y mesas | F2, F3, F4 |
+| F6 | Jerarquía y mesas (hecha) | F2, F3, F4 |
 | F7 | Puertos, conexiones y redes | F4, F6 |
 | F8 | Racks | F6, F7 |
 | F9 | Longitud de cables y presupuesto | F4, F7, F8 |
@@ -159,7 +162,7 @@ Los filtros van en la F10 porque usan redes, cables y conexiones (existen desde 
 - **Límites conocidos:** los datos de la sección «Modelo» se escriben directo en la plantilla y Ctrl+Z no los revierte; borrar un modelo propio lo quita del menú pero los equipos colocados lo conservan; pegar un equipo copia su nombre («Router1» repetido); si se borran todos los equipos de un modelo del catálogo, el siguiente nace de una copia nueva, sin el precio cargado antes.
 - «Nuevo» vacía el portapapeles interno.
 
-**F4B — imágenes (implementada el 12/11/2026; pendiente de verificación manual).**
+**F4B — imágenes (verificada por el usuario el 13/11/2026).**
 - **Qué se dibuja** (`imagenDe`): imagen del equipo → imagen de su modelo → icono → emoji. La imagen entra en el rectángulo del equipo sin deformarse.
 - **Imagen del equipo:** `o.img`, un paso de historial. Vale para dispositivos y racks, también los viejos sin modelo.
 - **Imagen del modelo:** vale para todos los equipos del modelo y se escribe en la plantilla: no es un paso de Ctrl+Z (deshacer una edición de un modelo propio sí la cambia, porque vuelve a la versión anterior).
@@ -167,19 +170,6 @@ Los filtros van en la F10 porque usan redes, cables y conexiones (existen desde 
 - **Interfaz:** sección «Imagen» del inspector y entradas «Imagen del equipo…» / «Quitar imagen del equipo» del menú contextual. Formatos PNG, JPEG y WebP (sin SVG), con los límites de `R`; un archivo rechazado muestra el motivo y no cambia nada.
 - **Rendimiento:** cada imagen usada se define una sola vez (`<symbol id="im-…">`) en un `<defs>` que se conserva entre redibujos. Va dentro de `#c`, así el PNG exportado las incluye; sin imágenes, `#c` queda idéntico a antes. Exportar PNG avisa si falla.
 - **Límites conocidos:** el menú izquierdo no muestra miniaturas; no hay recorte ni edición; las imágenes sin uso siguen en memoria y cuentan para el tope de 50 MB hasta «Nuevo» o recargar (al guardar se descartan); cambiar ancho o alto de una imagen suelta en el inspector la deforma.
-- **Pruebas automatizadas (navegador integrado): 76 de 77** (falla solo la de la referencia, ausente en ese navegador). **No se probó:** el selector con archivos reales, Firefox ni Safari, imágenes de varios MB al arrastrar y al exportar, el aviso de error al exportar.
-- **Comprobaciones manuales para el usuario:**
-  1. `?pruebas=1` → «Ejecutar pruebas»: 77 de 77.
-  2. Seleccionar un equipo → inspector «Imagen» → «Imagen del equipo…»: elegir un PNG, un JPEG y un WebP. Ctrl+Z y Ctrl+Y. «Quitar la del equipo».
-  3. «Imagen del modelo…»: cambia en todos los equipos de ese modelo; el que tiene imagen propia la conserva. «Quitar la del modelo».
-  4. Clic derecho sobre un equipo: «Imagen del equipo…» y «Quitar imagen del equipo».
-  5. Elegir un SVG, un `.txt` renombrado a `.png` y una imagen de más de 5 MB: aviso con el motivo y nada cambia.
-  6. «Marcar» → «Imagen…»: aparece en el centro, se mueve, gira, se copia y pega; un cable no se une a ella.
-  7. Imagen suelta seleccionada: arrastrar un asa de costado (estira) y una de esquina (misma proporción), también con la imagen girada; Ctrl+Z.
-  8. Imagen suelta con una pared o un cable encima, en la misma capa: la pared se ve y se puede seleccionar. «Cambiar imagen…» por una de otra proporción: no queda deformada.
-  9. Guardar, «Nuevo», abrir: vuelven todas las imágenes. Exportar PNG: salen las imágenes.
-  10. Abrir un proyecto viejo: se ve igual que antes.
-
 **Hallazgos de las revisiones thermo NO aplicados (decisión del usuario):** sacar `dibujarEquipo` de `draw()` (el SVG debe quedar byte a byte igual); mover `modeloDe`/`iconoDe` fuera de `dibujo.js`; registrar como acciones los manejadores de las secciones «Modelo» e «Imagen» en lugar de sus listeners propios sobre `#insp-cuerpo`; predicado `admiteCable` para `itemAt`; descartar imágenes sin uso al llegar al tope de 50 MB; pruebas menos dependientes de ids fijos y del orden de `PT`; foco del teclado al cerrar el diálogo de modelos; conservar el `g` de cada grupo de puertos al editar un modelo (importa en la F7).
 
 Fuera de la F4: los tipos de conexión de Packet Tracer (consola, cruzado, serial DCE/DTE, USB…) van con los cables en la F7; los puertos se definen en los modelos pero se conectan en la F7.
@@ -192,16 +182,21 @@ Archivos: `dibujo.js`, `controles.js`, `index.html`, `colocar.js`, `interaccion.
 4. Zonas rectangulares por dos puntos (clic-clic o arrastrar) con imán a esquinas y extremos de paredes; las zonas elípticas siguen funcionando; vértices, lados, rotación, selección múltiple e historial se conservan.
 5. Ida y vuelta de archivo. El relleno automático de recintos cerrados queda en la F12.
 
-### F6 — Jerarquía y mesas
-Archivos: `interaccion.js`, `historial.js`, `rotacion.js`, `dibujo.js`, `plantas.js`, `catalogo.js`; nuevo `jerarquia.js`.
-1. **Una sola mesa.** Tamaño y cantidad de puestos configurables, además de nombre y etiqueta. Su color no se puede cambiar (D18; se agrega a `TR.acc.sinColor`).
-2. Cada puesto mide como mínimo 0,50 m: el largo mínimo de la mesa es puestos × 0,50 m. Al subir los puestos la mesa crece hasta ese mínimo y no se puede achicar por debajo.
-3. Un equipo ocupa un puesto. Al redimensionar la mesa los puestos se redistribuyen en partes iguales y cada equipo sigue en su puesto. No se pueden reducir los puestos por debajo de los ocupados (se avisa).
-4. Los equipos sobre una mesa se dibujan **por encima** de ella.
-5. Mover y rotar una mesa mueve y rota sus equipos; soltar un equipo sobre una mesa lo ancla y fuera de ella lo desancla.
-6. Los hijos heredan planta y capa; borrar la mesa borra sus equipos; un cable a un equipo se une al equipo, no a la mesa.
-7. La asociación mesa-equipo es solo visual y se distingue de una conexión de red.
-8. Deshacer y rehacer restituyen anclajes.
+### F6 — Jerarquía y mesas (verificada por el usuario el 13/11/2026)
+Archivos: nuevo `jerarquia.js` (`TR.jer`); cambios chicos en `tipos.js`, `estado.js` (`itemAt` ignora la mesa), `catalogo.js`, `dibujo.js`, `interaccion.js`, `rotacion.js`, `historial.js`, `acciones.js`, `esquema.js` e `index.html` (carga `jerarquia.js` después de `acciones.js`).
+- **Mesa:** pestaña «Edificio» → «Mesa». `tipo: 'mesa'`, nace de 1,20 × 0,70 m con 2 puestos en fila a lo largo del ancho (líneas punteadas entre puestos). Sin cambio de color. Tamaño y puestos se editan en el inspector (sin asas en el plano). Se dibuja debajo de cables y equipos de su capa.
+- **Reglas** (`TR.jer.problema`; si no se cumplen, aviso y no cambia nada ni guarda historial): largo ≥ puestos × 0,50 m (subir los puestos agranda la mesa); no menos puestos que equipos (al bajarlos, los equipos se reacomodan en orden); cada equipo entra en la mesa (largo y fondo, según su giro); la suma de los largos de los equipos no supera el de la mesa. Se validan al anclar, al editar en el inspector (mesa o equipo), al girar con R / menú y al soltar el asa ↻ (si no entra, el giro se descarta).
+- **Posición:** un equipo anclado guarda `parent`, `puesto` y `lrot`. Su `x`, `y`, `rot`, `pl` y `cp` salen de la mesa en cada render (`sincronizar`): en el centro de su puesto, corrido lo justo para no salirse ni encimarse cuando es más grande que el puesto. En el inspector no muestra posición; su giro se edita y queda relativo a la mesa.
+- **Anclar:** colocar un equipo con un clic sobre una mesa, o soltarlo arrastrado con su centro encima, lo pone en el puesto libre más cercano. Soltarlo fuera lo desancla. Si la mesa está llena o el equipo no entra: un equipo nuevo **no se coloca** y uno arrastrado **vuelve a donde estaba** (se descarta todo el arrastre, sin paso de historial), siempre con aviso. Solo los `dispositivo` se anclan (no racks ni imágenes).
+- **Mesas superpuestas:** una mesa no puede pisar a otra de la misma planta (aunque estén en capas distintas); tocarse por el borde sí. Se valida al colocar (no se coloca), al arrastrar (vuelve a donde estaba), al editar posición, tamaño, giro o puestos en el inspector, al girar con R / ↻ y al pegar; siempre con aviso y sin paso de historial.
+- **Mover / girar la mesa:** sus equipos la siguen, y sus cables también. Con la mesa y sus equipos seleccionados, los equipos no se mueven ni giran dos veces (R6, `sinHijos`).
+- **Borrar la mesa** pide confirmación (también si sus equipos están seleccionados) y borra sus equipos; sus cables quedan sueltos (R7). **Cortar** no pregunta: quedan en el portapapeles. Borrar un equipo no toca la mesa.
+- **Copiar la mesa** copia también sus equipos, anclados a la copia. Un equipo copiado solo se pega suelto.
+- **Cables:** `itemAt` ignora la mesa: el cable se une al equipo. No se dibuja nada entre mesa y equipo (no se confunde con una conexión).
+- **Archivo:** `puestos`, `parent`, `puesto`, `lrot` en `ESPEC` (R9). Un equipo cuyo `parent` no existe queda suelto al abrir.
+- **Revisión thermo (13/11/2026):** aplicados los arreglos rápidos: archivo dañado con `parent` en una mesa o escalera (se suelta); confirmación con selección por rectángulo; arrastre conjunto donde uno sale y otro entra a una mesa llena (primero se desanclan los que salen); aviso al cortar; `mesaEn` elige según el orden de capas; «Mesa» en el inspector; «Posición y tamaño…» en equipos anclados (va al ancho). **No aplicados (decisión del usuario):** sacar de `sincronizar` las escrituras a `S` y la lectura de `drag`; lista de validadores en `TR.acc` en lugar de llamar a `TR.jer` desde `fijar`/`rotar`/`soltarArrastre`; agrupar hijos por mesa en una pasada (rendimiento, no medido); `norm360` única, `puestos` asegurado en un lugar y tope 50 como constante; recortar exportaciones de `TR.jer` y renombrar `puedeColocar`; partir líneas largas y la prueba que encadena 7 escenarios.
+- **Límites conocidos:** la etiqueta de la mesa y las de sus equipos pueden quedar encimadas debajo de la mesa; los racks como padre llegan en la F8.
+- **Pruebas automatizadas (navegador integrado): 84 de 85** (8 nuevas en `pruebas-f6.js`; falla solo la de la referencia, ausente en ese navegador). Las pruebas que hacen clic necesitan el panel del navegador visible: con el panel oculto (0 px) falla la del cable. No se probó: Firefox ni Safari, arrastres reales con el ratón (las pruebas simulan los eventos).
 
 ### F7 — Puertos, conexiones y redes
 Archivos: `estado.js`, `interaccion.js`, `historial.js`, `plantas.js`, `catalogo.js`, `controles.js`, `esquema.js`; nuevos `conexiones.js`, `redes.js`.
@@ -290,7 +285,7 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 
 ## 8. Mapa técnico para retomar
 
-**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `iconos` → `catalogo-pt` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `inspector` → `modelos` → `imagenes` → `contexto` → `archivos` → `main` (siempre el último). Con `?pruebas=1` se cargan además `pruebas` → `pruebas-f4`.
+**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `iconos` → `catalogo-pt` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `jerarquia` → `inspector` → `modelos` → `imagenes` → `contexto` → `archivos` → `main` (siempre el último). Con `?pruebas=1` se cargan además `pruebas` → `pruebas-f4` → `pruebas-f6`.
 
 **Estado global (`estado.js`):** `S` (proyecto; entra al historial), `V` (vista: `ox`, `oy`, `z` px/m), `sel`, `multi`, `selEdge`, `tool`, `tmp`, `drag`, `nid`, `curP`. `R` (recursos, `recursos.js`) está fuera de `S`. Namespace `TR` (`eventos.js`). El código nuevo usa `TR`: las letras `I`, `L`, `T`, `S`, `V` ya están ocupadas.
 
@@ -306,7 +301,7 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 - Clic derecho (`interaccion.js`): con herramienta u operación en curso cancela o termina; sin ellas abre el menú contextual.
 - El doble clic se detecta a mano (la página se redibuja en cada clic y el `dblclick` nativo se pierde).
 
-**Pruebas (`?pruebas=1`, botón «Ejecutar pruebas»):** 77 casos (63 de F0 a F3 y sus ajustes en `js/pruebas.js`; 8 de la F4A y 6 de la F4B en `js/pruebas-f4.js`). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar; las de la F4 usan `f4(fn)` (recursos vacíos, proyecto vacío y menú en «Dispositivos»). Para pruebas nuevas: archivo propio por fase, las utilidades de `TRP.util`, y no dejar pasos en el historial del usuario.
+**Pruebas (`?pruebas=1`, botón «Ejecutar pruebas»):** 85 casos (63 de F0 a F3 y sus ajustes en `js/pruebas.js`; 8 de la F4A y 6 de la F4B en `js/pruebas-f4.js`; 8 de la F6 en `js/pruebas-f6.js`, con sus proyectos `mesa`/`pc` y `arrastrarObj`). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar; las de la F4 usan `f4(fn)` (recursos vacíos, proyecto vacío y menú en «Dispositivos»). Para pruebas nuevas: archivo propio por fase, las utilidades de `TRP.util`, y no dejar pasos en el historial del usuario.
 - **Aviso importante:** la prueba «el dibujo es idéntico a la referencia» usa una referencia guardada en el `localStorage` del navegador (clave `topologias_ref_f0`). En otro navegador, otra cuenta o tras limpiar datos no existe y esa prueba falla por eso, no por un error del código. Se genera con «Guardar referencia de dibujo» usando una versión del código cuyo dibujo se considere correcto. No sobrescribir la del usuario sin avisarle.
 - «Medir rendimiento» compara contra una base de la F0 (render ~50 ms, mover sin arrastrar ~44 ms con 3000 objetos). Última medición del usuario (01/11/2026): render 50,6 ms y mover sin arrastrar 0 ms.
 
@@ -318,3 +313,8 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 - 11/11/2026: ajuste de escaleras entre plantas y correcciones de la revisión thermo del commit `cda924b`; todo verificado por el usuario. Iconos aprobados. F4A implementada.
 - 12/11/2026: revisión thermo de la F4A y correcciones; el usuario confirmó la F4A. F4B implementada, con imagen suelta y sus asas; revisión thermo de la F4B y correcciones recomendadas aplicadas. Pendiente la verificación manual de la F4B.
 - 13/11/2026: el usuario postergó la F5. Documento limpiado: se quitaron las listas de comprobaciones ya verificadas, la lista de modelos y la tabla de tamaños (están en `js/catalogo-pt.js`), preguntas ya respondidas, repeticiones y el detalle del registro de cambios. No se modificó código.
+- 13/11/2026: el usuario verificó la F4B. F6 (jerarquía y mesas) implementada con sus reglas de tamaño y la confirmación al borrar; D2 cambiada (puesto en lugar de `lx`/`ly`). Pendiente la verificación manual de la F6.
+- 13/11/2026: a pedido del usuario, sin lugar en la mesa un equipo nuevo no se coloca y uno arrastrado vuelve a su posición (con aviso).
+- 13/11/2026: revisión thermo de la F6; aplicados solo los arreglos rápidos (B1–B6).
+- 13/11/2026: a pedido del usuario, una mesa no puede ir encima de otra.
+- 13/11/2026: el usuario verificó la F6 (las 10 comprobaciones manuales). Se quitaron del documento.

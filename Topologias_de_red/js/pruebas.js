@@ -837,7 +837,7 @@ const TRP = (() => {
     if (document.getElementById('trp')) return;
     const d = document.createElement('div'); d.id = 'trp';
     d.style.cssText = 'position:fixed;left:10px;bottom:36px;z-index:30;width:440px;max-height:60vh;display:flex;flex-direction:column;background:#fff;border:1px solid #14232b;border-radius:10px;box-shadow:0 6px 22px rgba(0,0,0,.3);font:12px/1.4 "Segoe UI",Arial,sans-serif;color:#1d2a2f';
-    d.innerHTML = '<div style="display:flex;gap:4px;flex-wrap:wrap;padding:8px;border-bottom:1px solid #d3dadd;background:#eef2f4;border-radius:10px 10px 0 0"><b style="flex:1">Pruebas (Fases 0 a 4B)</b><button data-a="x">✕</button>'
+    d.innerHTML = '<div style="display:flex;gap:4px;flex-wrap:wrap;padding:8px;border-bottom:1px solid #d3dadd;background:#eef2f4;border-radius:10px 10px 0 0"><b style="flex:1">Pruebas (Fases 0 a 6)</b><button data-a="x">✕</button>'
       + '<button data-a="run">Ejecutar pruebas</button><button data-a="cap">Guardar referencia de dibujo</button><button data-a="cmp">Comparar con la referencia</button><button data-a="perf">Medir rendimiento</button></div>'
       + '<pre id="trp-out" style="margin:0;padding:8px;overflow:auto;white-space:pre-wrap;flex:1"></pre>';
     document.body.appendChild(d);
