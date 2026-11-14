@@ -1,5 +1,5 @@
 /* contexto.css: menú contextual (clic derecho) */
-#ctx{position:fixed;z-index:20;min-width:200px;max-width:min(280px,92vw);padding:4px;border:1px solid var(--borde);border-radius:10px;background:#fff;box-shadow:0 8px 28px rgba(20,35,43,.3);font-size:13px}
+#ctx{position:fixed;z-index:20;min-width:200px;max-width:min(280px,92vw);max-height:80vh;overflow-y:auto;padding:4px;border:1px solid var(--borde);border-radius:10px;background:#fff;box-shadow:0 8px 28px rgba(20,35,43,.3);font-size:13px}
 #ctx[hidden]{display:none}
 #ctx .ch{padding:6px 10px;color:#5d7078;font-size:12px;border-bottom:1px solid var(--borde);margin-bottom:3px}
 #ctx .cg+.cg{margin-top:3px;padding-top:3px;border-top:1px solid #e5eaec}

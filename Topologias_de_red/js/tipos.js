@@ -8,7 +8,7 @@ const TIPOS = {
   pared: { k: 'line' }, cable: { k: 'line' }, dispositivo: { k: 'item' }, rack: { k: 'item' }, escalera: { k: 'item' }, ascensor: { k: 'item' }, ventana: { k: 'item' }, imagen: { k: 'item' }, mesa: { k: 'item' },   // imagen = imagen suelta en el plano (F4B)
   puerta: { k: 'puerta' }, forma: { k: 'shape' }, zona: { k: 'zona' }, texto: { k: 'texto' }, medida: { k: 'medida' }
 };
-const SUB_CABLE = { 'UTP Cat6': 'utp6', 'Fibra óptica': 'fibra', 'Coaxial': 'coaxial', 'Serial': 'serial', 'Inalámbrico': 'inalambrico', 'Cable de energía': 'energia' };
+const SUB_CABLE = { 'UTP Cat6': 'utp6', 'Fibra óptica': 'fibra', 'Coaxial': 'coaxial', 'Serial': 'serial', 'Inalámbrico': 'inalambrico', 'Consola': 'consola', 'USB': 'usb', 'Cable de energía': 'energia' };
 const SUB_FORMA = { 'Rectángulo': 'rectangulo', 'Círculo': 'circulo', 'Triángulo': 'triangulo', 'Rombo': 'rombo', 'Hexágono': 'hexagono' };
 const SUB_DISPOSITIVO = {
   'Router': 'router', 'Switch': 'switch', 'Servidor': 'servidor', 'PC': 'pc', 'Firewall': 'firewall', 'Punto de acceso': 'punto-acceso', 'Impresora': 'impresora',

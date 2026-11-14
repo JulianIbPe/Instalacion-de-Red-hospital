@@ -2,7 +2,7 @@
 
 Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor ni framework). Se abre `index.html` en el navegador; `index.html?pruebas=1` abre además el panel de pruebas. Los scripts se cargan en el orden de `index.html` y comparten variables globales. Todas las coordenadas del modelo están en **metros**.
 
-> **Última actualización: 13/11/2026** (F6 completada y verificada por el usuario; siguiente: F7, sin empezar; ver sección 0).
+> **Última actualización: 13/11/2026** (F7A implementada, **pendiente de la verificación manual del usuario**; después sigue la F7B; ver sección 0).
 > **Regla de mantenimiento:** al terminar una fase, o al avanzar dentro de la fase en curso, se actualiza este documento (qué se hizo, resultados reales de las pruebas, qué falta y cuál es el siguiente paso).
 
 ## 0. Resumen para retomar (leer primero)
@@ -10,18 +10,21 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 **Dónde estamos (13/11/2026):**
 - F0 a F4 completadas y verificadas por el usuario (la F4B se verificó el 13/11/2026 y está commiteada en `5a085ca`, rama `branch_branch`).
 - **F5 (rellenos y zonas): postergada por decisión del usuario (13/11/2026).** Su plan se conserva en la sección 5. Ninguna otra fase depende de ella.
-- **F6 (jerarquía y mesas): completada y verificada por el usuario (13/11/2026), sin commitear.** Detalle en la sección 5.
-- Pruebas: 84 de 85 en el navegador integrado. La única que falla es «el dibujo es idéntico a la referencia», porque la referencia vive en el `localStorage` del navegador del usuario (sección 8).
+- **F6 (jerarquía y mesas): completada, verificada por el usuario y commiteada (13/11/2026, `1aa2ba6`).** Detalle en la sección 5.
+- **F7 partida en dos (13/11/2026): F7A (puertos y conexiones) implementada y pendiente de la verificación manual del usuario; F7B (redes/VLAN y etiquetas físicas) sin empezar.** Detalle y lista de comprobaciones en la sección 5.
+- Revisión thermo de la F7A hecha (13/11/2026) y arreglos chicos aplicados; detalle en la sección 5.
+- Pruebas: 93 de 94 en el navegador integrado. La única que falla es «el dibujo es idéntico a la referencia», porque la referencia vive en el `localStorage` del navegador del usuario (sección 8).
 
 **Qué hacer al retomar (en este orden):**
 1. Los archivos están en la carpeta del proyecto. No hay acceso al navegador del usuario: nada se da por probado si no lo ejecutó él o no se ejecutó realmente.
 2. Leer las secciones 0, 1, 3, 4, 6 y 8, y de la 5 la fase que toque.
-3. Preguntar al usuario si ya commiteó la F6 (lo hace él; preguntar antes de hacerlo).
-4. **No empezar ninguna fase sin que el usuario diga cuál sigue.** La F5 está postergada; la siguiente en el plan es la F7 (puertos, conexiones y redes). Antes de escribir código: presentar el diseño y esperar la orden.
+3. El usuario commitea por su cuenta o lo pide; preguntar antes de commitear.
+4. **No empezar ninguna fase sin que el usuario diga cuál sigue.** La F5 está postergada. Falta que el usuario verifique la F7A; recién después se presenta el diseño de la F7B (redes/VLAN y etiquetas físicas) y se espera la orden.
 5. Al terminar cada avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
 
 **Pendiente:**
-- Commit de la F6 (lo hace el usuario). La regla de mesas superpuestas no pasó por la revisión thermo.
+- Verificación manual de la F7A por el usuario (lista en la sección 5).
+- La regla de mesas superpuestas no pasó por la revisión thermo.
 - Confirmar el tamaño del texto bajo los equipos (0,28 m fijo: queda grande al lado de un equipo de 0,30 m).
 - Verificaciones menores que no bloquean: abrir un `.json` dañado y comprobar que el proyecto no cambia; deshacer justo después de abrir un archivo.
 
@@ -36,14 +39,15 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | F4 Catálogo, imágenes y modelos | Completada y verificada (F4A 12/11/2026, F4B 13/11/2026) |
 | F5 Rellenos y zonas | **Postergada por el usuario (13/11/2026)** |
 | F6 Jerarquía y mesas | Completada y verificada (13/11/2026) |
-| F7 a F12 | No iniciadas (sección 5) |
+| F7 Puertos, conexiones y redes | **F7A implementada (13/11/2026), pendiente de verificación manual**; F7B sin empezar |
+| F8 a F12 | No iniciadas (sección 5) |
 
 ## 2. Archivos del proyecto
 
 | Ruta | Contenido |
 |---|---|
 | `index.html` | Barra superior, menú izquierdo, área de trabajo con reglas, panel de plantas, inspector, barra de estado y aviso de «Nuevo». Carga las pruebas solo con `?pruebas=1` |
-| `css/` | `base`, `barra`, `menu`, `lienzo`, `plantas`, `dialogo`, `inspector`, `contexto`, `modelos` |
+| `css/` | `base`, `barra`, `menu`, `lienzo`, `plantas`, `dialogo`, `inspector`, `contexto`, `modelos`, `conexiones` |
 | `iconos/` | 34 SVG de dibujo propio (`viewBox` 96×96) y `vista-previa.png`. **Para cambiar un dibujo:** editar su SVG y correr `node iconos/generar.js` desde `Topologias_de_red` (regenera `js/iconos.js`) |
 | `js/estado.js` | Estado global (`S`, `V`, `tool`, `sel`, `tmp`, `drag`…) y utilidades (`byId`, `pt`, `toW`, `fmt`, `T`, `itemAt`) |
 | `js/eventos.js` | Namespace `TR`: `TR.stats` (contadores del render) y `TR.ui`. Obligatorio: aloja `TR.acc`, `TR.insp`, `TR.ctx`, `TR.mod`, `TR.img` |
@@ -68,18 +72,20 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | `js/modelos.js` | `TR.mod`: `equipo()` (objeto nuevo con su modelo y nombre con contador), diálogo de modelos propios (`abrir`, `guardar`, `borrarModelo`), sección «Modelo» del inspector |
 | `js/imagenes.js` | `TR.img`: selector de archivos (`elegir`, `cargar`), `ponerEquipo` / `quitarEquipo`, `ponerModelo`, `colocar` (imagen suelta), sección «Imagen» del inspector y entradas `img-poner` / `img-quitar` del menú contextual |
 | `js/jerarquia.js` | `TR.jer` (F6): mesas y equipos anclados. `sincronizar` (lo llama `renderObjetos`), `problema` (reglas de tamaño y puestos), `mesaEn`, `anclar`, `alSoltar`, `alSoltarArrastre`, `sinHijos` (R6), `hijosDeIds` (R7), `dibujar`. Registra el campo «Puestos» y la mesa en `sinColor` |
+| `js/conexiones.js` | `TR.con` (F7A): `S.conex` y puertos. `sincronizar` (lo llama `renderObjetos`; único lugar que mantiene las conexiones al día con los cables), `puertosDe` / `puerto`, `conexDe`, `asignar`, `elegir` y `alEmpezar` (menú de puertos al dibujar), `falta` (qué le falta a un extremo), `marcas` (círculos rojos de lo incompleto, en `#g-inc`), diálogo «Interfaces» (`abrir`), entradas del menú (`con-ifs`, `con-a`, `con-b`, `cab-…`) |
 | `js/contexto.js` | `TR.ctx`: menú contextual `#ctx`. Teclado: flechas, Home/End, Enter, Esc, Tab |
 | `js/archivos.js` | Guardar y abrir `.json` v2 (`abrirTexto` no toca nada si el archivo es inválido), exportar PNG (`construirSvgExport`), «Nuevo» |
 | `js/main.js` | Arranque (se carga el último) |
 | `js/pruebas.js` | Solo con `?pruebas=1`: panel de pruebas, proyectos de prueba, referencia de dibujo, medición de rendimiento y pruebas de las fases 0 a 3. Expone sus utilidades en `TRP.util` |
 | `js/pruebas-f4.js` | Solo con `?pruebas=1`, después de `pruebas.js`: pruebas de la Fase 4. Cada fase nueva lleva su propio archivo de pruebas |
 | `js/pruebas-f6.js` | Solo con `?pruebas=1`, después de `pruebas-f4.js`: pruebas de la Fase 6 |
+| `js/pruebas-f7.js` | Solo con `?pruebas=1`, después de `pruebas-f6.js`: pruebas de la Fase 7A |
 
 ## 3. Decisiones
 
 | N.º | Decisión |
 |---|---|
-| D1 | **Conexiones lógicas ligadas a la ruta física.** `S.conex`: cada conexión guarda origen y destino `{d: dispositivo, p: puerto}` y la lista ordenada `rutas` de líneas. La línea es solo geometría; la conexión conserva su `id` aunque cambie el recorrido. Las que tienen extremos sin definir son **incompletas**. Los tramos entre plantas se unen a la conexión existente, sin duplicar |
+| D1 | **Conexiones lógicas ligadas a la ruta física.** `S.conex`: cada conexión guarda origen y destino `{d: dispositivo, p: puerto}` y la lista ordenada `rutas` de líneas. La línea es solo geometría; la conexión conserva su `id` aunque cambie el recorrido. Las que tienen extremos sin definir son **incompletas**. Los tramos entre plantas se unen a la conexión existente, sin duplicar. **F7A (13/11/2026):** un cable = una conexión (`rutas` tiene hoy una sola línea); un cable unido al nodo de otro cable queda incompleto en esa punta; el «Cable de energía» no lleva conexión |
 | D2 | **Jerarquía.** Campo `parent`. Hijos con posición absoluta sincronizada (`x`, `y`, `rot`). Mesas: el hijo guarda `puesto` y `lrot`, **no** `lx`/`ly` (cambio del 13/11/2026: la posición sale del puesto, así se reparte sola al redimensionar o cambiar los puestos y nunca queda desactualizada). Racks: `ru:{u,h}`. El hijo hereda `pl` y `cp` del padre |
 | D3 | **Recursos fuera del historial.** Almacén `R` (imágenes por hash y modelos); se guarda con el proyecto; los recursos sin uso se descartan al guardar (salvo los modelos propios, que se conservan) |
 | D4 | **Historial.** Snapshots de `S` con tope en pasos y en bytes; estrategia intercambiable |
@@ -106,7 +112,7 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 - **`S`** (proyecto; entra en el historial): `edificio`, `unidad`, `plantas`, `objs`, `propios` (ids de los modelos propios que ofrece el menú), y desde las fases siguientes `conex`, `redes`, `presupuesto`.
 - **`R`** (recursos; fuera del historial): `imgs` y `modelos`. Los puertos predeterminados vienen de la plantilla del modelo (grupos `{g, n, tipo, vel, pref}`); la instancia solo guarda sobrescrituras (`po`) e interfaces (`ifs`). Los ids de puerto son `grupo:índice` (p. ej. `g0:12`). Editar nombre o puertos de una plantilla crea una versión nueva (`v + 1`, `base`) y pasa a ella los equipos colocados, en un paso deshacible.
 - **Estado de interfaz** (fuera de `S` y de `R`): `V`, `sel`, `multi`, `tool`, `tmp`, `drag`, filtros `F`, estado del inspector y del menú contextual.
-- **Campos por objeto de la jerarquía:** mesa `puestos`; equipo sobre una mesa `parent`, `puesto`, `lrot` (F6). Fases siguientes: dispositivo `po`, `ifs`, `ru`. Conexión `{id, a:{d,p}|null, b:{d,p}|null, rutas, sub, red, etqA, etqB, holgura}`; sin ruta = conexión lógica con longitud estimada.
+- **Campos por objeto de la jerarquía:** mesa `puestos`; equipo sobre una mesa `parent`, `puesto`, `lrot` (F6). F7A: dispositivo `po` (`{'g0:3': {off, desc}}`) y conexión `{id, a:{d,p?}|null, b:{d,p?}|null, rutas}`. Fases siguientes: dispositivo `ifs`, `ru`; conexión `sub, red, etqA, etqB, holgura`; sin ruta = conexión lógica con longitud estimada.
 - **Identidad:** un equipo es siempre el mismo objeto (en el plano, en una mesa o en un rack). El `ref` de un extremo de línea es solo anclaje geométrico y se sincroniza con funciones explícitas.
 
 **Reglas de coherencia**
@@ -120,7 +126,7 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | R5. Los hijos heredan `pl`/`cp` del padre | Hijos huérfanos en otra capa |
 | R6. Mover o rotar un contenedor sincroniza hijos; mover un hijo recalcula su posición local; soltarlo fuera lo desancla. En multiselección no se mueve un hijo cuyo padre ya está seleccionado | Doble movimiento |
 | R7. Borrar un contenedor borra sus hijos y las conexiones que los referencian. Borrar un dispositivo conserva sus cables como líneas libres y deja el extremo de la conexión en `null` | Referencias colgantes |
-| R8. Borrar una línea la quita de `rutas`; si era la última, la conexión queda «sin ruta» | Pérdida silenciosa de conexiones |
+| R8. Borrar una línea la quita de `rutas`; si era la última, **la conexión se borra** (decisión del usuario, 13/11/2026; las conexiones «sin ruta» llegan con el rack en la F8) | Puertos ocupados por cables que ya no existen |
 | R9. Todo campo nuevo se registra en `esquema.js`; la prueba de ida y vuelta falla si un campo se pierde | Datos descartados en silencio |
 | R10. El modal del rack comparte `S` y el historial global; cerrarlo no toca `V`, `sel` ni `tool` | Estados divergentes |
 
@@ -199,7 +205,34 @@ Archivos: nuevo `jerarquia.js` (`TR.jer`); cambios chicos en `tipos.js`, `estado
 - **Pruebas automatizadas (navegador integrado): 84 de 85** (8 nuevas en `pruebas-f6.js`; falla solo la de la referencia, ausente en ese navegador). Las pruebas que hacen clic necesitan el panel del navegador visible: con el panel oculto (0 px) falla la del cable. No se probó: Firefox ni Safari, arrastres reales con el ratón (las pruebas simulan los eventos).
 
 ### F7 — Puertos, conexiones y redes
-Archivos: `estado.js`, `interaccion.js`, `historial.js`, `plantas.js`, `catalogo.js`, `controles.js`, `esquema.js`; nuevos `conexiones.js`, `redes.js`.
+
+**F7A — puertos y conexiones (implementada el 13/11/2026; pendiente de la verificación manual del usuario).** Cubre los puntos 1, 2, 3, 6, 7, 8 y 9 de la lista de abajo.
+Archivos: nuevos `js/conexiones.js`, `css/conexiones.css`, `js/pruebas-f7.js`; cambios chicos en `interaccion.js`, `dibujo.js`, `esquema.js`, `catalogo.js`, `tipos.js`, `acciones.js` (grupo «Tipo de cable»), `inspector.js` (firma), `controles.js`, `contexto.css` e `index.html` (carga `conexiones.js` después de `jerarquia.js`).
+- **Datos:** `S.conex = [{id, a, b, rutas}]`, una conexión por cable de red. Cada extremo es `null` (la punta no está sobre un equipo) o `{d, p?}`. Puertos con id `grupo:índice` y nombre «GigabitEthernet 2» (pref + número desde 1; un grupo de un solo puerto usa solo el pref). El equipo guarda en `po` solo el estado (apagado) y la descripción. «Ocupado» se deduce de `S.conex`.
+- **`TR.con.sincronizar`** (en `renderObjetos`): crea la conexión del cable que no la tiene, borra la del cable borrado, toma el equipo de cada extremo de la unión `ref` de la punta y limpia el puerto si el equipo cambió, si el puerto ya no existe en el modelo, si no sirve para ese tipo de cable o si ya lo usa otra conexión. No guarda historial: corre después del `push()` de la acción. Por eso los archivos v1 y los v2 anteriores reciben sus conexiones al abrirse, sin código de migración.
+- **Dibujar:** con un cable de red, el clic sobre un equipo con puertos abre el menú «Puerto de …» (solo los que sirven para ese cable; los ocupados, desactivados; «Sin puerto» o Esc lo dejan sin elegir). El clic sobre el **segundo** equipo con puertos termina el cable solo y pide su puerto. Cable y puertos son un solo paso de historial. Los equipos sin puertos (proyectos viejos, eléctricos) funcionan como antes.
+- **Incompleto:** a una punta le falta el equipo, o el puerto cuando el equipo tiene puertos. Se marca con un círculo rojo punteado en la capa `#g-inc` (entre `#c` y `#g-tmp`; se rehace solo con los objetos): no sale en el PNG ni cambia `#c`. `TR.con.falta(c, k)` dice qué le falta a un extremo (`'equipo'`, `'puerto'` o `null`).
+- **Menú del cable e inspector:** «Extremo A/B: equipo · puerto» (abre el menú de puertos) y «Tipo de cable» (cambia nombre, subtipo y trazo; los puertos que no sirven se limpian). **Equipo:** «Interfaces…» abre un diálogo con cada puerto: activo, descripción y qué cable tiene conectado (el desplegable conecta, cambia o desconecta).
+- **Cables nuevos:** «Consola» y «USB» (medio `consola` y `usb`, los puertos RS-232 y USB de las PC).
+- **Reglas:** borrar un equipo deja el extremo en `null` y conserva el cable (R7); borrar el cable borra su conexión (R8 cambiada); un cable pegado nace con una conexión nueva e incompleta; el color del cable ya estaba bloqueado (D16).
+- **Fuera de la F7A (decisión del usuario):** IP y máscara por interfaz (`ifs`); cables cruzado y serial DCE/DTE; vincular los pares de cables viejos partidos con la antigua flecha de escalera.
+- **Límites conocidos:** un puerto apagado es solo un dato (se puede elegir igual, con el aviso «apagado»); el desplegable del diálogo pierde el foco al cambiar algo; al editar un modelo propio los grupos se renumeran por fila, así que quitar un grupo del medio corre los puertos de los cables ya conectados (hallazgo thermo de la F4 no aplicado); cambiar el tipo de un cable unido por un nodo a otros cables no los separa; `o.po` no se limpia si el modelo editado deja de tener ese puerto.
+- **Revisión thermo (13/11/2026), aplicados:** el segundo clic de un doble clic sobre el segundo equipo ya no cierra el menú de puertos ni empieza otro cable (el menú descarta los clics durante `TR.ctx.espera` = 350 ms); el menú de puertos y la terminación automática usan el equipo de la unión `ref` del punto, no el que está bajo el cursor; las marcas pasaron a `#g-inc` y no se rehacen al mover el ratón; arrastrar una punta fuera de su equipo y volver conserva el puerto (`sincronizar` salta el cable cuya punta se arrastra); «Interfaces» no guarda pasos vacíos, no repinta al editar estado o descripción y no deja tocar cables de capas bloqueadas; la firma del inspector solo mira los extremos con un objeto seleccionado; ids de puerto sin ceros a la izquierda, id de conexión hasta 1e9 y grupo sin nombre = «Puerto»; el teclado se bloquea con cualquier `dialog[open]`. **Para la F7B:** tipo de cable como campo + `fijar` (así lo ofrece el inspector) y un solo mecanismo para el puerto de las dos puntas al dibujar (hoy `pend` para la A y `sinPaso` para la B). **No aplicados (decisión del usuario):** sacar la rama del cable de `pointerdown` a `clicLinea`; firmar la lista de acciones en el inspector; tabla `MEDIO`, `S.conex` opcional, ids codificados en cadenas y afirmaciones de relleno en las pruebas.
+- **Pruebas automatizadas (navegador integrado, 13/11/2026): 93 de 94** (9 en `pruebas-f7.js`; falla solo la de la referencia, ausente en ese navegador). Necesitan el panel del navegador ancho: con 446 px de ancho fallan las que hacen clic en x = 7 m. Sin prueba automática: las opciones desactivadas de un cable en capa bloqueada en «Interfaces». Además se comprobó con un clic real que, con la herramienta de cable, el clic sobre un router abre «Puerto de Router1» con sus 3 puertos. No se pudo sacar captura (el panel del navegador estaba oculto). No se probó: Firefox ni Safari, el aspecto del diálogo «Interfaces», arrastres reales con el ratón.
+- **Comprobaciones manuales para el usuario:**
+  1. Ejecutar las pruebas (`?pruebas=1`): deben pasar las 94, incluida la de la referencia.
+  2. Colocar un router y un switch, elegir «UTP Cat6», clic en el router (elegir un puerto) y clic en el switch (elegir otro): el cable termina solo y no queda ningún círculo rojo. Ctrl+Z lo quita de una vez. Repetirlo terminando con **doble clic** sobre el switch: el menú de puertos debe quedar abierto y no debe empezar otro cable.
+  3. Dibujar un cable del router a un punto libre (terminar con doble clic): círculo rojo en la punta libre. Arrastrar esa punta sobre otro equipo: sigue el círculo rojo (falta el puerto) hasta elegirlo con clic derecho en el cable → «Extremo B».
+  4. Un segundo cable sobre el mismo router: el puerto usado aparece «(ocupado)» y desactivado.
+  5. Clic derecho en el router → «Interfaces…»: apagar un puerto, ponerle descripción, pasar el cable a otro puerto y dejarlo libre desde el desplegable. Revisar que el diálogo se vea bien.
+  6. Mover el router, ponerlo sobre una mesa y mover la mesa: el cable lo sigue y conserva sus puertos.
+  7. Borrar el switch: el cable queda con círculo rojo en esa punta. Borrar el cable: en «Interfaces…» del router el puerto vuelve a estar libre.
+  8. Clic derecho en el cable → «Tipo de cable» → «Coaxial»: cambia el trazo y los puertos se limpian. Cable «Consola» sobre una PC: solo ofrece «RS-232».
+  9. Guardar, «Nuevo», abrir: las conexiones y los puertos siguen. Abrir un proyecto viejo con cables: se ve igual que antes, con círculos rojos solo donde falta un equipo. Exportar PNG: sin círculos rojos.
+
+**F7B — redes/VLAN y etiquetas físicas (sin empezar):** puntos 4 y 5.
+
+Plan original de la F7. Archivos: `estado.js`, `interaccion.js`, `historial.js`, `plantas.js`, `catalogo.js`, `controles.js`, `esquema.js`; nuevos `conexiones.js`, `redes.js`.
 1. `S.conex` según D1; cada puerto con id único, tipo, estado y propiedades; los cables incompletos se ven distintos de los terminados.
 2. Conectar desde el plano pide el puerto cuando el dispositivo los tiene; clic derecho sobre un dispositivo muestra sus interfaces y permite modificar conexiones.
 3. Mover un vértice o redibujar la ruta no cambia el `id` de la conexión; al mover un dispositivo (o su mesa) los cables conservan sus extremos y actualizan la geometría; mover un extremo a otro dispositivo limpia el puerto.
@@ -285,7 +318,7 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 
 ## 8. Mapa técnico para retomar
 
-**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `iconos` → `catalogo-pt` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `jerarquia` → `inspector` → `modelos` → `imagenes` → `contexto` → `archivos` → `main` (siempre el último). Con `?pruebas=1` se cargan además `pruebas` → `pruebas-f4` → `pruebas-f6`.
+**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `iconos` → `catalogo-pt` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `jerarquia` → `conexiones` → `inspector` → `modelos` → `imagenes` → `contexto` → `archivos` → `main` (siempre el último). Con `?pruebas=1` se cargan además `pruebas` → `pruebas-f4` → `pruebas-f6` → `pruebas-f7`.
 
 **Estado global (`estado.js`):** `S` (proyecto; entra al historial), `V` (vista: `ox`, `oy`, `z` px/m), `sel`, `multi`, `selEdge`, `tool`, `tmp`, `drag`, `nid`, `curP`. `R` (recursos, `recursos.js`) está fuera de `S`. Namespace `TR` (`eventos.js`). El código nuevo usa `TR`: las letras `I`, `L`, `T`, `S`, `V` ya están ocupadas.
 
@@ -301,7 +334,7 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 - Clic derecho (`interaccion.js`): con herramienta u operación en curso cancela o termina; sin ellas abre el menú contextual.
 - El doble clic se detecta a mano (la página se redibuja en cada clic y el `dblclick` nativo se pierde).
 
-**Pruebas (`?pruebas=1`, botón «Ejecutar pruebas»):** 85 casos (63 de F0 a F3 y sus ajustes en `js/pruebas.js`; 8 de la F4A y 6 de la F4B en `js/pruebas-f4.js`; 8 de la F6 en `js/pruebas-f6.js`, con sus proyectos `mesa`/`pc` y `arrastrarObj`). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar; las de la F4 usan `f4(fn)` (recursos vacíos, proyecto vacío y menú en «Dispositivos»). Para pruebas nuevas: archivo propio por fase, las utilidades de `TRP.util`, y no dejar pasos en el historial del usuario.
+**Pruebas (`?pruebas=1`, botón «Ejecutar pruebas»):** 94 casos (63 de F0 a F3 y sus ajustes en `js/pruebas.js`; 8 de la F4A y 6 de la F4B en `js/pruebas-f4.js`; 8 de la F6 en `js/pruebas-f6.js`, con sus proyectos `mesa`/`pc` y `arrastrarObj`; 9 de la F7A en `js/pruebas-f7.js`, con `f7`, `poner`, `cablear` y `elegirP`). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar; las de la F4 usan `f4(fn)` (recursos vacíos, proyecto vacío y menú en «Dispositivos»). Para pruebas nuevas: archivo propio por fase, las utilidades de `TRP.util`, y no dejar pasos en el historial del usuario.
 - **Aviso importante:** la prueba «el dibujo es idéntico a la referencia» usa una referencia guardada en el `localStorage` del navegador (clave `topologias_ref_f0`). En otro navegador, otra cuenta o tras limpiar datos no existe y esa prueba falla por eso, no por un error del código. Se genera con «Guardar referencia de dibujo» usando una versión del código cuyo dibujo se considere correcto. No sobrescribir la del usuario sin avisarle.
 - «Medir rendimiento» compara contra una base de la F0 (render ~50 ms, mover sin arrastrar ~44 ms con 3000 objetos). Última medición del usuario (01/11/2026): render 50,6 ms y mover sin arrastrar 0 ms.
 
@@ -318,3 +351,5 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 - 13/11/2026: revisión thermo de la F6; aplicados solo los arreglos rápidos (B1–B6).
 - 13/11/2026: a pedido del usuario, una mesa no puede ir encima de otra.
 - 13/11/2026: el usuario verificó la F6 (las 10 comprobaciones manuales). Se quitaron del documento.
+- 13/11/2026: F7 partida en F7A y F7B. F7A (puertos y conexiones) implementada con las cuatro decisiones del usuario: borrar el cable borra la conexión (R8 cambiada), el cable termina solo en el segundo equipo, cables nuevos «Consola» y «USB», un cable = una conexión. Pendiente la verificación manual.
+- 13/11/2026: revisión thermo de la F7A; aplicados los arreglos chicos recomendados (doble clic, equipo de la unión, capa `#g-inc`, arrastre de punta, diálogo «Interfaces», validaciones). Dos pruebas nuevas (94 en total).

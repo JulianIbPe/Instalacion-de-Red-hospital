@@ -67,8 +67,8 @@ let asasOut = [], hitsOut = [];           // asas de edición de lo seleccionado
 const contar = k => { if (typeof TR !== 'undefined') TR.stats[k]++; };   // contadores de eventos.js (opcional)
 let capas = null, ultGrilla = '';
 function iniciarCapas() {
-  svg.innerHTML = '<defs id="defs-fondo"></defs><g id="vp"><g id="g-grilla"></g><g id="c"></g><g id="g-tmp"></g></g>';
-  capas = { defs: svg.querySelector('#defs-fondo'), vp: svg.querySelector('#vp'), grilla: svg.querySelector('#g-grilla'), c: svg.querySelector('#c'), tmp: svg.querySelector('#g-tmp') };
+  svg.innerHTML = '<defs id="defs-fondo"></defs><g id="vp"><g id="g-grilla"></g><g id="c"></g><g id="g-inc"></g><g id="g-tmp"></g></g>';   // #g-inc (F7A): marcas de las conexiones incompletas; fuera de #c (no se exportan) y se rehacen solo con los objetos
+  capas = { defs: svg.querySelector('#defs-fondo'), vp: svg.querySelector('#vp'), grilla: svg.querySelector('#g-grilla'), c: svg.querySelector('#c'), inc: svg.querySelector('#g-inc'), tmp: svg.querySelector('#g-tmp') };
   ultGrilla = '';
 }
 const capasOk = () => !!capas && svg.contains(capas.c) && svg.contains(capas.tmp);
@@ -84,6 +84,7 @@ function renderObjetos() {                // objetos del proyecto (lo que se exp
   contar('obj'); if (!capasOk()) iniciarCapas();
   TR.jer.sincronizar();                   // F6: los equipos de cada mesa siguen a su mesa
   sincronizarTrazas();                    // el recorrido de un cable por una escalera sigue a la escalera si ésta se movió, giró o cambió de tamaño
+  TR.con.sincronizar();                   // F7A: una conexión por cable de red, con sus extremos al día
   asasOut = []; hitsOut = [];
   // Orden de dibujo: primero por jerarquía de capa (las capas altas se pintan encima) y, dentro de una misma capa, por tipo de objeto (ORD)
   const E = S.edificio, all = [...S.objs].filter(esVisible).sort((a, b) => rangoCapa(a) - rangoCapa(b) || ordDe(a) - ordDe(b));
@@ -93,6 +94,7 @@ function renderObjetos() {                // objetos del proyecto (lo que se exp
   capas.c.innerHTML = `<defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map(o => { const g = draw(o) + resaltar(o); return esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}${hitsOut.join('')}${asasOut.join('')}`;
   const imgs = [...new Set(all.map(imagenDe).filter(Boolean))], clave = imgs.join();
   if (clave !== claveImg) { defsImg.innerHTML = imgs.map(i => { const im = R.imgs[i]; return `<symbol id="im-${i}" viewBox="0 0 ${im.w} ${im.h}"><image href="${im.data}" width="${im.w}" height="${im.h}"/></symbol>`; }).join(''); claveImg = clave; }
+  capas.inc.innerHTML = TR.con.marcas();
   if (clave) capas.c.prepend(defsImg);   // dentro de #c para que el PNG exportado las incluya; sin imágenes, #c queda igual que antes
 }
 function renderTmp() {                    // lo temporal de la interacción (no forma parte del proyecto ni del PNG)

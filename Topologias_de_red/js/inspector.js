@@ -14,7 +14,7 @@ TR.insp = (() => {
   let firma = null, ids = [], visible = window.innerWidth > 760;
   const fmtNum = v => String(+Number(v).toFixed(3));
   const tipoTxt = os => { if (os.length > 1) return os.length + ' objetos'; const o = os[0], s = subDe(o); return (TIPO_NOM[tipoDe(o)] || tipoDe(o)) + (s && s != 'otro' ? ' · ' + s : ''); };
-  const firmaDe = os => os.map(o => o.id + ':' + o.k + ':' + tipoDe(o) + '/' + (subDe(o) || '') + ':' + (o.modelo || '') + (o.modelo && TR.mod.esPropio(o.modelo) ? '*' : '') + ':' + (o.img || '') + '/' + ((modeloDe(o) || {}).img || '')).join('|');   // '*': modelo propio (ofrece «Editar modelo…»); las imágenes activan o desactivan los «Quitar» de la sección «Imagen»
+  const firmaDe = os => os.map(o => o.id + ':' + o.k + ':' + tipoDe(o) + '/' + (subDe(o) || '') + ':' + (o.modelo || '') + (o.modelo && TR.mod.esPropio(o.modelo) ? '*' : '') + ':' + (o.img || '') + '/' + ((modeloDe(o) || {}).img || '') + ':' + (os.length == 1 ? TR.con.firma(o) : '')).join('|');   // los extremos de un cable solo se muestran con un objeto seleccionado   // '*': modelo propio (ofrece «Editar modelo…»); las imágenes activan o desactivan los «Quitar» de la sección «Imagen»
   const aplicables = (def, os) => os.filter(def.aplica);
   function textoDe(def, os) {                                             // valor común como texto ('' si no hay o si difieren)
     const vs = aplicables(def, os).map(def.leer); if (!vs.length || !vs.every(v => v === vs[0])) return '';

@@ -1,0 +1,9 @@
+/* conexiones.css: diálogo «Interfaces» de un equipo, ver js/conexiones.js */
+#dlg-if{width:min(680px,96vw);padding:22px;border:0;border-radius:12px;background:#fff;color:var(--texto);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#dlg-if::backdrop{background:rgba(20,35,43,.55)}
+#dlg-if h3{margin:0 0 12px;font-size:18px}
+#dlg-if .di-h,#dlg-if .di-r{display:grid;grid-template-columns:150px 46px 1fr 1.3fr;gap:6px;align-items:center;font-size:13px}
+#dlg-if .di-h{margin-bottom:4px;color:#5d7078;font-size:12px}
+#di-g{display:grid;gap:6px;max-height:55vh;overflow-y:auto;margin-bottom:12px}
+#dlg-if input[type=text],#dlg-if select{min-width:0;padding:5px 8px;border:1px solid var(--borde);border-radius:6px;background:#fff;color:var(--texto);font:inherit}
+#dlg-if .acc{flex-direction:row;justify-content:flex-end}

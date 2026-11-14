@@ -69,8 +69,13 @@ svg.addEventListener('pointerdown', e => {
   else if (tool.k == 'line') {
     snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e));   // los imanes miden la distancia con el cursor real, no con el punto ya ajustado a la grilla
     const it = itemAt(e), q = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p;   // nodo del mismo tipo > dispositivo > punto libre
-    if (!tmp) tmp = { k: 'line', n: tool.n, c: esCable(tool) ? tool.c : col(), w: tool.w, d: tool.d, pts: [q], label: '', pl: S.plantaAct, cp: S.capaAct };   // pl y cp: dónde empieza el cable
-    else { if (S.plantaAct != tmp.pl) { q.pl = S.plantaAct; q.cp = S.capaAct; } tmp.pts.push(q); }   // un punto en otra planta (tras cruzar una escalera) lleva la suya
+    const dev = q.ref ? byId(q.ref) : null, conP = TR.con.conPuertos(tool, dev);   // F7A: un cable de red unido a un equipo con puertos pide el puerto (conexiones.js); el equipo es el de la unión, no el que está bajo el cursor (el imán de nodos puede unir desde fuera del icono)
+    if (!tmp) { tmp = { k: 'line', n: tool.n, c: esCable(tool) ? tool.c : col(), w: tool.w, d: tool.d, pts: [q], label: '', pl: S.plantaAct, cp: S.capaAct }; TR.con.alEmpezar(conP && dev, e); }   // pl y cp: dónde empieza el cable
+    else if (conP && tmp.pts.length == 1 && tmp.pts[0].ref == dev.id) return;   // segundo clic sobre el mismo equipo: no hay cable de un equipo a sí mismo sin recorrido
+    else {
+      if (S.plantaAct != tmp.pl) { q.pl = S.plantaAct; q.cp = S.capaAct; } tmp.pts.push(q);   // un punto en otra planta (tras cruzar una escalera) lleva la suya
+      if (conP) { const L = tmp; finishLine(); TR.con.elegir(L.id, 'b', e, true); return; }   // el cable termina solo en el segundo equipo y pide su puerto (mismo paso de historial)
+    }
   }
   render();
 });

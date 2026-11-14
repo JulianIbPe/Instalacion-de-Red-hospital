@@ -10,7 +10,7 @@ const SH = {   // vértices por defecto de cada forma, por subtipo estable (no p
 const NOMBRE_FORMA = { rectangulo: 'Rectángulo', circulo: 'Círculo', triangulo: 'Triángulo', rombo: 'Rombo', hexagono: 'Hexágono' };
 const CAT = {
   'Dispositivos': PT.map(m => ({ k: 'item', n: m.nombre, w: m.w, h: m.h, cat: m.cat, pt: m })),   // F4A: modelos de catalogo-pt.js (pt = plantilla); los equipos sin modelo de proyectos viejos se siguen dibujando con su emoji
-  'Cables': [L('UTP Cat6', '#2e86de', .06), L('Fibra óptica', '#f39c12', .06), L('Coaxial', '#555555', .07), L('Serial', '#8e44ad', .06, '.2 .1'), L('Inalámbrico', '#16a085', .05, '.1 .15')],
+  'Cables': [L('UTP Cat6', '#2e86de', .06), L('Fibra óptica', '#f39c12', .06), L('Coaxial', '#555555', .07), L('Serial', '#8e44ad', .06, '.2 .1'), L('Inalámbrico', '#16a085', .05, '.1 .15'), L('Consola', '#5dade2', .05), L('USB', '#34495e', .05)],   // F7A: Consola y USB (los puertos RS-232 y USB de las PC)
   'Formas': Object.keys(SH).map(sub => ({ k: 'shape', n: NOMBRE_FORMA[sub], tipo: 'forma', sub })),
   'Eléctrico': [I('Lámpara', '💡', .5, .5), I('Enchufe', '🔌', .4, .4), I('Interruptor', '🎚️', .4, .4), I('UPS', '🔋'), I('Tablero', '⚡', .6, .8), L('Cable de energía', '#e74c3c', .05, '.3 .08')],
   // Las escaleras nuevas llevan esc ('descanso' | 'espiral'): al colocarlas se guardan como {n:'Escalera', t: esc} (ver colocar.js)

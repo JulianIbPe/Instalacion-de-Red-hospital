@@ -41,9 +41,29 @@ const ESQ = (() => {
   const lista = (f, min, max) => (v, c) => { if (!Array.isArray(v) || v.length < min || v.length > max) return INV; const r = v.map(q => f(q, c)); return r.includes(INV) ? INV : r; };
   const vertice = (v, c) => { if (!Array.isArray(v) || v.length != 2) return INV; const x = numero(-10, 10)(v[0], c), y = numero(-10, 10)(v[1], c); return x === INV || y === INV ? INV : [x, y]; };
 
+  const RE_PUERTO = /^g(0|[1-9]\d{0,2}):(0|[1-9]\d{0,2})$/;   // F7A: id de un puerto = grupo:índice, sin ceros a la izquierda (un mismo puerto no puede escribirse de dos formas)
+  const po = (v, c) => {                   // sobrescrituras de puertos de un equipo: {'g0:3': {off: true, desc}}
+    if (!v || typeof v != 'object' || Array.isArray(v)) return INV; const r = {};
+    for (const k of Object.keys(v).slice(0, 4096)) {
+      const e = v[k], d = e && typeof e == 'object' && e.desc !== undefined ? texto(100)(e.desc, c) : undefined;
+      if (!RE_PUERTO.test(k) || !e || typeof e != 'object' || d === INV) { aviso(c, 'valores inválidos omitidos'); continue; }
+      const x = { ...(e.off === true && { off: true }), ...(d && { desc: d }) }; if (Object.keys(x).length) r[k] = x;
+    }
+    return Object.keys(r).length ? r : INV;
+  };
+  const extremo = v => v === null || v === undefined ? null : typeof v == 'object' && idNum(v.d) !== INV && (v.p === undefined || (typeof v.p == 'string' && RE_PUERTO.test(v.p))) ? { d: v.d, ...(v.p !== undefined && { p: v.p }) } : INV;
+  function sanearConex(c, v) {             // S.conex: solo la forma; los extremos y las rutas que no correspondan a los cables los corrige TR.con.sincronizar al dibujar
+    const vistos = new Set(), out = [];
+    for (const x of Array.isArray(v) ? v.slice(0, LIM.objetos) : [null]) {
+      const ok = x && typeof x == 'object', id = ok ? entero(1, 1e9)(x.id) : INV, a = ok ? extremo(x.a) : INV, b = ok ? extremo(x.b) : INV, rutas = ok ? lista(idNum, 1, 1000)(x.rutas, c) : INV;
+      if ([id, a, b, rutas].includes(INV) || vistos.has(id)) { aviso(c, 'conexiones no válidas omitidas'); continue; }
+      vistos.add(id); out.push({ id, a, b, rutas });
+    }
+    return out;
+  }
   const COMUNES = { pl: idTxt, cp: idTxt, tipo: v => own(TIPOS, v) ? v : INV, sub: etq };
   const ESPEC = {
-    item: { req: ['x', 'y', 'w', 'h'], f: { n: texto(LIM.nombre), ic: icono, x: coord, y: coord, w: dim, h: dim, rot: ang, label: texto(LIM.texto), c: color, t: en(['descanso', 'espiral']), img: patron(RE_IMG), modelo: patron(RE_MOD), puestos: entero(1, 50), parent: idNum, puesto: entero(0, 49), lrot: ang } },   // F6: mesa (puestos) y equipo sobre una mesa (parent, puesto, lrot)
+    item: { req: ['x', 'y', 'w', 'h'], f: { n: texto(LIM.nombre), ic: icono, x: coord, y: coord, w: dim, h: dim, rot: ang, label: texto(LIM.texto), c: color, t: en(['descanso', 'espiral']), img: patron(RE_IMG), modelo: patron(RE_MOD), puestos: entero(1, 50), parent: idNum, puesto: entero(0, 49), lrot: ang, po } },   // F6: mesa (puestos) y equipo sobre una mesa (parent, puesto, lrot); F7A: po
     line: { req: ['pts'], def: { c: '#444444', w: 0.06 }, f: { n: texto(LIM.nombre), c: color, w: numero(0.001, 50), d: dash, pts: lista(punto, 1, LIM.puntos), label: texto(LIM.texto) } },
     shape: { req: ['x', 'y', 'w', 'h'], f: { n: texto(LIM.nombre), x: coord, y: coord, w: dim, h: dim, rot: ang, c: color, f: patron(/^[a-z0-9-]{1,16}$/, 16), ls: en(['con', 'par', 'dis', 'pun', 'mix']), label: texto(LIM.texto), u: lista(vertice, 3, 1000), hid: lista(entero(0, 1000), 0, 1000) } },
     zona: { req: ['s', 'x', 'y', 'w', 'h'], f: { s: en(['r', 'e']), n: texto(LIM.nombre), x: coord, y: coord, w: dim, h: dim, rot: ang, c: color, f: patron(/^[a-z0-9-]{1,16}$/, 16), ls: en(['con', 'par', 'dis', 'pun', 'mix']), label: texto(LIM.texto) } },
@@ -94,7 +114,7 @@ const ESQ = (() => {
   }
   function sanearEstado(c, d) {
     if (!d || typeof d != 'object' || Array.isArray(d)) return error(c, 'El archivo no contiene un proyecto');
-    for (const k of Object.keys(d)) if (!['version', 'formato', 'edificio', 'unidad', 'plantas', 'plantaAct', 'capaAct', 'pn', 'cn', 'objs', 'propios'].includes(k)) aviso(c, 'campos desconocidos omitidos');
+    for (const k of Object.keys(d)) if (!['version', 'formato', 'edificio', 'unidad', 'plantas', 'plantaAct', 'capaAct', 'pn', 'cn', 'objs', 'propios', 'conex'].includes(k)) aviso(c, 'campos desconocidos omitidos');
     if (!Array.isArray(d.objs)) return error(c, 'Falta la lista de objetos («objs»)');
     if (d.objs.length > LIM.objetos) return error(c, `El proyecto tiene ${d.objs.length} objetos; el máximo es ${LIM.objetos}`);
     const r = {};
@@ -117,6 +137,7 @@ const ESQ = (() => {
     }); });
     r.objs = objs.filter(o => { if (o.k != 'puerta') return true; const w = porId.get(o.pared); if (w && w.k == 'line') return true; aviso(c, 'puertas sin pared omitidas'); return false; });
     if (d.propios !== undefined) { const v = lista(patron(RE_MOD), 0, LIM.modelos)(d.propios, c); if (v === INV) aviso(c, 'valores inválidos omitidos'); else if (v.length) r.propios = [...new Set(v)]; }   // F4A: modelos propios que ofrece el menú
+    if (d.conex !== undefined) { const v = sanearConex(c, d.conex); if (v.length) r.conex = v; }   // F7A
     return r;
   }
   function sanearRecursos(c, rec) {

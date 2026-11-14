@@ -1,7 +1,7 @@
 // ---------- Controles: teclado, color, relleno, edificio y unidad ----------
 document.addEventListener('keydown', e => {
   if (!dlg.hidden) { if (e.key == 'Escape') cerrarDlg(); return; }   // con el aviso abierto, solo Esc (cancelar)
-  if (TR.mod && TR.mod.abierto()) return;                              // con el diálogo de modelo abierto no actúa ningún atajo (Esc lo cierra el propio <dialog>)
+  if (document.querySelector('dialog[open]')) return;                  // con un diálogo abierto (modelo propio, interfaces) no actúa ningún atajo (Esc lo cierra el propio <dialog>)
   if (TR.ctx && TR.ctx.abierto()) { TR.ctx.tecla(e); return; }       // con el menú contextual abierto: solo flechas, Enter, Esc y Tab (ver contexto.js)
   if (['SELECT', 'TEXTAREA'].includes(e.target.tagName) || e.target.isContentEditable || (e.target.tagName == 'INPUT' && !['checkbox', 'color'].includes(e.target.type))) return;
   if (drag) return;                                                     // durante un arrastre no actúa ninguna tecla (R, Supr, Ctrl+Z… agregarían pasos en medio del arrastre)

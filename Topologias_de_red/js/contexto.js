@@ -4,7 +4,7 @@
 // Las entradas salen de TR.acc.paraMenu (acciones.js), según el tipo de lo seleccionado.
 // Posición y tamaño no se editan aquí: el menú lleva al campo del inspector. Se cierra con Esc, clic fuera, rueda, cambio de ventana o al ejecutar una acción.
 TR.ctx = (() => {
-  const m = $('#ctx'); let abierto = false, puntoClic = { x: 0, y: 0 }, alElegir = null;   // puntoClic: dónde se pega; alElegir: función a llamar con el id elegido (menú de escalera de un cable en curso)
+  const m = $('#ctx'), api = { espera: 350 }; let abierto = false, puntoClic = { x: 0, y: 0 }, alElegir = null, hasta = 0;   // hasta: mientras no pase ese instante, el menú ignora los clics (F7A: el segundo clic de un doble clic); api.espera = duración en ms (las pruebas la ponen en 0)   // puntoClic: dónde se pega; alElegir: función a llamar con el id elegido (menú de escalera de un cable en curso)
   const tipoNom = { pared: 'Pared', cable: 'Cable', dispositivo: 'Dispositivo', rack: 'Rack', escalera: 'Escalera', ascensor: 'Ascensor', ventana: 'Ventana', puerta: 'Puerta', forma: 'Forma', zona: 'Zona', texto: 'Texto', medida: 'Medida' };
   const botones = () => [...m.querySelectorAll('button:not(:disabled)')];
   function cerrar() { if (!abierto) return; abierto = false; alElegir = null; m.hidden = true; m.innerHTML = ''; }
@@ -13,8 +13,8 @@ TR.ctx = (() => {
     m.style.left = Math.max(4, Math.min(e.clientX, innerWidth - w - 4)) + 'px'; m.style.top = Math.max(4, Math.min(e.clientY, innerHeight - h - 4)) + 'px';
     const b = botones()[0]; if (b) b.focus();
   }
-  function abrirItems(titulo, items, e, cb) {                                           // menú sencillo de opciones (lo usa trazas.js al hacer clic en una escalera con un cable en curso)
-    cerrar(); TR.ui.menu++; alElegir = cb;
+  function abrirItems(titulo, items, e, cb, espera) {                                   // menú sencillo de opciones (lo usa trazas.js al hacer clic en una escalera con un cable en curso); espera: ignora los clics del primer instante
+    cerrar(); TR.ui.menu++; alElegir = cb; hasta = espera ? Date.now() + api.espera : 0;
     m.innerHTML = `<div class="ch">${esc(titulo)}</div><div class="cg">${items.map(i => `<button role="menuitem" data-a="${i.id}"${i.habil ? '' : ' disabled'}><i></i>${esc(i.texto)}</button>`).join('')}</div>`;
     ubicar(e); return true;
   }
@@ -40,10 +40,10 @@ TR.ctx = (() => {
     else if (n && e.key == 'Home') { e.preventDefault(); bs[0].focus(); }
     else if (n && e.key == 'End') { e.preventDefault(); bs[n - 1].focus(); }
   }
-  m.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (!b || b.disabled) return; const f = alElegir; cerrar(); if (f) f(b.dataset.a); else TR.acc.ejecutar(b.dataset.a, { punto: puntoClic }); });
+  m.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (!b || b.disabled || Date.now() < hasta) return; const f = alElegir; cerrar(); if (f) f(b.dataset.a); else TR.acc.ejecutar(b.dataset.a, { punto: puntoClic }); });
   m.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEventListener('pointerdown', e => { if (abierto && !m.contains(e.target)) cerrar(); }, true);   // en captura: corre antes que la apertura de un menú nuevo
+  document.addEventListener('pointerdown', e => { if (!abierto || m.contains(e.target)) return; if (Date.now() < hasta) e.stopPropagation(); else cerrar(); }, true);   // dentro de la espera el clic se descarta: ni cierra el menú ni llega al plano   // en captura: corre antes que la apertura de un menú nuevo
   document.addEventListener('wheel', () => cerrar(), { capture: true, passive: true });
   window.addEventListener('blur', cerrar); window.addEventListener('resize', cerrar);
-  return { abrir, abrirItems, cerrar, tecla, abierto: () => abierto };
+  return Object.assign(api, { abrir, abrirItems, cerrar, tecla, abierto: () => abierto });
 })();

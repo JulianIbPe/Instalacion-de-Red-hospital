@@ -122,7 +122,7 @@ TR.acc = (() => {
   registrar({ id: 'copiar', grupo: 'portapapeles', texto: '⧉ Copiar', aplica: os => os.some(o => o.k != 'puerta'), ejecutar: copiarSel });
   registrar({ id: 'pegar', grupo: 'portapapeles', global: true, texto: '📋 Pegar', aplica: () => true, habilitada: () => portapapeles.length > 0, ejecutar: (os, extra) => pegar(extra) });
   registrar({ id: 'eliminar', grupo: 'objeto', donde: ['menu', 'insp'], texto: '🗑️ Eliminar', aplica: os => os.length > 0, ejecutar: eliminar });
-  const GRUPOS = [['editar', null], ['relleno', 'Relleno'], ['contorno', 'Contorno'], ['transformar', null], ['historial', null], ['portapapeles', null], ['objeto', null]];
+  const GRUPOS = [['editar', null], ['relleno', 'Relleno'], ['contorno', 'Contorno'], ['cable', 'Tipo de cable'], ['transformar', null], ['historial', null], ['portapapeles', null], ['objeto', null]];
 
   const vista = (a, os) => ({ id: a.id, texto: typeof a.texto == 'function' ? a.texto(os) : a.texto, marca: a.marca ? !!a.marca(os) : false, habil: os.every(esEditable) && a.habilitada(os) });
   function paraMenu(os) {                        // [{titulo, items:[{id, texto, marca, habil}]}] para el menú contextual
