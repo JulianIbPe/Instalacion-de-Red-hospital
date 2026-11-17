@@ -26,7 +26,7 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 5. Al terminar cada avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
 
 **Pendiente:**
-- Nada de la F7B ni de la F8 está commiteado.
+- La F7B y la F8 están commiteadas en `9ca8a49` (rama `branch_branch`, 17/11/2026); este renglón del documento quedó sin commitear.
 - **Decidir antes de la F9** (hallazgos thermo de la F8 sin aplicar, sección 5): los tres refactors medianos.
 - La regla de mesas superpuestas no pasó por la revisión thermo.
 - Confirmar el tamaño del texto bajo los equipos (0,28 m fijo: queda grande al lado de un equipo de 0,30 m).
@@ -404,4 +404,4 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 - 16/11/2026: el usuario verificó la F7B y la F8A (todas las comprobaciones manuales; se quitaron del documento) y pidió seguir. F8B (puertos, patch cords y etiquetas en la vista del rack; cable del plano hacia un equipo del rack) implementada; 2 pruebas nuevas (111 en total). Pendiente la verificación manual.
 - 16/11/2026: revisión thermo de la F8; aplicados los arreglos chicos recomendados (punta del cable sobre el rack, montajes dañados, cierre de la vista al abrir, arrastre cancelado, táctil, selección fuera del render, predicados). Una prueba más (112 en total). Los refactors medianos quedan para decidir antes de la F9.
 - 17/11/2026: a pedido del usuario, copiar o cortar un rack lleva sus patch cords.
-- 17/11/2026: el usuario verificó la F8B (se quitaron sus comprobaciones manuales del documento). F8 completa. Nada commiteado todavía.
+- 17/11/2026: el usuario verificó la F8B (se quitaron sus comprobaciones manuales del documento). F8 completa. F7B y F8 commiteadas en `9ca8a49`.
