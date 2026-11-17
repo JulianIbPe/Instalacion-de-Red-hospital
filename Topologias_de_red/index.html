@@ -22,7 +22,7 @@
   <div class="grp"><label>Edificio <input id="bw" type="number" value="20" min="1" step="0.5"> × <input id="bh" type="number" value="12" min="1" step="0.5"> m</label><button id="bset">Aplicar</button></div>
   <div class="grp"><button id="bsel" title="Seleccionar y mover objetos (Esc)">🖱️ Seleccionar</button><button id="bmed" title="Medir de un punto a otro">📏 Medir</button><button id="bgrid" class="on" title="Mostrar u ocultar la grilla y ajustar los objetos a ella (G)">▦ Grilla</button><select id="gpaso" title="Paso de la grilla: a cuánto se ajusta lo que se coloca o se mueve (Auto = según el zoom)"><option value="0">Auto</option><option value="1">1 m</option><option value=".5">50 cm</option><option value=".25">25 cm</option><option value=".1">10 cm</option><option value=".05">5 cm</option><option value=".01">1 cm</option></select><button id="bmid" title="Imán al punto medio: el cursor se pega a la mitad de líneas, paredes y lados de formas (tecla M)">◇ Medio</button><button id="unit" title="Unidad de las PRÓXIMAS mediciones (las ya hechas no cambian)">Medir en: m</button></div>
   <div class="grp"><button id="bundo" title="Deshacer (Ctrl+Z)">↶</button><button id="bredo" title="Rehacer (Ctrl+Y)">↷</button><button id="bdel" title="Borrar el objeto seleccionado (Supr)">🗑️ Borrar</button></div>
-  <div class="grp"><button id="bredes" title="Redes (se crean solas) y VLAN del proyecto">🧩 Redes</button><button id="bpres" title="Presupuesto: equipos y cables, con exportación a CSV">💲 Presupuesto</button><button id="betq" aria-pressed="false" title="Mostrar u ocultar las etiquetas físicas de los puertos (salen en el PNG)">🏷️ Etiquetas</button></div>
+  <div class="grp"><button id="bredes" title="Redes (se crean solas) y VLAN del proyecto">🧩 Redes</button><button id="bpres" title="Presupuesto: equipos y cables, con exportación a CSV">💲 Presupuesto</button><button id="bfil" aria-pressed="false" title="Filtros: ocultar, atenuar o aislar equipos, cables, redes o capas (no borran nada)">🔍 Filtros</button><button id="betq" aria-pressed="false" title="Mostrar u ocultar las etiquetas físicas de los puertos (salen en el PNG)">🏷️ Etiquetas</button></div>
   <span class="sp"></span>
   <div class="grp last"><button id="binsp" class="on" aria-pressed="true" title="Mostrar u ocultar el panel de propiedades">⚙️</button><button id="bnew" title="Empezar un archivo nuevo">📄 Nuevo</button><button id="save" class="prim" title="Descargar la topología como archivo .json">💾 Guardar</button><button id="load" title="Abrir un archivo .json guardado">📂 Abrir</button><button id="png" title="Exportar la topología como imagen PNG">🖼️ PNG</button></div>
   <input type="file" id="file" accept=".json" hidden>
@@ -49,7 +49,13 @@
     <svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
     <aside id="plantas" aria-label="Plantas y capas"></aside>
     <div id="sup" role="dialog" aria-label="Cables superpuestos" hidden></div>
-    <div id="faviso" hidden>Mostrando solo un cable y sus equipos <button>Mostrar todo</button></div>
+    <div id="fpanel" role="dialog" aria-label="Filtros" hidden>
+      <div class="fp-h"><b>Filtros</b><button id="fp-x" title="Cerrar">✕</button></div>
+      <div class="fp-n"><select id="fp-por" aria-label="Filtrar por"><option value="disp">Dispositivo</option><option value="cat">Tipo de equipo</option><option value="cable">Tipo de cable</option><option value="red">Red / VLAN</option><option value="capa">Capa</option></select><select id="fp-val" aria-label="Cuál"></select><select id="fp-modo" aria-label="Qué hacer"><option value="ocultar">Ocultar</option><option value="atenuar">Atenuar</option><option value="aislar">Aislar</option></select><button id="fp-add">Agregar</button></div>
+      <div id="fp-lista"></div>
+      <div class="fp-pie"><span class="fp-nota">No borran nada ni cambian el proyecto; el PNG sale como se ve.</span><button id="fp-todo">Mostrar todo</button></div>
+    </div>
+    <div id="faviso" hidden>Hay filtros activos <button>Mostrar todo</button></div>
   </div>
   <aside id="insp" aria-label="Propiedades del objeto"><div class="ih"><b>Propiedades</b><button id="insp-x" title="Cerrar el panel">✕</button></div><div id="insp-cuerpo"></div></aside>
 </div>

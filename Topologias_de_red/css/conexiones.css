@@ -44,13 +44,20 @@
 #dlg-pres .dp-g{margin:14px 0 0;font-size:15px;text-align:right}
 #dlg-pres .acc{flex-direction:row;justify-content:flex-end}
 #dp-csv{margin-right:auto}
-/* F10A: panel de cables superpuestos y aviso del cable aislado (js/superposicion.js, js/filtros.js) */
-#sup{position:absolute;z-index:3;max-width:min(420px,90%);max-height:60%;overflow-y:auto;padding:8px;border:1px solid var(--borde);border-radius:8px;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:13px}
-#sup[hidden],#faviso[hidden]{display:none}
+/* F10: panel de cables superpuestos (js/superposicion.js), panel «Filtros» (no modal) y aviso de filtros activos (js/filtros.js) */
+#sup,#fpanel{position:absolute;z-index:3;border:1px solid var(--borde);border-radius:8px;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:13px}
+#sup{max-width:min(420px,90%);max-height:60%;overflow-y:auto;padding:8px}
+#fpanel{top:32px;right:8px;width:min(400px,calc(100% - 48px));padding:10px}
+#sup[hidden],#fpanel[hidden],#faviso[hidden]{display:none}
+#sup button,#faviso button,#fpanel button{padding:3px 8px;border:1px solid var(--borde);border-radius:6px;background:#fff;color:var(--texto);font:inherit;cursor:pointer}
 #sup .sup-t{margin-bottom:6px;color:#5d7078;font-size:12px}
 #sup .sup-r{display:flex;flex-direction:column;gap:2px;padding:6px;border-radius:6px}
 #sup .sup-r:hover{background:#fdf1dc}
 #sup .sup-b{display:flex;gap:6px;margin-top:4px}
-#sup button,#faviso button{padding:3px 8px;border:1px solid var(--borde);border-radius:6px;background:#fff;color:var(--texto);font:inherit;cursor:pointer}
 #sup button[aria-pressed=true]{background:var(--ambar);color:#fff}
 #faviso{position:absolute;z-index:3;top:32px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:18px;background:var(--tinta);color:#fff;font-size:13px}
+#fpanel .fp-h,#fpanel .fp-pie,#fpanel .fp-r{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#fpanel .fp-n{display:grid;grid-template-columns:1fr 1.4fr 1fr auto;gap:6px;margin:8px 0}
+#fpanel select{min-width:0;padding:4px 6px;border:1px solid var(--borde);border-radius:6px;background:#fff;color:var(--texto);font:inherit}
+#fpanel .fp-r{padding:4px 6px;border-radius:6px;background:#f2f4f5;margin-bottom:4px}
+#fpanel .fp-nota{margin:4px 0;color:#5d7078;font-size:12px}

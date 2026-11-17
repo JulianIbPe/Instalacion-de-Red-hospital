@@ -23,6 +23,7 @@ TR.con = (() => {
     const pref = G && G.pref || 'Puerto';   // un modelo leído de un archivo puede traer un grupo sin nombre
     return G && +i < G.n ? { id, nombre: G.n > 1 ? pref + ' ' + (+i + 1) : pref, tipo: G.tipo, ...(o.po || {})[id] } : undefined;
   }
+  const equiposDe = (L, c = conexDe(L.id)) => [...new Set([...L.pts.map(q => q.ref), c && c.a && c.a.d, c && c.b && c.b.d].filter(x => x != null))];   // F10: equipos que toca un cable (por la unión de sus puntas y por su conexión)
   const esParche = c => !c.rutas.length;   // F8B: patch cord = conexión sin ruta
   const enRack = r => r && TR.rack.esRack(r) ? TR.rack.hijosDe(r).filter(o => grupos(o).length) : [];   // F8B: equipos con puertos montados en el rack r
   const pidePuerto = d => grupos(d).length > 0 || enRack(d).length > 0;   // el equipo tiene puertos, o es un rack con equipos que los tienen
@@ -41,9 +42,9 @@ TR.con = (() => {
   const usos = o => (S.conex || []).flatMap(c => ['a', 'b'].filter(k => c[k] && c[k].d == o.id).map(k => ({ c, k })));   // extremos de conexión que llegan al equipo
   const otro = k => k == 'a' ? 'b' : 'a';
 
-  let htmlMarcas = '';
+  let htmlMarcas = [];                    // [{L, h}]: marcas de las puntas incompletas; marcas() las pasa por el filtro (F10) al dibujarlas
   function sincronizar() {
-    const cx = S.conex || [], cables = S.objs.filter(esRed); htmlMarcas = '';
+    const cx = S.conex || [], cables = S.objs.filter(esRed); htmlMarcas = [];
     if (!cables.length && !cx.length) return;
     const porId = new Map(S.objs.map(o => [o.id, o])), con = new Set(), usados = new Set();
     const vivas = cx.filter(c => {          // R8 (decisión del 13/11/2026): al borrar el cable se borra su conexión
@@ -66,8 +67,8 @@ TR.con = (() => {
       if (!dev) { c[k] = null; delete c['etq' + k.toUpperCase()]; }      // R7: sin equipo en la punta (su etiqueta propia tampoco queda)
       else if (!e || e.d != dev.id) { c[k] = { d: dev.id }; delete c['etq' + k.toUpperCase()]; }   // la punta pasó a otro equipo: el puerto y la etiqueta propia se limpian
       else if (e.p) { const p = puerto(dev, e.p), u = dev.id + '/' + e.p; if (!p || !sirve(p, L) || usados.has(u)) delete e.p; else usados.add(u); }
-      if (!falta(c, k, id => porId.get(id)) || !puntoVisible(L, q) || TR.fil.oculto(L)) continue;   // F10: un cable oculto por un filtro no muestra su marca
-      const p = dev || pt(q); htmlMarcas += `<circle class="inc" cx="${p.x}" cy="${p.y}" r=".17" fill="none" stroke="#e74c3c" stroke-width=".05" stroke-dasharray=".1 .07" pointer-events="none"/>`;
+      if (!falta(c, k, id => porId.get(id)) || !puntoVisible(L, q)) continue;
+      const p = dev || pt(q); htmlMarcas.push({ L, h: `<circle class="inc" cx="${p.x}" cy="${p.y}" r=".17" fill="none" stroke="#e74c3c" stroke-width=".05" stroke-dasharray=".1 .07" pointer-events="none"/>` });
     } }
     const fin = vivas.filter(c => !rotas.has(c)); if (fin.length) S.conex = fin; else delete S.conex;
   }
@@ -167,5 +168,5 @@ TR.con = (() => {
   TR.acc.registrarCampo({ id: 'cable', sec: 'apar', et: 'Tipo de cable', t: 'sel', multi: true, opc: CAT.Cables.map(t => [subDe(t), t.n]), aplica: esRed, leer: subDe, parse: v => cableDe(v) ? v : undefined, poner: (o, v) => { const t = cableDe(v); Object.assign(o, { n: t.n, sub: v, c: t.c, w: t.w, d: t.d }); } });
   for (const [s, n] of TR.acc.campo('cable').opc) TR.acc.registrar({ id: 'cab-' + s, grupo: 'cable', texto: n, aplica: os => os.length > 0 && os.every(esRed), marca: os => os.every(o => subDe(o) == s), ejecutar: os => TR.acc.fijar(os.map(o => o.id), 'cable', s).ok });
 
-  return { esRed, esParche, puerto, puertosDe, fijarPuerto, conexDe, usos, remoto, parche, quitar, falta, sincronizar, marcas: () => htmlMarcas, asignar, elegir, conPuertos, alEmpezar, abrir, cerrar, abierto: () => dlgI.open, firma, txtExt };
+  return { esRed, esParche, puerto, puertosDe, fijarPuerto, conexDe, usos, remoto, parche, quitar, falta, sincronizar, marcas: () => htmlMarcas.map(m => TR.fil.envolver(m.L, m.h)).join(''), equiposDe, nombre, asignar, elegir, conPuertos, alEmpezar, abrir, cerrar, abierto: () => dlgI.open, firma, txtExt };
 })();

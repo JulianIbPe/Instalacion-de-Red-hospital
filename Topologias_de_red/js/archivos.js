@@ -12,7 +12,7 @@ $('#save').onclick = guardarJson;
 
 // ---------- Archivo nuevo ----------
 function nuevoArchivo() {                       // vacía todo y deja la página como al abrirla (la unidad de medición se conserva)
-  hist.length = 0; fut.length = 0; R.vaciar(); TR.acc.portapapeles.length = 0; TR.fil.mostrarTodo(true); TR.sup.cerrar(true);   // el portapapeles podría apuntar a modelos o imágenes que ya no existen
+  hist.length = 0; fut.length = 0; R.vaciar(); TR.acc.portapapeles.length = 0; TR.fil.vaciar(); TR.sup.cerrar(true);   // el portapapeles podría apuntar a modelos o imágenes que ya no existen
   S = estadoInicial(S.unidad); nid = 1; panel(); V = { ox: 40, oy: 40, z: 50 };
   $('#bw').value = 20; $('#bh').value = 12; setTool(null);   // setTool también limpia la selección y vuelve a dibujar
 }
@@ -30,14 +30,15 @@ $('#load').onclick = () => $('#file').click();
 function abrirTexto(t) {                        // devuelve {ok, avisos} o {ok:false, errores}
   const r = ESQ.leer(t); if (!r.ok) return r;
   const sim = R.fusionar(r.recursos, { simular: true }); if (!sim.ok) return { ok: false, errores: [sim.error] };
-  TR.vr.cerrar(); TR.fil.mostrarTodo(true); TR.sup.cerrar(true);   // F10: los filtros apuntan a ids del proyecto anterior. F8: la vista de un rack no sigue abierta sobre otro proyecto
+  TR.vr.cerrar();                               // F8: la vista de un rack no sigue abierta sobre otro proyecto
   const previo = S, nidPrevio = nid, h0 = hist.length;
   try {
     push();
     const f = R.fusionar(r.recursos); R.remapEstado(r.estado, f.mapa);
     S = { ...estadoInicial(r.estado.unidad || 'm'), ...r.estado, unidad: r.estado.unidad || 'm' }; normalizar(); normalizarTipos(); panel();
     nid = 1; for (const o of S.objs) if (o.id >= nid) nid = o.id + 1;
-    $('#bw').value = S.edificio.w; $('#bh').value = S.edificio.h; $('#unit').textContent = 'Medir en: ' + S.unidad; sel = tmp = drag = null; multi = []; selEdge = null; render();
+    $('#bw').value = S.edificio.w; $('#bh').value = S.edificio.h; $('#unit').textContent = 'Medir en: ' + S.unidad; sel = tmp = drag = null; multi = []; selEdge = null;
+    TR.fil.vaciar(); TR.sup.cerrar(true); render();   // F10: los filtros apuntan a ids del proyecto anterior (se quitan solo si la apertura salió bien)
   } catch (e) {                                  // un fallo inesperado no deja el proyecto a medias: se vuelve al anterior
     S = previo; nid = nidPrevio; while (hist.length > h0) hist.pop();
     try { panel(); $('#bw').value = S.edificio.w; $('#bh').value = S.edificio.h; render(); } catch {}

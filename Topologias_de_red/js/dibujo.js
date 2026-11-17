@@ -87,14 +87,14 @@ function renderObjetos() {                // objetos del proyecto (lo que se exp
   sincronizarTrazas();                    // el recorrido de un cable por una escalera sigue a la escalera si ésta se movió, giró o cambió de tamaño
   TR.con.sincronizar();                   // F7A: una conexión por cable de red, con sus extremos al día
   TR.red.sincronizar();                   // F7B: ningún puerto apunta a una VLAN que ya no existe
-  TR.fil.sincronizar();                   // F10: el filtro sigue a su cable y no deja seleccionado lo que no se ve
+  TR.fil.sincronizar();                   // F10: estado de cada objeto según los filtros (y nada seleccionado que no se vea)
   asasOut = []; hitsOut = [];
   // Orden de dibujo: primero por jerarquía de capa (las capas altas se pintan encima) y, dentro de una misma capa, por tipo de objeto (ORD)
-  const E = S.edificio, all = S.objs.filter(o => esVisible(o) && !o.ru).sort((a, b) => rangoCapa(a) - rangoCapa(b) || ordDe(a) - ordDe(b));
+  const E = S.edificio, all = S.objs.filter(o => esVisible(o) && !o.ru && !TR.fil.oculto(o)).sort((a, b) => rangoCapa(a) - rangoCapa(b) || ordDe(a) - ordDe(b));
   const pats = all.filter(o => o.f == 'hat').map(patronHat).join('')   // cada icono usado se define una sola vez dentro de #c (así el PNG exportado lo incluye) y los equipos lo reutilizan con <use>
     + [...new Set(all.map(modeloDe).filter(Boolean).map(iconoDe))].map(k => `<symbol id="ic-${k}" viewBox="0 0 96 96">${ICONOS[k]}</symbol>`).join('');
   const edif = `<rect x="0" y="0" width="${E.w}" height="${E.h}" fill="none" stroke="#17262c" stroke-width=".08" stroke-dasharray=".4 .2"/>` + T(E.w / 2, -.25, E.w + ' m', .4) + `<text x="-.3" y="${E.h / 2}" font-size=".4" text-anchor="middle" transform="rotate(-90 -.3 ${E.h / 2})" fill="#17262c" font-family="Segoe UI,Arial,sans-serif">${E.h} m</text>`;
-  capas.c.innerHTML = `<defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map(o => { const f = TR.fil.estado(o); if (f == 'oculto') return ''; const g = draw(o) + resaltar(o); return f == 'fondo' ? `<g pointer-events="none" opacity=".25">${g}</g>` : esEditable(o) ? g : `<g pointer-events="none" opacity=".55">${g}</g>`; }).join('')}${TR.red.etiquetas()}${hitsOut.join('')}${asasOut.join('')}`;
+  capas.c.innerHTML = `<defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map(o => esEditable(o) ? TR.fil.envolver(o, draw(o)) + resaltar(o) : TR.fil.envolver(o, `<g pointer-events="none" opacity=".55">${draw(o) + resaltar(o)}</g>`)).join('')}${TR.red.etiquetas()}${hitsOut.join('')}${asasOut.join('')}`;
   const imgs = [...new Set(all.map(imagenDe).filter(Boolean))], clave = imgs.join();
   if (clave !== claveImg) { defsImg.innerHTML = imgs.map(i => { const im = R.imgs[i]; return `<symbol id="im-${i}" viewBox="0 0 ${im.w} ${im.h}"><image href="${im.data}" width="${im.w}" height="${im.h}"/></symbol>`; }).join(''); claveImg = clave; }
   capas.inc.innerHTML = TR.con.marcas();
@@ -111,6 +111,7 @@ function renderPaneles() {                // botones, opciones, reglas y barra d
   $('#bundo').disabled = !hist.length; $('#bredo').disabled = !fut.length; $('#bdel').disabled = !seleccionados().length;
   sincronizarOpciones(); menuSiCambio();
   if (TR.vr) TR.vr.refrescar();             // F8: la vista del rack abierto (se cierra sola si su rack ya no existe)
+  TR.fil.refrescar();                     // F10: botón «Filtros» y aviso sobre el plano
   if (TR.insp) TR.insp.refrescar();         // Fase 3: el inspector solo rehace su DOM si cambia la selección (ver inspector.js); nunca se llama al mover el ratón
   rulers(); status();
 }

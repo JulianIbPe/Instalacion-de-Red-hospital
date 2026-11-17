@@ -126,9 +126,9 @@ TR.red = (() => {
     const porId = new Map(S.objs.map(o => [o.id, o])), get = id => porId.get(id), pos = q => (q.ref != null && get(q.ref)) || pt(q); let h = '';
     for (const c of S.conex) for (const k of ['a', 'b']) {
       const t = !TR.con.esParche(c) && textoEtq(c, k, get); if (!t) continue;   // un patch cord (sin ruta) no tiene cable en el plano: sus etiquetas van en la vista del rack
-      const L = get(c.rutas[k == 'a' ? 0 : c.rutas.length - 1]), n = L.pts.length, q = L.pts[k == 'a' ? 0 : n - 1]; if (n < 2 || !puntoVisible(L, q) || TR.fil.oculto(L)) continue;   // un cable de un solo punto (archivo dañado) no tiene hacia dónde poner la etiqueta
+      const L = get(c.rutas[k == 'a' ? 0 : c.rutas.length - 1]), n = L.pts.length, q = L.pts[k == 'a' ? 0 : n - 1]; if (n < 2 || !puntoVisible(L, q)) continue;   // un cable de un solo punto (archivo dañado) no tiene hacia dónde poner la etiqueta
       const a = pos(q), b = pos(L.pts[k == 'a' ? 1 : n - 2]), len = Math.hypot(b.x - a.x, b.y - a.y) || 1, d = Math.min(.8, len * .4), v = de(TR.con.puerto(get(c[k].d), c[k].p).vlan);   // sobre el cable, a 0,8 m del equipo (o al 40 % de un tramo corto)
-      h += `<text class="etq" x="${r3(a.x + (b.x - a.x) * d / len)}" y="${r3(a.y + (b.y - a.y) * d / len - .12)}" font-size=".2" text-anchor="middle" fill="${v ? v.color : '#1d2a2f'}" stroke="#fff" stroke-width=".06" paint-order="stroke" font-family="Segoe UI,Arial,sans-serif" pointer-events="none">${esc(t)}</text>`;
+      h += TR.fil.envolver(L, `<text class="etq" x="${r3(a.x + (b.x - a.x) * d / len)}" y="${r3(a.y + (b.y - a.y) * d / len - .12)}" font-size=".2" text-anchor="middle" fill="${v ? v.color : '#1d2a2f'}" stroke="#fff" stroke-width=".06" paint-order="stroke" font-family="Segoe UI,Arial,sans-serif" pointer-events="none">${esc(t)}</text>`);   // F10: la etiqueta sigue al filtro de su cable
     }
     return h;
   }

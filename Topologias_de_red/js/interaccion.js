@@ -28,7 +28,7 @@ function finishLine() {
   if (q.length > 1) { delete tmp.cur; add(tmp); } tmp = null; render();
 }
 svg.addEventListener('pointerdown', e => {
-  svg.setPointerCapture(e.pointerId); let p = toW(e); avisoMsg = ''; TR.sup.cerrar();
+  svg.setPointerCapture(e.pointerId); let p = toW(e); avisoMsg = '';
   if (e.button == 2) {                                            // clic derecho: termina el cable, cancela la medición o la pieza a medio colocar; sin herramienta ni operación en curso abre el menú contextual (Fase 3)
     const enCurso = !!tmp || !!drag; finishLine();
     if (tmp && (tmp.k == 'medida' || tmp.pa)) { tmp = null; drag = null; render(); } else if (!tool && !enCurso) TR.ctx.abrir(e);
@@ -97,7 +97,6 @@ svg.addEventListener('pointerdown', e => {
   render();
 });
 svg.addEventListener('pointermove', e => {
-  TR.sup.alMover(e);       // F10A: espera del panel de cables superpuestos
   const p = curP = toW(e);
   const eligiendoCota = tmp && tmp.k == 'medida' && tmp.st == 2;
   snapPt = (tool && tool.k == 'medida' && !eligiendoCota) || (drag && drag.m == 'h' && drag.o.k == 'medida' && drag.h != 'o') ? cercano(rawW(e)) : null;
@@ -143,10 +142,10 @@ svg.addEventListener('pointerup', e => {
   soltarArrastre();
 });
 svg.addEventListener('pointercancel', soltarArrastre);   // toque o lápiz cancelado: misma revisión que al soltar
-svg.addEventListener('pointerleave', () => { if (!TR.sup.abierto()) TR.sup.cerrar(); prevPuerta = null; snapPt = null; renderTmp(); });
+svg.addEventListener('pointerleave', () => { prevPuerta = null; snapPt = null; renderTmp(); });
 svg.addEventListener('contextmenu', e => e.preventDefault());
 svg.addEventListener('wheel', e => {
-  e.preventDefault(); TR.sup.cerrar(); const r = svg.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  e.preventDefault(); const r = svg.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
   const z = Math.min(3000, Math.max(8, V.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
   V.ox = mx - (mx - V.ox) * z / V.z; V.oy = my - (my - V.oy) * z / V.z; V.z = z; renderFondo(); renderTmp(); rulers(); status();   // el zoom solo cambia la vista, la grilla y las ayudas de medida (#g-tmp): los objetos no dependen de ella
 }, { passive: false });
