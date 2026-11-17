@@ -5,7 +5,7 @@
 // sub  = variante estable (p. ej. 'router', 'utp6', 'circulo'). Las escaleras mantienen su variante en o.t (sin t = recta, 'descanso', 'espiral').
 // derivarTipo() es el ÚNICO lugar donde los nombres visibles se traducen a tipos (objetos de proyectos antiguos y piezas aún sin tipo).
 const TIPOS = {
-  pared: { k: 'line' }, cable: { k: 'line' }, dispositivo: { k: 'item' }, rack: { k: 'item' }, escalera: { k: 'item' }, ascensor: { k: 'item' }, ventana: { k: 'item' }, imagen: { k: 'item' }, mesa: { k: 'item' },   // imagen = imagen suelta en el plano (F4B)
+  pared: { k: 'line' }, cable: { k: 'line' }, linea: { k: 'line' }, dispositivo: { k: 'item' }, rack: { k: 'item' }, escalera: { k: 'item' }, ascensor: { k: 'item' }, ventana: { k: 'item' }, imagen: { k: 'item' }, mesa: { k: 'item' },   // imagen = imagen suelta en el plano (F4B); linea = lado de una forma que no es pared (lote C): ni pared ni cable, su sub es el tipo de línea (LINEAS de formas.js)
   puerta: { k: 'puerta' }, forma: { k: 'shape' }, zona: { k: 'zona' }, texto: { k: 'texto' }, medida: { k: 'medida' }
 };
 const SUB_CABLE = { 'UTP Cat6': 'utp6', 'Fibra óptica': 'fibra', 'Coaxial': 'coaxial', 'Serial': 'serial', 'Inalámbrico': 'inalambrico', 'Consola': 'consola', 'USB': 'usb', 'Cable de energía': 'energia' };

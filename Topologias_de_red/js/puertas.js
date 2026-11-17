@@ -69,12 +69,12 @@ function segmentoCercano(r, dmax = .5) { // tramo de pared más cercano al punto
   return best;
 }
 function anchoNuevo(L) {                 // ancho de una puerta nueva: 0,9 m, o el múltiplo de la grilla más parecido si la grilla está activa
-  const p = pasoGrilla(); return Math.min(rejilla ? Math.max(p, Math.round(PUERTA_W / p) * p) : PUERTA_W, L);
+  const p = pasoActual(); return Math.min(rejilla ? Math.max(p, Math.round(PUERTA_W / p) * p) : PUERTA_W, L);
 }
 function sPuerta(sg, w) {                // posición del centro de la puerta en el tramo: punto medio de la pared > grilla > libre (cada 5 cm)
   const lim = v => Math.min(Math.max(v, w / 2), sg.L - w / 2);
   if (medioOn && Math.abs(sg.t - sg.L / 2) * V.z < 18) return { s: lim(sg.L / 2), medio: true };
-  if (rejilla) { const p = pasoGrilla(); return { s: lim(Math.round((sg.t - w / 2) / p) * p + w / 2) }; }   // el borde izquierdo del hueco cae en una línea de la grilla
+  if (rejilla) { const p = pasoActual(); return { s: lim(Math.round((sg.t - w / 2) / p) * p + w / 2) }; }   // el borde izquierdo del hueco cae en una línea de la grilla
   return { s: lim(Math.round(sg.t * 20) / 20) };
 }
 function puertaHover(r) {
@@ -115,7 +115,7 @@ function girarPuerta(d, r) {             // la puerta sigue al cursor: abre haci
 function redimPuerta(d, h, r) {          // estirar por un costado: el otro extremo del hueco queda fijo
   if (h == 'gi') return girarPuerta(d, r);
   const g = geoPuerta(d); if (!g) return;
-  const p = rejilla ? pasoGrilla() : .05, min = rejilla ? Math.ceil(PUERTA_MIN / p) * p : PUERTA_MIN;   // con grilla, los bordes del hueco caen en sus líneas
+  const p = rejilla ? pasoActual() : .05, min = rejilla ? Math.ceil(PUERTA_MIN / p) * p : PUERTA_MIN;   // con grilla, los bordes del hueco caen en sus líneas
   const t = Math.min(Math.max(Math.round(((r.x - g.a.x) * g.u.x + (r.y - g.a.y) * g.u.y) / p) * p, 0), g.L), izq = g.s - g.w / 2, der = g.s + g.w / 2;
   const L = h == 'da' ? Math.min(t, der - min) : izq, R = h == 'db' ? Math.max(t, izq + min) : der;
   d.w = +(R - L).toFixed(3); d.s = +((L + R) / 2).toFixed(3);

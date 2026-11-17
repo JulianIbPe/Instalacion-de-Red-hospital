@@ -21,6 +21,10 @@ document.addEventListener('keydown', e => {
   else if (e.key == 'Enter') finishLine();
   else if (k == 'r' && !mod) TR.acc.rotar(e.shiftKey ? -90 : 90);   // valida las escaleras como el menú
   else if ((e.key == 'Delete' || e.key == 'Backspace') && !enBoton) borrar();
+  else if (e.key.startsWith('Arrow') && !tool && !tmp && !enBoton && !mod) {   // flechas: mueven lo seleccionado 1 cm, por el mismo camino que un arrastre (mismas reglas de escaleras, mesas y racks; un paso de historial por pulsación)
+    const v = { ArrowLeft: [-.01, 0], ArrowRight: [.01, 0], ArrowUp: [0, -.01], ArrowDown: [0, .01] }[e.key], os = seleccionados().filter(o => o.k != 'puerta');   // las puertas solo se deslizan por su pared con el ratón
+    if (v && os.length) { e.preventDefault(); arrastrar({ m: 'mv', os }); push(); drag.pu = 1; moverObjs(os, v[0], v[1], null, r3); soltarArrastre(); }
+  }
 });
 // Color, relleno y contorno del menú izquierdo usan la misma lógica que el inspector (acciones.js). D16: los cables NO cambian de color; las paredes sí.
 const gestoCol = { p: false };   // el selector de color dispara muchos eventos: se guarda un solo paso de historial por gesto
@@ -32,6 +36,7 @@ function alternarMedio() { medioOn = !medioOn; $('#bmid').classList.toggle('on',
 $('#bmid').onclick = alternarMedio;
 function alternarGrilla() { rejilla = !rejilla; $('#bgrid').classList.toggle('on', rejilla); render(); }
 $('#bgrid').onclick = alternarGrilla;
+$('#gpaso').onchange = e => { pasoFijo = +e.target.value; e.target.blur(); render(); };   // blur: con el desplegable enfocado no actúan los atajos
 $('#lstyle').onchange = () => { TR.acc.fijar(idsSel(), 'ls', lin()); };
 let ultSel = null;                        // al seleccionar un objeto, color/relleno/línea del menú pasan a mostrar los suyos
 function sincronizarOpciones() {

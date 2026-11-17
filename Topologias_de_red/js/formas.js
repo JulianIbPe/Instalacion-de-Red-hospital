@@ -58,14 +58,17 @@ function borrarLado() {                   // quita el contorno de ese lado (la f
   render();
 }
 function dibujarForma(o, id, on, hd) {
-  const fill = `fill="${fillOf(o)}" fill-opacity="${o.f == 'sol' ? .35 : 1}"`, circulo = esCirculo(o);
+  const fill = `fill="${fillOf(o)}" fill-opacity="${o.f == 'sol' ? .35 : 1}"`, circulo = esCirculo(o), hueca = fillOf(o) == 'none';   // hueca (sin relleno): un clic adentro no la selecciona, solo su borde
   const R = x => circulo && o.rot ? `<g transform="rotate(${o.rot} ${o.x} ${o.y})">${x}</g>` : x;   // el círculo (óvalo) puede estar girado
   let h;
-  if (circulo) h = `<g ${id} transform="translate(${o.x} ${o.y})"><ellipse rx="${o.w / 2}" ry="${o.h / 2}" ${fill} ${trazo(o)}/></g>`;
+  const franja = 'fill="none" stroke="transparent" stroke-width=".3" pointer-events="stroke"/>';   // zona de clic del borde de una forma hueca (el trazo solo es muy fino para acertarle)
+  if (circulo) h = `<g ${id} transform="translate(${o.x} ${o.y})"><ellipse rx="${o.w / 2}" ry="${o.h / 2}" ${fill} ${trazo(o)}/>${hueca ? `<ellipse rx="${o.w / 2}" ry="${o.h / 2}" ${franja}` : ''}</g>`;
   else {
     const u = uDe(o), n = u.length, hid = o.hid || [], P = u.map(q => [q[0] * o.w, q[1] * o.h]);
-    let g = `<polygon points="${P.map(q => q.join(',')).join(' ')}" ${fill} ${hid.length ? 'stroke="none"' : trazo(o)} pointer-events="all"/>`;
-    if (hid.length) g += P.map((q, i) => hid.includes(i) ? '' : `<line x1="${q[0]}" y1="${q[1]}" x2="${P[(i + 1) % n][0]}" y2="${P[(i + 1) % n][1]}" ${trazo(o)}/>`).join('');
+    const lado = (i, at) => `<line x1="${P[i][0]}" y1="${P[i][1]}" x2="${P[(i + 1) % n][0]}" y2="${P[(i + 1) % n][1]}" ${at}`;
+    let g = `<polygon points="${P.map(q => q.join(',')).join(' ')}" ${fill} ${hid.length ? 'stroke="none"' : trazo(o)}${hueca ? '' : ' pointer-events="all"'}/>`;
+    if (hid.length) g += P.map((q, i) => hid.includes(i) ? '' : lado(i, trazo(o) + '/>')).join('');
+    if (hueca) g += P.map((q, i) => hid.includes(i) ? '' : lado(i, franja)).join('');
     h = `<g ${id} transform="translate(${o.x} ${o.y})">${g}</g>`;
   }
   if (o.label) h += T(o.x, o.y + .1, o.label);

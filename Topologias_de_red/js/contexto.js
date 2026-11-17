@@ -5,7 +5,7 @@
 // Posición y tamaño no se editan aquí: el menú lleva al campo del inspector. Se cierra con Esc, clic fuera, rueda, cambio de ventana o al ejecutar una acción.
 TR.ctx = (() => {
   const m = $('#ctx'), api = { espera: 350 }; let abierto = false, puntoClic = { x: 0, y: 0 }, alElegir = null, hasta = 0;   // hasta: mientras no pase ese instante, el menú ignora los clics (F7A: el segundo clic de un doble clic); api.espera = duración en ms (las pruebas la ponen en 0)   // puntoClic: dónde se pega; alElegir: función a llamar con el id elegido (menú de escalera de un cable en curso)
-  const tipoNom = { pared: 'Pared', cable: 'Cable', dispositivo: 'Dispositivo', rack: 'Rack', escalera: 'Escalera', ascensor: 'Ascensor', ventana: 'Ventana', puerta: 'Puerta', forma: 'Forma', zona: 'Zona', texto: 'Texto', medida: 'Medida' };
+  const tipoNom = { pared: 'Pared', cable: 'Cable', linea: 'Línea', dispositivo: 'Dispositivo', rack: 'Rack', escalera: 'Escalera', ascensor: 'Ascensor', ventana: 'Ventana', puerta: 'Puerta', forma: 'Forma', zona: 'Zona', texto: 'Texto', medida: 'Medida' };
   const botones = () => [...m.querySelectorAll('button:not(:disabled)')];
   function cerrar() { if (!abierto) return; abierto = false; alElegir = null; m.hidden = true; m.innerHTML = ''; }
   function ubicar(e) {                                                                  // dentro de la ventana, con el foco en la primera entrada activa

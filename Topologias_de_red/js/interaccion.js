@@ -4,6 +4,19 @@ const add = o => (push(), o.id = nid++, o.pl = o.pl === undefined ? S.plantaAct 
 function arrastrar(d) {                  // arrastre que modifica objetos (mover, asas, girar): guarda qué objetos cambia, copia de sus escaleras y el rehacer, para poder volver atrás al soltar
   d.os = d.os || (d.o ? [d.o] : d.lista ? d.lista.map(x => x.o) : []); d.antes = d.os.filter(o => o && esEsc(o)).map(copiar); d.fut = fut.slice(); return drag = d;
 }
+function moverObjs(os, dx, dy, raw, aj = sn) {   // mueve varios objetos a la vez (arrastre o flechas). raw = cursor real, para deslizar puertas (sin él no se mueven); aj = ajuste de la posición final
+  os.forEach(o => {
+    if (o.k == 'line') o.pts.forEach(q => { if (!q.ref && !q.rl && !q.es && puntoEn(o, q)) { q.x += dx; q.y += dy; } });   // solo los puntos libres de ESTA planta (los de escalera siguen a su escalera)
+    else if (o.k == 'puerta') { if (raw && !os.some(x => x.id == o.pared)) moverPuerta(o, raw); }   // se desliza por la pared
+    else if (o.k == 'medida') { o.a = { x: o.a.x + dx, y: o.a.y + dy }; o.b = { x: o.b.x + dx, y: o.b.y + dy }; }
+    else { o.x = aj(o.x + dx); o.y = aj(o.y + dy); }
+  });
+}
+function orto(a, p) {                    // Mayús: lleva p a la horizontal, la vertical o la diagonal de 45° que pasa por a (la que quede más cerca)
+  const dx = p.x - a.x, dy = p.y - a.y, ax = Math.abs(dx), ay = Math.abs(dy), T22 = .4142;   // tan(22,5°)
+  if (ay <= ax * T22) return { x: p.x, y: a.y }; if (ax <= ay * T22) return { x: a.x, y: p.y };
+  const m = sn((ax + ay) / 2); return { x: r3(a.x + Math.sign(dx) * m), y: r3(a.y + Math.sign(dy) * m) };
+}
 function soltarArrastre() {              // fin de un arrastre (soltar o puntero cancelado): una escalera que quedó en un lugar no válido descarta el paso del arrastre
   if (drag && drag.pu && drag.antes && revisarEscalerasMovidas(drag.os, drag.antes)) descartarPaso(drag.fut);
   else if (drag && drag.pu) TR.jer.alSoltarArrastre(drag);   // F6: anclar o desanclar equipos de las mesas; un giro que no entra en su mesa se descarta
@@ -23,7 +36,7 @@ svg.addEventListener('pointerdown', e => {
   }
   if (e.button == 1) { drag = { m: 'pan', sx: e.clientX, sy: e.clientY, ox: V.ox, oy: V.oy }; return; }
   // Doble clic detectado a mano: la página se redibuja en cada clic y el evento 'dblclick' nativo se pierde.
-  const now = Date.now(), dbl = !e.shiftKey && now - lastDown.t < 350 && Math.hypot(e.clientX - lastDown.x, e.clientY - lastDown.y) < 6;
+  const now = Date.now(), dbl = (!e.shiftKey || !!tmp) && now - lastDown.t < 350 && Math.hypot(e.clientX - lastDown.x, e.clientY - lastDown.y) < 6;
   lastDown = { t: dbl ? 0 : now, x: e.clientX, y: e.clientY };
   if (dbl) {
     if (tmp && tmp.k == 'line') { finishLine(); return; }
@@ -42,7 +55,7 @@ svg.addEventListener('pointerdown', e => {
     // Mayús + clic izquierdo: si no se arrastra, añade/quita el objeto de la selección; si se arrastra, dibuja un rectángulo de selección
     const gr = e.target.closest('[data-grab]');   // hoja de una puerta: se agarra directamente para girarla
     if (gr && t && !e.shiftKey) { const dd = byId(+t.dataset.id); if (dd && dd.k == 'puerta') { sel = dd.id; multi = []; arrastrar({ m: 'h', o: dd, h: 'gi', p0: p }); render(); return; } }
-    if (e.shiftKey) { const r = rawW(e); drag = { m: 'box', id: t ? +t.dataset.id : null, sx: e.clientX, sy: e.clientY, x0: r.x, y0: r.y, moved: false }; return; }
+    if (e.shiftKey && !(hh && byId(sel))) { const r = rawW(e); drag = { m: 'box', id: t ? +t.dataset.id : null, sx: e.clientX, sy: e.clientY, x0: r.x, y0: r.y, moved: false }; return; }
     if (hh && byId(sel)) { selEdge = prevEdge; arrastrar({ m: 'h', o: byId(sel), h: hh.dataset.h, p0: p }); }
     else if (t && ed && +t.dataset.id === sel && !multi.length) { selEdge = { id: sel, i: +ed.dataset.e }; drag = { m: 'lado', o: byId(sel), i: selEdge.i, last: p }; }   // clic en un lado de la forma ya seleccionada
     else if (t) { const id = +t.dataset.id; if (!multi.includes(id)) { sel = id; multi = []; } arrastrar({ m: 'mv', os: seleccionados(), last: p, p0: p }); }
@@ -69,7 +82,8 @@ svg.addEventListener('pointerdown', e => {
   }
   else if (tool.k == 'line') {
     snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e));   // los imanes miden la distancia con el cursor real, no con el punto ya ajustado a la grilla
-    const it = itemAt(e), q = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p;   // nodo del mismo tipo > dispositivo > punto libre
+    const it = itemAt(e); let q = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p;   // nodo del mismo tipo > dispositivo > punto libre
+    if (e.shiftKey && tmp && tmp.k == 'line') q = orto(pt(tmp.pts[tmp.pts.length - 1]), p);   // Mayús: tramo recto (punto libre, sin uniones)
     { const m = q.ref && byId(q.ref); if (m && m.ru) q.ref = m.parent; }   // F8B: el nodo de otro cable que termina en un equipo montado está en el centro del rack: se une al rack, que pregunta a cuál de sus equipos
     const dev = q.ref ? byId(q.ref) : null, conP = TR.con.conPuertos(tool, dev);   // F7A: un cable de red unido a un equipo con puertos pide el puerto (conexiones.js); el equipo es el de la unión, no el que está bajo el cursor (el imán de nodos puede unir desde fuera del icono)
     if (!tmp) { tmp = { k: 'line', n: tool.n, c: esCable(tool) ? tool.c : col(), w: tool.w, d: tool.d, pts: [q], label: '', pl: S.plantaAct, cp: S.capaAct }; TR.con.alEmpezar(conP && dev, e); }   // pl y cp: dónde empieza el cable
@@ -89,7 +103,7 @@ svg.addEventListener('pointermove', e => {
   snapMedio = false; snapNodo = null; if (!snapPt) imanNodos(rawW(e));
   if (!snapPt && !eligiendoCota) imanMedio(rawW(e));
   const q = snapPt || p;   // el cursor se pega al imán más cercano (puntos, nodos o puntos medios)
-  if (tmp && tmp.k == 'line') tmp.cur = snapPt || p; else if (eligiendoCota) tmp.off = offDe(tmp, p); else if (tmp && tmp.k == 'medida') tmp.b = q; else if (tmp && tmp.pa) ajustarColocacion(tmp, q);
+  if (tmp && tmp.k == 'line') { if (e.shiftKey) { snapPt = null; snapNodo = null; snapMedio = false; tmp.cur = orto(pt(tmp.pts[tmp.pts.length - 1]), p); } else tmp.cur = snapPt || p; } else if (eligiendoCota) tmp.off = offDe(tmp, p); else if (tmp && tmp.k == 'medida') tmp.b = q; else if (tmp && tmp.pa) ajustarColocacion(tmp, q, e.shiftKey);
   if (drag) {
     const d = drag;
     if (d.m == 'pan') { V.ox = d.ox + e.clientX - d.sx; V.oy = d.oy + e.clientY - d.sy; }
@@ -103,20 +117,16 @@ svg.addEventListener('pointermove', e => {
     else if (d.m == 'mv') {
       const dx = p.x - d.last.x, dy = p.y - d.last.y; d.last = p;
       if ((dx || dy) && !d.pu) { push(); d.pu = 1; }
-      d.os.forEach(o => {               // mueve todos los objetos seleccionados a la vez
-        if (o.k == 'line') o.pts.forEach(q => { if (!q.ref && !q.rl && !q.es && puntoEn(o, q)) { q.x += dx; q.y += dy; } });   // solo los puntos libres de ESTA planta (los de escalera siguen a su escalera)
-        else if (o.k == 'puerta') { if (!d.os.some(x => x.id == o.pared)) moverPuerta(o, rawW(e)); }   // se desliza por la pared
-        else if (o.k == 'medida') { o.a = { x: o.a.x + dx, y: o.a.y + dy }; o.b = { x: o.b.x + dx, y: o.b.y + dy }; }
-        else { o.x = sn(o.x + dx); o.y = sn(o.y + dy); }
-      });
+      moverObjs(d.os, dx, dy, rawW(e));
     } else if (d.m == 'h') {
       const o = d.o; if (!d.pu && (p.x != d.p0.x || p.y != d.p0.y || o.k == 'puerta')) { push(); d.pu = 1; }
-      if (o.k == 'zona') redimZona(o, p);
+      if (o.k == 'zona') { d.ar ||= o.w / o.h; redimZona(o, p); if (e.shiftKey && !o.rot) { o.w = r3(Math.max(o.w, o.h * d.ar)); o.h = r3(o.w / d.ar); } }   // Mayús: conserva la proporción del inicio del arrastre (shortcut: solo zonas sin giro; para las giradas hay que llevar el cálculo a redimZona)
       else if (o.k == 'puerta') redimPuerta(o, d.h, rawW(e));
-      else if (o.k == 'item') (esImagen(o) ? redimProporcional : redimensionarRot)(o, d.h, p, d.ar ||= o.w / o.h);   // escaleras e imágenes sueltas (las esquinas de una imagen conservan la proporción que tenía al empezar el arrastre)
-      else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else redimensionarRot(o, d.h, p); }
+      else if (o.k == 'item') (esImagen(o) || e.shiftKey ? redimProporcional : redimensionarRot)(o, d.h, p, d.ar ||= o.w / o.h);   // escaleras e imágenes sueltas (las esquinas de una imagen conservan la proporción que tenía al empezar el arrastre)
+      else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else (e.shiftKey ? redimProporcional : redimensionarRot)(o, d.h, p, d.ar ||= o.w / o.h); }   // Mayús en una esquina: conserva la proporción
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
-      else { const it = itemAt(e), v = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p, antes = o.pts[d.h]; if (antes.pl) { v.pl = antes.pl; v.cp = antes.cp; }
+      else { const it = itemAt(e), nb = o.pts[d.h - 1] || o.pts[d.h + 1], v = e.shiftKey && nb ? orto(pt(nb), p) : snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p, antes = o.pts[d.h];   // Mayús: el tramo hasta el punto vecino queda recto (punto libre)
+        if (antes.pl) { v.pl = antes.pl; v.cp = antes.cp; }
         if (d.r0 === undefined) d.r0 = antes.ref || null;                 // unión que tenía la punta al empezar el arrastre
         if (v.ref != null && d.r0 && (byId(d.r0) || {}).parent == v.ref) v.ref = d.r0;   // F8: sigue sobre el rack de su equipo montado (que no está en el plano): conserva el equipo y, con él, el puerto
         o.pts[d.h] = v; }   // el punto conserva su planta y capa
@@ -135,6 +145,6 @@ svg.addEventListener('pointerleave', () => { prevPuerta = null; snapPt = null; r
 svg.addEventListener('contextmenu', e => e.preventDefault());
 svg.addEventListener('wheel', e => {
   e.preventDefault(); const r = svg.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
-  const z = Math.min(300, Math.max(8, V.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
-  V.ox = mx - (mx - V.ox) * z / V.z; V.oy = my - (my - V.oy) * z / V.z; V.z = z; renderFondo(); rulers(); status();   // el zoom solo cambia la vista y la grilla: los objetos no dependen de ella
+  const z = Math.min(3000, Math.max(8, V.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
+  V.ox = mx - (mx - V.ox) * z / V.z; V.oy = my - (my - V.oy) * z / V.z; V.z = z; renderFondo(); renderTmp(); rulers(); status();   // el zoom solo cambia la vista, la grilla y las ayudas de medida (#g-tmp): los objetos no dependen de ella
 }, { passive: false });

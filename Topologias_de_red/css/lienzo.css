@@ -1,6 +1,9 @@
 /* lienzo.css: área de trabajo y reglas */
+/* Las reglas llevan su largo fijado acá: sin él, el borde de 1 px achica el canvas entero (23/24) y las marcas se corren respecto de la grilla */
 #work{flex:1;position:relative;background:#fff;overflow:hidden}
 #corner{position:absolute;left:0;top:0;width:24px;height:24px;z-index:1;background:#e8edef;color:#5d7078;font-size:10px;display:grid;place-items:center;border-right:1px solid #aab8be;border-bottom:1px solid #aab8be}
-#rt{position:absolute;left:24px;top:0;height:24px;border-bottom:1px solid #aab8be}
-#rl{position:absolute;left:0;top:24px;width:24px;border-right:1px solid #aab8be}
+#rt{position:absolute;left:24px;top:0;height:24px;width:calc(100% - 24px);border-bottom:1px solid #aab8be}
+#rl{position:absolute;left:0;top:24px;width:24px;height:calc(100% - 24px);border-right:1px solid #aab8be}
 #svg{position:absolute;left:24px;top:24px;right:0;bottom:0;width:calc(100% - 24px);height:calc(100% - 24px);touch-action:none;cursor:crosshair;user-select:none}
+/* Lo de una capa bloqueada va en un <g pointer-events="none">, pero un hijo con su propio pointer-events (formas, franja de clic de las líneas) lo pisaba y seguía recibiendo clics: esta regla le gana al atributo */
+#c > g[pointer-events="none"] *{pointer-events:none}

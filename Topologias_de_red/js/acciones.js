@@ -140,6 +140,10 @@ TR.acc = (() => {
   function sincronizarColor() {                  // D16: con una herramienta de cable, o con solo cables seleccionados, el selector de color del menú izquierdo queda desactivado
     const c = $('#col'), os = seleccionados(), bloq = tool ? (tool.k == 'line' && esCable(tool)) : (os.length > 0 && os.every(esCable));
     if (c.disabled !== bloq) c.disabled = bloq; const t = bloq ? 'El color de un cable lo define su tipo' : ''; if (c.title !== t) c.title = t;
+    // Color, Relleno y Línea del menú izquierdo solo se muestran si sirven: con una herramienta, lo que usa al crear; sin ella, lo que se puede cambiar en lo seleccionado
+    const ve = tool ? { col: (tool.k == 'line' && !esCable(tool)) || tool.k == 'shape' || tool.k == 'zona' || (tool.k == 'item' && esEscalera(tool)), fill: tool.k == 'zona', lstyle: tool.k == 'shape' || tool.k == 'zona' }
+      : { col: os.some(colorable), fill: os.some(rellenable), lstyle: os.some(rellenable) };
+    for (const k in ve) { const l = $('#' + k).closest('label'); if (l.hidden === ve[k]) l.hidden = !ve[k]; }
   }
   return { campos, acciones, sinColor, portapapeles, registrar, registrarCampo, campo, fijar, rotar, copiar: copiarSel, cortar, pegar, eliminar, ejecutar, paraMenu, paraInspector, sincronizarColor, colorable, OFFSET };
 })();
