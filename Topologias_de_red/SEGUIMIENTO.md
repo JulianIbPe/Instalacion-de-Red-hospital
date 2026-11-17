@@ -2,7 +2,7 @@
 
 Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor ni framework). Se abre `index.html` en el navegador; `index.html?pruebas=1` abre además el panel de pruebas. Los scripts se cargan en el orden de `index.html` y comparten variables globales. Todas las coordenadas del modelo están en **metros**.
 
-> **Última actualización: 17/11/2026** (F9 completa y verificada por el usuario; ver sección 0).
+> **Última actualización: 17/11/2026** (F10A implementada; falta la verificación del usuario; ver sección 0).
 > **Regla de mantenimiento:** al terminar una fase, o al avanzar dentro de la fase en curso, se actualiza este documento (qué se hizo, resultados reales de las pruebas, qué falta y cuál es el siguiente paso).
 
 ## 0. Resumen para retomar (leer primero)
@@ -18,13 +18,14 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 - Revisión thermo de la F8 (A y B) hecha (16/11/2026) y arreglos chicos aplicados; detalle en la sección 5.
 - **Ajustes de dibujo (10 pedidos del usuario, 17/11/2026), en cuatro lotes; no son una fase del plan. Los cuatro lotes (A, B, C y D) están implementados, verificados por el usuario y commiteados (17/11/2026). Sin revisión thermo todavía.** Detalle en la sección 7 («Ajustes de dibujo posteriores a la F8»).
 - **F9 (longitud de cables y presupuesto): partida en F9A y F9B; diseño aprobado con las opciones recomendadas (17/11/2026). F9A (longitud de cables) y F9B (presupuesto y CSV) completadas y verificadas por el usuario (17/11/2026). Revisión thermo hecha y arreglos chicos aplicados (sección 5).** Detalle en la sección 5.
-- Pruebas: 126 de 126 en el navegador integrado (17/11/2026). A pedido del usuario se quitaron 6 pruebas viejas: las cinco de «instalación» (F0 a F3: comprobaban que se hubieran copiado los archivos de cada fase) y «el dibujo es idéntico a la referencia» (fallaba siempre porque el dibujo cambió a propósito; la comparación sigue disponible con el botón «Comparar con la referencia»).
+- **F10 (cables superpuestos, aislar cable y filtros): partida en F10A y F10B; diseño aprobado con las opciones recomendadas (17/11/2026). F10A (panel de cables superpuestos y aislar un cable) implementada; falta la verificación manual del usuario.** F10B (filtros) sin empezar. Detalle en la sección 5.
+- Pruebas: 130 de 130 en el navegador integrado (17/11/2026; 4 nuevas de la F10A). A pedido del usuario se quitaron 6 pruebas viejas: las cinco de «instalación» (F0 a F3: comprobaban que se hubieran copiado los archivos de cada fase) y «el dibujo es idéntico a la referencia» (fallaba siempre porque el dibujo cambió a propósito; la comparación sigue disponible con el botón «Comparar con la referencia»).
 
 **Qué hacer al retomar (en este orden):**
 1. Los archivos están en la carpeta del proyecto. No hay acceso al navegador del usuario: nada se da por probado si no lo ejecutó él o no se ejecutó realmente.
 2. Leer las secciones 0, 1, 3, 4, 6 y 8, y de la 5 la fase que toque.
 3. El usuario commitea por su cuenta o lo pide; preguntar antes de commitear.
-4. **No empezar ninguna fase ni lote sin que el usuario diga cuál sigue.** La F5 está postergada. No queda ninguna verificación manual pendiente. La siguiente fase del plan es la F10 (cables superpuestos, aislar cable y filtros): antes de escribir código, presentar el diseño y esperar la orden.
+4. **No empezar ninguna fase ni lote sin que el usuario diga cuál sigue.** La F5 está postergada. No queda ninguna verificación manual pendiente. Falta que el usuario verifique la F10A (comprobaciones en la sección 5). La F10B (filtros) espera su orden.
 5. Al terminar cada avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
 
 **Pendiente:**
@@ -49,7 +50,8 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | F7 Puertos, conexiones y redes | Completada y verificada (F7A 15/11/2026, F7B 16/11/2026) |
 | F8 Racks | Completada y verificada (F8A 16/11/2026, F8B 17/11/2026) |
 | F9 Longitud de cables y presupuesto | Completada y verificada (17/11/2026) |
-| F10 a F12 | No iniciadas (sección 5) |
+| F10 Cables superpuestos, aislar cable y filtros | F10A implementada (17/11/2026), falta verificarla; F10B sin empezar |
+| F11 y F12 | No iniciadas (sección 5) |
 
 ## 2. Archivos del proyecto
 
@@ -96,6 +98,9 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | `js/cables.js` | `TR.cab` (F9A): longitud de los cables (`medida`, `instalacion`), largo estimado de un patch cord (`estimada`), alto de planta (`altoDe`, 3 m por omisión) y holgura. Registra el campo de solo lectura «Longitud» y la línea `cab-largo` del menú |
 | `js/presupuesto.js` | `TR.pres` (F9B): `calcular` (cables por tipo, equipos por categoría y modelo, totales por moneda, pendientes), `csv`, `fijarHolgura`, `fijarConCables`, `fijarCable` y el diálogo «Presupuesto» (botón `#bpres`) |
 | `js/pruebas-f9.js` | Solo con `?pruebas=1`, después de `pruebas-ajustes.js`: pruebas de la Fase 9 (9A y 9B) |
+| `js/filtros.js` | `TR.fil` (F10A): estado visual fuera de `S` (D10). `aislar(id)` de un cable, `mostrarTodo`, `estado(o)` (`''`, `'oculto'`, `'fondo'`), `oculto`, `sincronizar` (lo llama `renderObjetos`), aviso `#faviso`, acción `fil-aislar` del menú del cable |
+| `js/superposicion.js` | `TR.sup` (F10A): `superpuestos(segs, p, tol)` (detección pura), `segmentos()`, `alMover` (espera de 400 ms, desde el `pointermove`), `abrirEn`, `cerrar(todo)`, `trazo()` (destacado en `#g-tmp`); panel `#sup` |
+| `js/pruebas-f10.js` | Solo con `?pruebas=1`, después de `pruebas-f9.js`: pruebas de la Fase 10 |
 | `js/pruebas-ajustes.js` | Solo con `?pruebas=1`, después de `pruebas-f8.js`: pruebas de los ajustes de dibujo posteriores a la F8 (6 del lote A, 3 del lote B, 3 del lote C y 2 del lote D) |
 
 ## 3. Decisiones
@@ -336,6 +341,18 @@ Plan original. Archivos: `escaleras.js`, `plantas.js`, `inspector.js`, `archivos
 8. Exportar CSV (`;`, BOM UTF-8, coma decimal, números como datos); verificar la apertura en Excel en español. PDF y XLSX quedan para la F12.
 
 ### F10 — Cables superpuestos, aislar cable y filtros
+
+**Decisiones del usuario (17/11/2026), todas las recomendadas:** partir en F10A y F10B; al aislar, paredes, puertas, escaleras y textos quedan de fondo atenuados y sin clics; el PNG exporta lo que se ve (filtrado); lo atenuado por un filtro (F10B) se puede seleccionar; abrir un archivo o «Nuevo» quita los filtros.
+
+**F10A — cables superpuestos y aislar un cable (implementada el 17/11/2026; falta la verificación del usuario).** Cubre los puntos 1 a 4 del plan de abajo.
+Archivos: nuevos `js/filtros.js` (`TR.fil`), `js/superposicion.js` (`TR.sup`) y `js/pruebas-f10.js` (se cargan después de `presupuesto.js`); cambios chicos en `dibujo.js` (`renderObjetos` consulta `TR.fil.estado`; `renderTmp` dibuja `TR.sup.trazo()`), `interaccion.js` (espera del panel al mover, cierre al hacer clic, al salir y con la rueda), `controles.js` (Esc cierra el panel y apaga el destacado), `conexiones.js` (exporta `txtExt`; sin marca roja en un cable oculto), `redes.js` (sin etiqueta en un cable oculto), `archivos.js` (abrir y «Nuevo» quitan el filtro), `index.html` y `css/conexiones.css`.
+- **Detección:** tramos de cables distintos de la planta actual sobre la misma recta (2 cm o menos) que comparten más de 1 cm, justo donde está el cursor. Un cruce, puntas que se tocan o paralelos a 5 cm no cuentan. Un cable oculto por un filtro no cuenta.
+- **Panel `#sup`:** con el cursor quieto 400 ms sin herramienta ni arrastre; el cálculo se hace solo al cumplirse la espera. Por cable: tipo y etiqueta, extremos A y B, longitud medida y los botones Seleccionar (desactivado si su capa está bloqueada), Destacar (trazo rosa en `#g-tmp`, sigue hasta Esc o volver a pulsarlo) y Aislar. Pasar el cursor por un renglón también lo destaca. **Prioridad del destacado** (pedido del usuario, 17/11/2026): un clic sobre un cable por donde pasa el cable destacado (a ~8 px) selecciona el destacado, aunque otro esté dibujado encima (`TR.sup.prioridad`, llamado desde el `pointerdown`); no aplica si su capa está bloqueada o si está oculto por un filtro. Al alejar el cursor más de 24 px sin entrar al panel, o al salir del panel, se cierra recién a los 0,9 s (si el cursor entra al panel o vuelve, sigue abierto; pedido del usuario, 17/11/2026); con un clic en el plano, la rueda o Esc se cierra al instante. No cambia el color (D16).
+- **Aislar** (botón del panel o «Aislar este cable» del menú contextual): se ven el cable, sus equipos (por la unión de las puntas y por la conexión) y la mesa o el rack donde están; otros cables, equipos, mesas y racks no se dibujan (tampoco sus etiquetas ni marcas rojas); lo demás queda de fondo con opacidad .25 y sin clics. Aviso arriba «Mostrando solo un cable y sus equipos · Mostrar todo». Lo que queda oculto o de fondo se deselecciona. Si el cable se borra, el filtro se va solo.
+- **Pruebas automatizadas (navegador integrado, 17/11/2026): 130 de 130** (4 nuevas: cierre demorado y prioridad del destacado; detección con casos límite; panel, destacado y selección; aislar sin cambiar `S`, historial, imanes ni presupuesto, y `#c` idéntico con «Mostrar todo»). Se vio en captura el panel abierto por un `pointermove` real con dos cables y el plano aislado tras un clic real en «Aislar»; «Mostrar todo» con clic real. Cierre demorado con `pointermove` reales (abierto a los 0,4 s de alejarse, cerrado al 1,1 s) y prioridad con `pointerdown` real sobre dos cables (sin destacado se elige el de arriba; con el de abajo destacado, ese).
+- **Comprobaciones manuales pendientes (usuario):** 1) dibujar dos cables uno encima del otro, dejar el cursor quieto sobre la parte común: aparece el panel; pasar al panel sin que se cierre; 2) Seleccionar, Destacar (y Esc lo apaga) y Aislar desde el panel, con tiempo para llegar al panel; con un cable destacado, un clic sobre los superpuestos lo selecciona a él; 3) «Aislar este cable» desde el menú contextual y «Mostrar todo»; 4) exportar PNG con un cable aislado; 5) un cruce de dos cables no abre el panel.
+- **Límites conocidos:** dos cables trazados a mano a más de 2 cm no se detectan; el panel no aparece con una herramienta activa; en pantallas táctiles no hay cursor quieto (el panel no aparece; «Aislar» sigue en el menú contextual).
+
 Archivos: `dibujo.js`, `interaccion.js`, `inspector.js`; nuevos `superposicion.js`, `filtros.js`.
 1. Al mantener el cursor sobre cables superpuestos aparece un panel flotante con los cables detectados; sigue abierto al pasar el cursor al panel y no bloquea otras herramientas.
 2. Desde el panel: seleccionar un cable, consultar sus extremos y destacar su recorrido. **No** permite cambiar el color (D16).
@@ -420,7 +437,7 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 
 ## 8. Mapa técnico para retomar
 
-**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `iconos` → `catalogo-pt` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `jerarquia` → `conexiones` → `redes` → `rack` → `vistarack` → `cables` → `inspector` → `modelos` → `imagenes` → `presupuesto` → `contexto` → `archivos` → `main` (siempre el último). Con `?pruebas=1` se cargan además `pruebas` → `pruebas-f4` → `pruebas-f6` → `pruebas-f7` → `pruebas-f8` → `pruebas-ajustes` → `pruebas-f9`.
+**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `iconos` → `catalogo-pt` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `jerarquia` → `conexiones` → `redes` → `rack` → `vistarack` → `cables` → `inspector` → `modelos` → `imagenes` → `presupuesto` → `filtros` → `superposicion` → `contexto` → `archivos` → `main` (siempre el último). Con `?pruebas=1` se cargan además `pruebas` → `pruebas-f4` → `pruebas-f6` → `pruebas-f7` → `pruebas-f8` → `pruebas-ajustes` → `pruebas-f9` → `pruebas-f10`.
 
 **Estado global (`estado.js`):** `S` (proyecto; entra al historial), `V` (vista: `ox`, `oy`, `z` px/m), `sel`, `multi`, `selEdge`, `tool`, `tmp`, `drag`, `nid`, `curP`. `R` (recursos, `recursos.js`) está fuera de `S`. Namespace `TR` (`eventos.js`). El código nuevo usa `TR`: las letras `I`, `L`, `T`, `S`, `V` ya están ocupadas.
 
@@ -475,3 +492,5 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 - 18/11/2026: a pedido del usuario, al estirar una pared (o cualquier línea) las medidas de los tramos que toca la punta aparecen también junto al cursor; 1 prueba nueva (126 en total). Con el panel del navegador oculto fallan 22 pruebas que hacen clic, igual que sin el cambio; la nueva pasa. Pendiente la verificación manual.
 - 17/11/2026: el usuario verificó la F9A y la F9B (todas las comprobaciones manuales; se quitaron del documento). F9 completa.
 - 17/11/2026: revisión thermo de la F9 (dos pasadas): sin hallazgos críticos. El usuario eligió aplicar los 7 arreglos chicos (fórmulas en el CSV, precio de tipos desconocidos, alto al copiar planta, avisos, equipos sin nombre, constante de holgura, inspector al cambiar un precio); una prueba nueva (126 en total, todas pasan). Los refactors quedan sin aplicar.
+- 17/11/2026: el usuario pidió seguir con la F10. Diseño presentado (F10A cables superpuestos y aislar cable; F10B filtros) y aprobado con las cinco opciones recomendadas. F10A implementada; 3 pruebas nuevas (129 en total, todas pasan). Pendiente la verificación manual.
+- 17/11/2026: a pedido del usuario, el panel de superpuestos se cierra con 0,9 s de demora y un clic sobre cables superpuestos elige el destacado; 1 prueba nueva (130 en total, todas pasan). Pendiente la verificación manual.

@@ -13,7 +13,7 @@ document.addEventListener('keydown', e => {
   else if (mod && !e.shiftKey && !e.altKey && ['c', 'x', 'v'].includes(k)) {   // Ctrl+C / Ctrl+X / Ctrl+V (portapapeles interno, ver acciones.js): solo sin herramienta ni operación en curso; pegar centra en el cursor
     if (!tool && !tmp && !drag && TR.acc.ejecutar(k == 'c' ? 'copiar' : k == 'x' ? 'cortar' : 'pegar', { punto: curP })) e.preventDefault();
   }
-  else if (e.key == 'Escape') setTool(null);
+  else if (e.key == 'Escape') { TR.sup.cerrar(true); setTool(null); }
   else if (k == 'g') alternarGrilla();
   else if (k == 'f' && !mod) voltearPuerta('lado');
   else if (k == 'h' && !mod) voltearPuerta('bis');
