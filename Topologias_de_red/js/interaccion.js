@@ -33,6 +33,7 @@ svg.addEventListener('pointerdown', e => {
     if (!tool && o && esAscensor(o) && !e.altKey) {                 // ascensor: sube (o baja si ya es la planta más alta); Alt+doble clic = etiqueta
       const i = S.plantas.findIndex(p => p.id == S.plantaAct); drag = null; irPlanta(i < S.plantas.length - 1 || i < 1 ? 1 : -1); return;
     }
+    if (!tool && o && TR.rack.esRack(o)) { drag = null; TR.vr.abrir(o.id); return; }   // F8: doble clic en un rack abre su vista (la etiqueta se edita en el menú o el inspector)
     if (!tool && o && o.k != 'medida') { const v = prompt('Etiqueta:', o.label || ''); if (v !== null && v !== (o.label || '')) { push(); o.label = v; drag = null; render(); } return; }
   }
   if (!tool) {
@@ -69,9 +70,10 @@ svg.addEventListener('pointerdown', e => {
   else if (tool.k == 'line') {
     snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e));   // los imanes miden la distancia con el cursor real, no con el punto ya ajustado a la grilla
     const it = itemAt(e), q = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p;   // nodo del mismo tipo > dispositivo > punto libre
+    { const m = q.ref && byId(q.ref); if (m && m.ru) q.ref = m.parent; }   // F8B: el nodo de otro cable que termina en un equipo montado está en el centro del rack: se une al rack, que pregunta a cuál de sus equipos
     const dev = q.ref ? byId(q.ref) : null, conP = TR.con.conPuertos(tool, dev);   // F7A: un cable de red unido a un equipo con puertos pide el puerto (conexiones.js); el equipo es el de la unión, no el que está bajo el cursor (el imán de nodos puede unir desde fuera del icono)
     if (!tmp) { tmp = { k: 'line', n: tool.n, c: esCable(tool) ? tool.c : col(), w: tool.w, d: tool.d, pts: [q], label: '', pl: S.plantaAct, cp: S.capaAct }; TR.con.alEmpezar(conP && dev, e); }   // pl y cp: dónde empieza el cable
-    else if (conP && tmp.pts.length == 1 && tmp.pts[0].ref == dev.id) return;   // segundo clic sobre el mismo equipo: no hay cable de un equipo a sí mismo sin recorrido
+    else if (conP && tmp.pts.length == 1 && (tmp.pts[0].ref == dev.id || (byId(tmp.pts[0].ref) || {}).parent == dev.id)) return;   // segundo clic sobre el mismo equipo (o sobre el rack del equipo): no hay cable sin recorrido; dos equipos del mismo rack se unen con un patch cord en su vista
     else {
       if (S.plantaAct != tmp.pl) { q.pl = S.plantaAct; q.cp = S.capaAct; } tmp.pts.push(q);   // un punto en otra planta (tras cruzar una escalera) lleva la suya
       if (conP) { const L = tmp; finishLine(); TR.con.elegir(L.id, 'b', e, true); return; }   // el cable termina solo en el segundo equipo y pide su puerto (mismo paso de historial)
@@ -114,7 +116,10 @@ svg.addEventListener('pointermove', e => {
       else if (o.k == 'item') (esImagen(o) ? redimProporcional : redimensionarRot)(o, d.h, p, d.ar ||= o.w / o.h);   // escaleras e imágenes sueltas (las esquinas de una imagen conservan la proporción que tenía al empezar el arrastre)
       else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else redimensionarRot(o, d.h, p); }
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
-      else { const it = itemAt(e), v = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p, antes = o.pts[d.h]; if (antes.pl) { v.pl = antes.pl; v.cp = antes.cp; } o.pts[d.h] = v; }   // el punto conserva su planta y capa
+      else { const it = itemAt(e), v = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p, antes = o.pts[d.h]; if (antes.pl) { v.pl = antes.pl; v.cp = antes.cp; }
+        if (d.r0 === undefined) d.r0 = antes.ref || null;                 // unión que tenía la punta al empezar el arrastre
+        if (v.ref != null && d.r0 && (byId(d.r0) || {}).parent == v.ref) v.ref = d.r0;   // F8: sigue sobre el rack de su equipo montado (que no está en el plano): conserva el equipo y, con él, el puerto
+        o.pts[d.h] = v; }   // el punto conserva su planta y capa
     }
   }
   repintarMovimiento();   // solo se redibuja lo que cambió (ver dibujo.js): sin herramienta ni arrastre, solo la barra de estado

@@ -1,9 +1,28 @@
 /* conexiones.css: diálogo «Interfaces» de un equipo, ver js/conexiones.js */
-#dlg-if{width:min(680px,96vw);padding:22px;border:0;border-radius:12px;background:#fff;color:var(--texto);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#dlg-if{width:min(880px,96vw);padding:22px;border:0;border-radius:12px;background:#fff;color:var(--texto);box-shadow:0 12px 40px rgba(0,0,0,.35)}
 #dlg-if::backdrop{background:rgba(20,35,43,.55)}
 #dlg-if h3{margin:0 0 12px;font-size:18px}
-#dlg-if .di-h,#dlg-if .di-r{display:grid;grid-template-columns:150px 46px 1fr 1.3fr;gap:6px;align-items:center;font-size:13px}
+#dlg-if .di-h,#dlg-if .di-r{display:grid;grid-template-columns:150px 46px 1fr 1.3fr 130px 74px;gap:6px;align-items:center;font-size:13px}
 #dlg-if .di-h{margin-bottom:4px;color:#5d7078;font-size:12px}
 #di-g{display:grid;gap:6px;max-height:55vh;overflow-y:auto;margin-bottom:12px}
 #dlg-if input[type=text],#dlg-if select{min-width:0;padding:5px 8px;border:1px solid var(--borde);border-radius:6px;background:#fff;color:var(--texto);font:inherit}
 #dlg-if .acc{flex-direction:row;justify-content:flex-end}
+/* Diálogo «Redes» (js/redes.js) */
+#dlg-red{width:min(600px,96vw);padding:22px;border:0;border-radius:12px;background:#fff;color:var(--texto);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#dlg-red::backdrop{background:rgba(20,35,43,.55)}
+#dlg-red h3{margin:0 0 6px;font-size:18px}
+#dlg-red h4{margin:12px 0 2px;font-size:14px}
+#dr-a{display:grid;gap:4px;max-height:24vh;overflow-y:auto;margin-bottom:6px;font-size:13px}
+#dlg-red .dr-au{display:grid;grid-template-columns:60px 1fr auto;gap:8px;padding:5px 8px;border:1px solid var(--borde);border-radius:6px}
+#dlg-red .dr-au i{font-style:normal;color:#5d7078}
+#dlg-if .di-red{display:flex;align-items:center;gap:4px;white-space:nowrap}
+#dlg-red .dr-n{margin:0 0 8px;color:#5d7078;font-size:12.5px}
+#dlg-red .dr-h,#dlg-red .dr-r{display:grid;grid-template-columns:1.3fr 80px 1fr 46px 32px;gap:6px;align-items:center;font-size:13px}
+#dlg-red .dr-h{margin-bottom:4px;color:#5d7078;font-size:12px}
+#dr-g{display:grid;gap:6px;max-height:30vh;overflow-y:auto;margin-bottom:12px}
+#dlg-red input:not([type=color]){min-width:0;padding:5px 8px;border:1px solid var(--borde);border-radius:6px;background:#fff;color:var(--texto);font:inherit}
+#dlg-red input[type=color]{width:100%;height:30px;padding:0;border:1px solid var(--borde);border-radius:6px;background:#fff}
+#dlg-red .dr-r button{padding:5px 8px;border:1px solid var(--borde);border-radius:6px;background:#fff;color:var(--texto)}
+#dlg-red .dr-r button:hover{background:#eef2f4}
+#dlg-red .acc{flex-direction:row;justify-content:flex-end}
+#dr-add{margin-right:auto}

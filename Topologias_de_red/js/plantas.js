@@ -9,7 +9,11 @@ function capaDe(o) { const p = S.plantas.find(p => p.id == o.pl); return p && p.
 function rangoCapa(o) {                  // posición de la capa del objeto dentro de su planta (mayor = más arriba); lo que no tiene capa (lo que se está dibujando) va arriba de todo
   const p = S.plantas.find(p => p.id == o.pl), i = p ? p.capas.findIndex(c => c.id == o.cp) : -1; return i < 0 ? 1e9 : i;
 }
-function esVisible(o) { if (o.pl === undefined) return true; if (esMultiplanta(o)) return o.pts.some(q => puntoVisible(o, q)); const c = capaDe(o); return o.pl == S.plantaAct && !!c && c.visible; }   // un cable que atraviesa plantas se ve en cada planta donde tiene puntos en una capa visible (trazas.js)
+function esVisible(o) {
+  if (o.pl === undefined) return true;
+  if (o.ru) { const r = byId(o.parent); return !!r && TR.vr.rack() == r.id && esVisible(r); }   // F8: un equipo montado en un rack solo se ve (y se edita) con la vista de ese rack abierta
+  if (esMultiplanta(o)) return o.pts.some(q => puntoVisible(o, q)); const c = capaDe(o); return o.pl == S.plantaAct && !!c && c.visible;   // un cable que atraviesa plantas se ve en cada planta donde tiene puntos en una capa visible (trazas.js)
+}
 function esEditable(o) { if (o.pl === undefined) return true; if (esMultiplanta(o)) return o.pts.some(q => puntoEditable(o, q)); return esVisible(o) && !capaDe(o).bloqueada; }
 const capaEditable = () => { const c = capaActual(); return c.visible && !c.bloqueada; };
 

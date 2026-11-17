@@ -22,7 +22,7 @@ TR.jer = (() => {
   }
   function sincronizar() {                 // lo llama renderObjetos: posición, giro, planta y capa de cada hijo salen de su mesa (R5)
     const mesas = new Map(S.objs.filter(esMesa).map(m => [m.id, m])), arr = drag && drag.m == 'mv' && drag.os || [];
-    S.objs.forEach(o => { if (o.parent != null && (!mesas.has(o.parent) || tipoDe(o) != 'dispositivo')) soltar(o); });   // archivo dañado (mesa inexistente, o una mesa o escalera con padre): queda suelto
+    S.objs.forEach(o => { if (o.parent != null && !o.ru && (!mesas.has(o.parent) || tipoDe(o) != 'dispositivo')) soltar(o); });   // archivo dañado (mesa inexistente, o una mesa o escalera con padre): queda suelto
     for (const m of mesas.values()) {
       const hs = hijosDe(m); if (!hs.length) continue;
       if (hs.some((o, i) => !(o.puesto < (m.puestos || 1)) || (i && o.puesto == hs[i - 1].puesto))) hs.forEach((o, i) => { o.puesto = i; });   // puestos fuera de rango o repetidos (se bajaron los puestos): se reacomodan en orden
@@ -62,8 +62,9 @@ TR.jer = (() => {
   const plDe = o => o.pl === undefined ? S.plantaAct : o.pl;
   const pisada = (m, v = x => x, extra = []) => S.objs.map(v).concat(extra).some(o => o !== m && (m.id == null || o.id !== m.id) && esMesa(o) && plDe(o) == plDe(m) && seSolapan(m, o));
   const mesasNuevas = nuevas => nuevas.some(m => esMesa(m) && pisada(m, x => x, nuevas.filter(x => x !== m))) ? ENCIMA : null;   // mesas que todavía no están en S (colocar o pegar)
-  function mesaEn(p) {                     // mesa editable de la planta actual bajo el punto p (la que se ve arriba: capa más alta y, en la misma capa, la última)
-    return S.objs.filter(m => esMesa(m) && esEditable(m)).reverse().sort((a, b) => rangoCapa(b) - rangoCapa(a)).find(m => { const l = rotP(p, m, -(m.rot || 0)); return Math.abs(l.x - m.x) <= m.w / 2 && Math.abs(l.y - m.y) <= m.h / 2; });
+  const mesaEn = p => contEn(p, esMesa);
+  function contEn(p, es) {                 // contenedor editable (mesa, o rack en la F8) de la planta actual bajo el punto p (el que se ve arriba: capa más alta y, en la misma capa, el último)
+    return S.objs.filter(m => es(m) && esEditable(m)).reverse().sort((a, b) => rangoCapa(b) - rangoCapa(a)).find(m => { const l = rotP(p, m, -(m.rot || 0)); return Math.abs(l.x - m.x) <= m.w / 2 && Math.abs(l.y - m.y) <= m.h / 2; });
   }
   function anclar(o, m) {                  // o al puesto libre más cercano de m; devuelve el aviso si no se puede (o no cambia)
     const ocup = new Set(hijosDe(m).filter(h => h !== o).map(h => h.puesto)), lx = rotP(o, m, -(m.rot || 0)).x - m.x;
@@ -74,6 +75,7 @@ TR.jer = (() => {
   }
   function alSoltar(o) {                   // equipo colocado o soltado: sobre una mesa se ancla y fuera de ella se desancla; devuelve el aviso si no entra en la mesa (o no cambia)
     if (tipoDe(o) != 'dispositivo') return null;
+    const rk = TR.rack.en(o); if (rk) { const msg = TR.rack.montar(o, rk); if (!msg) avisoMsg = `✔ «${o.label || o.n || 'El equipo'}» quedó montado en el rack (U ${o.ru.u}) · doble clic en el rack para verlo`; return msg; }   // F8: sobre un rack se monta en su primera unidad libre
     const m = mesaEn(o); if (!m) { soltar(o); return null; }
     return anclar(o, m);
   }
@@ -98,5 +100,5 @@ TR.jer = (() => {
   TR.acc.sinColor.push(esMesa);           // D18
   TR.acc.registrarCampo({ id: 'puestos', sec: 'geo', et: 'Puestos', t: 'num', aplica: esMesa, leer: o => o.puestos || 1, parse: v => { const n = Number(String(v).replace(',', '.')); return Number.isInteger(n) && n >= 1 && n <= 50 ? n : undefined; }, poner: (o, v) => { o.puestos = v; o.w = Math.max(o.w, r3(v * PUESTO)); } });   // al subir los puestos la mesa crece hasta su largo mínimo
 
-  return { PUESTO, sincronizar, problema, ver, sinHijos, mesaEn, anclar, alSoltar, puedeColocar, mesasNuevas, alSoltarArrastre, hijosDeIds, dibujar, ext };
+  return { PUESTO, sincronizar, problema, ver, sinHijos, mesaEn, contEn, anclar, alSoltar, puedeColocar, mesasNuevas, alSoltarArrastre, hijosDeIds, dibujar, ext };
 })();

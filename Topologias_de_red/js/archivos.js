@@ -30,6 +30,7 @@ $('#load').onclick = () => $('#file').click();
 function abrirTexto(t) {                        // devuelve {ok, avisos} o {ok:false, errores}
   const r = ESQ.leer(t); if (!r.ok) return r;
   const sim = R.fusionar(r.recursos, { simular: true }); if (!sim.ok) return { ok: false, errores: [sim.error] };
+  TR.vr.cerrar();                               // F8: la vista de un rack no sigue abierta sobre otro proyecto
   const previo = S, nidPrevio = nid, h0 = hist.length;
   try {
     push();
@@ -67,11 +68,11 @@ function construirSvgExport() {
     return { xml, w, h, k };
   } finally { sel = g.sel; multi = g.multi; selEdge = g.selEdge; tmp = g.tmp; render(); }
 }
-$('#png').onclick = () => {
-  const { xml, w, h, k } = construirSvgExport();
+function exportarPng(xml, ancho, alto, nombre) {   // SVG autocontenido -> PNG descargado (el plano y, desde su vista, el interior de un rack)
   const img = new Image(); img.onload = () => {
-    const cv = document.createElement('canvas'); cv.width = w * k; cv.height = h * k; cv.getContext('2d').drawImage(img, 0, 0);
-    cv.toBlob(bl => download(URL.createObjectURL(bl), 'topologia.png'));
+    const cv = document.createElement('canvas'); cv.width = ancho; cv.height = alto; cv.getContext('2d').drawImage(img, 0, 0);
+    cv.toBlob(bl => download(URL.createObjectURL(bl), nombre));
   }; img.onerror = () => alert('No se pudo exportar el PNG. Si el proyecto tiene imágenes muy pesadas, probá con imágenes más livianas.');
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
-};
+}
+$('#png').onclick = () => { const { xml, w, h, k } = construirSvgExport(); exportarPng(xml, w * k, h * k, 'topologia.png'); };

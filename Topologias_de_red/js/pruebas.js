@@ -532,7 +532,7 @@ const TRP = (() => {
       sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,c,f,ls', 'rectángulo'); sel = 3; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot,c,f,ls', 'círculo'); sel = 5; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot,c,f,ls', 'zona');
       sel = 7; render(); ser(camposInsp(), 'label,x,y,rot', 'texto'); sel = 8; render(); ser(camposInsp(), '', 'medida'); sel = null; multi = [1, 3]; render(); ser(camposInsp(), 'c,f,ls', 'varios');
     });
-    conProyecto(fDispositivos().estado, () => { sel = 5; render(); ser(camposInsp(), 'n,label', 'cable'); sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot', 'dispositivo'); });
+    conProyecto(fDispositivos().estado, () => { sel = 5; render(); ser(camposInsp(), 'n,label,cable', 'cable'); sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot', 'dispositivo'); });
     conProyecto(fParedes().estado, () => { sel = 1; render(); ser(camposInsp(), 'n,label,c', 'pared'); sel = 3; render(); ser(camposInsp(), '', 'puerta'); });
   });
   prueba('Fase 3: con la capa bloqueada ninguna acción ni campo actúa y no se guarda historial', () => {

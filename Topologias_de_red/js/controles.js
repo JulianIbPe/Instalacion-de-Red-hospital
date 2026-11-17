@@ -7,6 +7,7 @@ document.addEventListener('keydown', e => {
   if (drag) return;                                                     // durante un arrastre no actúa ninguna tecla (R, Supr, Ctrl+Z… agregarían pasos en medio del arrastre)
   const mod = e.ctrlKey || e.metaKey, k = e.key.toLowerCase();
   const enBoton = ['BUTTON', 'SUMMARY', 'INPUT'].includes(e.target.tagName);   // con un botón, un resumen o un checkbox/color enfocado, Supr y Retroceso no borran objetos (se evita borrar sin querer)
+  if (TR.vr.rack() != null && !(mod && (k == 'z' || k == 'y')) && !((e.key == 'Delete' || e.key == 'Backspace') && sel != TR.vr.rack())) { if (e.key == 'Escape') TR.vr.cerrar(); return; }   // F8: con la vista de un rack abierta solo actúan deshacer, rehacer, Supr (sobre un equipo, no sobre el rack) y Esc (vuelve al plano)
   if (mod && k == 'z' && !e.shiftKey) { e.preventDefault(); deshacer(); }
   else if (mod && (k == 'y' || (k == 'z' && e.shiftKey))) { e.preventDefault(); rehacer(); }
   else if (mod && !e.shiftKey && !e.altKey && ['c', 'x', 'v'].includes(k)) {   // Ctrl+C / Ctrl+X / Ctrl+V (portapapeles interno, ver acciones.js): solo sin herramienta ni operación en curso; pegar centra en el cursor
