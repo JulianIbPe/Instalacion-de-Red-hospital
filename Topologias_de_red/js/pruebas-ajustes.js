@@ -164,4 +164,14 @@
       deshacer(); panel();
     });
   });
+
+  prueba('Ajustes A: al estirar una punta o un vértice de una pared, las medidas de sus tramos aparecen también junto al cursor', () => {
+    con([pared(1, [{ x: 1, y: 1 }, { x: 3, y: 1 }, { x: 3, y: 3 }])], () => {
+      V.z = 50; rejilla = true; pasoFijo = .25; sel = 1; multi = []; render(); const h = document.querySelector('#c [data-h="1"]'), hb = h.getBoundingClientRect(), c = pant(4, 1);
+      sinCaptura(() => { lastDown.t = 0; ptr(h, 'pointerdown', hb.left + hb.width / 2, hb.top + hb.height / 2); ptr(svg, 'pointermove', c.x, c.y);
+        const g = $('#g-tmp').innerHTML; afirmar(g.includes('translate(4 1) scale(1)'), 'falta el grupo junto al cursor'); ser((g.match(/↔ 3\.00 m/g) || []).length, 2, 'el tramo horizontal: en la cota y junto al cursor'); afirmar((g.match(/2\.24 m · 63\.4°/g) || []).length == 2, 'el tramo vecino también');
+        ptr(svg, 'pointerup', c.x, c.y); });
+      afirmar(!$('#g-tmp').innerHTML.includes('translate(4 1) scale(1)'), 'al soltar ya no está junto al cursor');
+    });
+  });
 })();

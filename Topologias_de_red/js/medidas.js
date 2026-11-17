@@ -33,16 +33,20 @@ function medidaLado(a, b, k = 1, txt, col) {   // longitud de un tramo, a un cos
 // Largo de cada tramo; en verde con ↔ / ↕ si está exactamente horizontal o vertical, y si no con su ángulo. Su tamaño sigue al zoom (k): al alejar se agrandan y al acercar se achican, para que se lean siempre.
 function ayudasLineas() {
   const k = 50 / V.z; let h = '';
-  const tramo = (a, b) => {
-    const dx = Math.abs(b.x - a.x), dy = Math.abs(b.y - a.y), L = Math.hypot(dx, dy), recta = dx < 1e-6 || dy < 1e-6; if (L < .005) return '';
-    const txt = recta ? (dy < 1e-6 ? '↔ ' : '↕ ') + fmt(L) : fmt(L) + ' · ' + +(Math.atan2(dy, dx) * 180 / Math.PI).toFixed(1) + '°';
-    h += medidaLado(a, b, k, txt, recta ? '#1e8e3e' : undefined); return txt;
+  const texto = (a, b) => {
+    const dx = Math.abs(b.x - a.x), dy = Math.abs(b.y - a.y), L = Math.hypot(dx, dy), recta = dx < 1e-6 || dy < 1e-6; if (L < .005) return null;
+    return { recta, txt: recta ? (dy < 1e-6 ? '↔ ' : '↕ ') + fmt(L) : fmt(L) + ' · ' + +(Math.atan2(dy, dx) * 180 / Math.PI).toFixed(1) + '°' };
   };
+  const tramo = (a, b) => { const t = texto(a, b); if (!t) return ''; h += medidaLado(a, b, k, t.txt, t.recta ? '#1e8e3e' : undefined); return t.txt; };
+  const junto = (p, txts) => { txts = txts.filter(Boolean); if (txts.length) h += `<g transform="translate(${p.x} ${p.y}) scale(${k})" pointer-events="none">${txts.map((t, i) => T(1.2, -.5 + i * .4, t, .3)).join('')}</g>`; };   // medidas al lado del cursor, una debajo de otra
   if (tmp && tmp.k == 'line' && tmp.cur && tmp.pts.length) {             // tramo que se está dibujando: la medida va también junto al cursor
-    const b = tmp.cur, txt = tramo(pt(tmp.pts[tmp.pts.length - 1]), b);
-    if (txt) h += `<g transform="translate(${b.x} ${b.y}) scale(${k})" pointer-events="none">${T(1.2, -.5, txt, .3)}</g>`;
+    const b = tmp.cur; junto(b, [tramo(pt(tmp.pts[tmp.pts.length - 1]), b)]);
   }
   const o = !tmp && !multi.length && byId(sel);
   if (o && o.k == 'line' && esVisible(o)) segmentosEnPlanta(o, S.plantaAct).forEach(P => P.slice(1).forEach((b, i) => tramo(P[i], b)));   // línea seleccionada (también mientras se estira): todos sus tramos de esta planta
+  if (o && o.k == 'line' && drag && drag.m == 'h' && drag.o === o && o.pts[+drag.h]) {   // se estira una punta o un vértice: las medidas de sus tramos van también junto al cursor
+    const i = +drag.h, p = pt(o.pts[i]), vec = [o.pts[i - 1], o.pts[i + 1]].filter(q => q && puntoEn(o, q));
+    junto(p, vec.map(q => (texto(pt(q), p) || {}).txt));
+  }
   return h;
 }
