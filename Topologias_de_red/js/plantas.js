@@ -41,7 +41,7 @@ function panel() {                       // dibuja el panel de abajo a la derech
   const nP = S.plantas.length;
   $('#plantas').innerHTML = `<div class="ph"><b>Plantas</b><button data-a="np" title="Añadir una planta">＋ Planta</button></div><div class="hint">Arriba = más alto. Arrastra ⠿ o usa ▲ ▼ para cambiar el orden.</div>` + [...S.plantas].reverse().map(p => {
     const on = p.id == S.plantaAct, ip = S.plantas.indexOf(p);
-    let h = `<div class="pl ${on ? 'on' : ''}" data-row="p" data-id="${p.id}"><span class="gr" data-g="1" title="Arrastra para mover la planta">⠿</span><button class="pn" data-a="sp" data-p="${p.id}">${esc(p.nombre)}</button>` + (on ? `<button data-a="mp" data-d="1" ${ip >= nP - 1 ? 'disabled' : ''} title="Subir planta">▲</button><button data-a="mp" data-d="-1" ${ip <= 0 ? 'disabled' : ''} title="Bajar planta">▼</button><button data-a="cpp" title="Copiar planta (con sus capas y objetos)">⧉</button><button data-a="rp" title="Renombrar planta">✎</button><button data-a="dp" title="Borrar planta">🗑️</button>` : '') + `</div>`;
+    let h = `<div class="pl ${on ? 'on' : ''}" data-row="p" data-id="${p.id}"><span class="gr" data-g="1" title="Arrastra para mover la planta">⠿</span><button class="pn" data-a="sp" data-p="${p.id}">${esc(p.nombre)}</button>` + (on ? `<button data-a="mp" data-d="1" ${ip >= nP - 1 ? 'disabled' : ''} title="Subir planta">▲</button><button data-a="mp" data-d="-1" ${ip <= 0 ? 'disabled' : ''} title="Bajar planta">▼</button><button data-a="cpp" title="Copiar planta (con sus capas y objetos)">⧉</button><button data-a="ap" title="Alto de la planta (de su piso al de la de arriba; se usa para la longitud de los cables)">↕ ${fmt(TR.cab.altoDe(p), 'm')}</button><button data-a="rp" title="Renombrar planta">✎</button><button data-a="dp" title="Borrar planta">🗑️</button>` : '') + `</div>`;
     const nC = p.capas.length;
     if (on) h += `<div class="capas">` + [...p.capas].reverse().map(c => {
       const ic = p.capas.indexOf(c);
@@ -78,7 +78,7 @@ function copiarCapa(p, c) {               // la copia queda justo encima de la o
 function copiarPlanta(p) {                // la copia queda arriba de todas y pasa a ser la planta activa. Si sus escaleras no son compatibles con las de la planta que le queda debajo, se copia sin escaleras
   const antes = conflictosEscaleras(), de = S.objs.filter(o => o.pl == p.id); push();
   const id = 'p' + (++S.pn), cap = new Map(p.capas.map(c => [c.id, 'c' + (++S.cn)]));
-  S.plantas.push({ id, nombre: p.nombre + ' (copia)', ca: cap.get(p.ca) || cap.get(p.capas[0].id), capas: p.capas.map(c => ({ ...c, id: cap.get(c.id) })) });
+  S.plantas.push({ id, nombre: p.nombre + ' (copia)', ca: cap.get(p.ca) || cap.get(p.capas[0].id), capas: p.capas.map(c => ({ ...c, id: cap.get(c.id) })), ...(p.alto ? { alto: p.alto } : {}) });
   let n = duplicarObjs(de, o => ({ pl: id, cp: cap.get(o.cp) })), sinEsc = false;
   if ([...conflictosEscaleras().keys()].some(k => !antes.has(k))) { const m = S.objs.length; S.objs = S.objs.filter(o => !(o.pl == id && esEsc(o))); n -= m - S.objs.length; sinEsc = true; }
   S.plantaAct = id; S.capaAct = S.plantas[S.plantas.length - 1].ca; limpiarSel();
@@ -95,6 +95,7 @@ $('#plantas').onclick = e => {
   else if (a == 'cpp') copiarPlanta(p);
   else if (a == 'cpc') copiarCapa(p, cap(idc));
   else if (a == 'rp') { const n = prompt('Nombre de la planta:', p.nombre); if (n && n.trim() && n.trim() != p.nombre) { push(); p.nombre = n.trim(); } }
+  else if (a == 'ap') { const t = prompt('Alto de la planta en metros (de su piso al de la planta de arriba):', TR.cab.altoDe(p)); if (t == null) return; const v = parseFloat(t.replace(',', '.')); if (!(v >= 1 && v <= 100)) { alert('El alto debe estar entre 1 y 100 m.'); return; } if (v != TR.cab.altoDe(p)) { push(); p.alto = v; } }
   else if (a == 'dp') {
     if (S.plantas.length < 2) { alert('El edificio debe tener al menos una planta.'); return; }
     const k = cuentaEn(p.id), cr = cablesQueCruzan(p.id); if (!confirm(`¿Borrar «${p.nombre}»${k ? ' y sus ' + k + ' objetos' : ''}?` + (cr ? `\n${cr} cable(s) atraviesan esta planta y se borrarán completos, en todas las plantas.` : ''))) return;

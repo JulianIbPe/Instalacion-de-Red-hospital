@@ -66,6 +66,19 @@ const ESQ = (() => {
     }
     return out;
   }
+  const SUBS_PRECIO = [...Object.values(SUB_CABLE), 'parche'], moneda = patron(/^[A-Z]{3}$/, 3);
+  function sanearPresupuesto(c, v) {       // S.presupuesto (F9B): {holgura? (%), conCables? (solo false), cables?: {sub: {precio?, moneda?}}}; 'parche' = patch cords
+    const r = {}; if (!v || typeof v != 'object' || Array.isArray(v)) { aviso(c, 'valores inválidos omitidos'); return r; }
+    if (v.holgura !== undefined) { const h = numero(0, 100)(v.holgura, c); if (h === INV) aviso(c, 'valores inválidos omitidos'); else r.holgura = h; }
+    if (v.conCables === false) r.conCables = false;
+    if (v.cables && typeof v.cables == 'object' && !Array.isArray(v.cables)) for (const k of Object.keys(v.cables)) {
+      const e = v.cables[k], o = {}; if (!SUBS_PRECIO.includes(k) || !e || typeof e != 'object') { aviso(c, 'valores inválidos omitidos'); continue; }
+      if (e.precio !== undefined) { const p = numero(0, 1e12)(e.precio, c); if (p !== INV) o.precio = p; else aviso(c, 'valores inválidos omitidos'); }
+      if (e.moneda !== undefined) { if (moneda(e.moneda) !== INV) o.moneda = e.moneda; else aviso(c, 'valores inválidos omitidos'); }
+      if (Object.keys(o).length) (r.cables || (r.cables = {}))[k] = o;
+    }
+    return r;
+  }
   function sanearVlans(c, v) {             // S.vlans (F7B): {id, nombre, vlan?, subred?, color}
     const vistos = new Set(), out = [];
     for (const x of Array.isArray(v) ? v.slice(0, 500) : [null]) {
@@ -123,13 +136,15 @@ const ESQ = (() => {
       }
       const nombre = texto(LIM.nombre)(p.nombre, c), r = { id: p.id, nombre: nombre === INV ? 'Planta' : nombre };   // mismo orden de campos que el estado original
       if (p.ca !== undefined && idTxt(p.ca) !== INV) r.ca = p.ca;
-      r.capas = capas; out.push(r);
+      r.capas = capas;
+      if (p.alto !== undefined) { const a = numero(1, 100)(p.alto, c); if (a === INV) aviso(c, 'valores inválidos omitidos'); else r.alto = a; }   // F9A: alto de la planta (m); sin el campo = 3 m
+      out.push(r);
     }
     return out;
   }
   function sanearEstado(c, d) {
     if (!d || typeof d != 'object' || Array.isArray(d)) return error(c, 'El archivo no contiene un proyecto');
-    for (const k of Object.keys(d)) if (!['version', 'formato', 'edificio', 'unidad', 'plantas', 'plantaAct', 'capaAct', 'pn', 'cn', 'objs', 'propios', 'conex', 'vlans'].includes(k)) aviso(c, 'campos desconocidos omitidos');
+    for (const k of Object.keys(d)) if (!['version', 'formato', 'edificio', 'unidad', 'plantas', 'plantaAct', 'capaAct', 'pn', 'cn', 'objs', 'propios', 'conex', 'vlans', 'presupuesto'].includes(k)) aviso(c, 'campos desconocidos omitidos');
     if (!Array.isArray(d.objs)) return error(c, 'Falta la lista de objetos («objs»)');
     if (d.objs.length > LIM.objetos) return error(c, `El proyecto tiene ${d.objs.length} objetos; el máximo es ${LIM.objetos}`);
     const r = {};
@@ -154,6 +169,7 @@ const ESQ = (() => {
     if (d.propios !== undefined) { const v = lista(patron(RE_MOD), 0, LIM.modelos)(d.propios, c); if (v === INV) aviso(c, 'valores inválidos omitidos'); else if (v.length) r.propios = [...new Set(v)]; }   // F4A: modelos propios que ofrece el menú
     if (d.conex !== undefined) { const v = sanearConex(c, d.conex); if (v.length) r.conex = v; }   // F7A
     if (d.vlans !== undefined) { const v = sanearVlans(c, d.vlans); if (v.length) r.vlans = v; }   // F7B
+    if (d.presupuesto !== undefined) { const v = sanearPresupuesto(c, d.presupuesto); if (Object.keys(v).length) r.presupuesto = v; }   // F9B
     const vl = new Set((r.vlans || []).map(v => v.id));
     r.objs.forEach(o => {                   // un puerto que apunta a una VLAN que el archivo no trae: se suelta
       if (!o.po) return;

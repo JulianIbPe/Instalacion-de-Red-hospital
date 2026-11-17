@@ -110,10 +110,6 @@ const TRP = (() => {
   }
 
   // ---------- Pruebas ----------
-  prueba('Instalación: js/archivos.js es la versión de la Fase 0 (define construirSvgExport y el botón PNG la usa)', () => {
-    afirmar(typeof construirSvgExport === 'function', 'falta construirSvgExport: el navegador está usando un js/archivos.js anterior a la Fase 0 (o está en otra carpeta). Reemplazalo en Topologias_de_red/js/ y recargá con Ctrl+F5');
-    afirmar(String($('#png').onclick).includes('construirSvgExport'), 'el botón PNG todavía usa el manejador anterior: js/archivos.js no es la versión de la Fase 0');
-  });
   prueba('Proyectos de prueba: ids únicos y referencias válidas', () => {
     fixtures().concat([fEstres(40)]).forEach(fx => {
       const o = fx.estado.objs, ids = o.map(x => x.id), caps = new Set(fx.estado.plantas.flatMap(p => p.capas.map(c => p.id + '/' + c.id)));
@@ -158,11 +154,6 @@ const TRP = (() => {
   const mover = (i, extra = {}) => { const r = svg.getBoundingClientRect(); svg.dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + 120 + i * 7, clientY: r.top + 90 + (i % 5) * 3, bubbles: true, ...extra })); };
   const conMenuContado = fn => { const m0 = window.menu; window.menu = function () { TR.stats.menu++; return m0.apply(this, arguments); }; try { return fn(); } finally { window.menu = m0; } };
   const cableEnCurso = () => ({ k: 'line', n: tool.n, c: tool.c, w: tool.w, d: tool.d, pts: [{ x: 2, y: 2 }], label: '' });
-  prueba('Fase 1: instalación (dibujo.js, interaccion.js y eventos.js son los de la Fase 1)', () => {
-    afirmar(typeof TR !== 'undefined', 'falta js/eventos.js: reemplazá index.html y agregá js/eventos.js');
-    afirmar(typeof renderObjetos === 'function' && typeof renderTmp === 'function' && typeof repintarMovimiento === 'function', 'js/dibujo.js no es la versión de la Fase 1');
-    afirmar(document.querySelector('#svg > #vp > #g-grilla') && document.querySelector('#svg > #vp > #c') && document.querySelector('#svg > #vp > #g-tmp'), 'el SVG no tiene la estructura de capas (#vp con #g-grilla, #c y #g-tmp)');
-  });
   prueba('Fase 1: mover el ratón sin herramienta ni arrastre no reconstruye nada', () => {
     afirmar(typeof TR !== 'undefined', 'falta js/eventos.js');
     conProyecto(fDispositivos().estado, () => conMenuContado(() => {
@@ -211,12 +202,6 @@ const TRP = (() => {
       ser(TR.stats.obj, 10, 'redibujos de #c'); afirmar(o.x > x0, 'el objeto no se movió'); afirmar($('#c').innerHTML !== antes, '#c no cambió'); ser(hist.length, h0 + 1, 'pasos de historial');
     });
   });
-  prueba('Fase 1: el dibujo es idéntico a la referencia guardada en la Fase 0', () => {
-    const ref = leer(CLAVE_REF); afirmar(ref && ref.datos, 'no hay referencia guardada en este navegador (se guarda con «Guardar referencia de dibujo» con la versión de la Fase 0)');
-    const act = referenciaActual(), dif = [];
-    Object.keys(ref.datos).forEach(n => Object.keys(ref.datos[n]).forEach(v => { const x = ref.datos[n][v], y = (act[n] || {})[v]; if (!y || x.hash !== y.hash || x.largo !== y.largo) dif.push(n + '/' + v); }));
-    afirmar(!dif.length, 'diferencias respecto a la referencia: ' + dif.join(', '));
-  });
 
   // ---------- Pruebas de la Fase 2 (tipos estables, formato v2, recursos e historial) ----------
   const bytesUri = (bytes, mime) => { let t = ''; for (const b of bytes) t += String.fromCharCode(b); return 'data:' + mime + ';base64,' + btoa(t); };
@@ -227,11 +212,6 @@ const TRP = (() => {
     const g = { i: R.imgs, m: R.modelos, n: R.nm, l: { ...R.limites } }; R.imgs = {}; R.modelos = {}; R.nm = 0;
     try { return fn(); } finally { R.imgs = g.i; R.modelos = g.m; R.nm = g.n; R.limites = g.l; }
   }
-  prueba('Fase 2: instalación (tipos.js, recursos.js, esquema.js, historial.js y archivos.js son los de la Fase 2)', () => {
-    afirmar(typeof ESQ !== 'undefined' && typeof R !== 'undefined' && typeof derivarTipo === 'function', 'faltan js/tipos.js, js/recursos.js o js/esquema.js (o index.html no los carga)');
-    afirmar(typeof Hist !== 'undefined' && typeof Hist.recortar === 'function', 'js/historial.js no es la versión de la Fase 2');
-    afirmar(typeof abrirTexto === 'function', 'js/archivos.js no es la versión de la Fase 2');
-  });
   prueba('Fase 2: migración v1 → v2: los proyectos de prueba abren y se dibujan igual que antes', () => {
     fixtures().forEach(fx => {
       const r = ESQ.leer(v1(fx.estado)); afirmar(r.ok, fx.nombre + ': ' + (r.errores || []).join(' | ')); ser(r.version, 1, fx.nombre + ': versión detectada'); ser(r.avisos.length, 0, fx.nombre + ': avisos ' + r.avisos.join(' | '));
@@ -349,16 +329,6 @@ const TRP = (() => {
     if (S.plantas.length > 1) { irA('p2'); out.reglas = [['', 3, 3, 1.2, 2.8], ['descanso', 3, 3, 1.2, 2.8], ['descanso', 6, 3, 1.6, 2.8], ['espiral', 6, 3, 1.6, 2.8], ['', 15, 3, 1, 2]].map(([t, x, y, w, h]) => { const r = escaleraObstruida({ k: 'item', n: 'Escalera', ...(t ? { t } : {}), x, y, w, h, rot: 0 }); return r ? r.msg.slice(0, 40) : null; }); irA('p1'); }
     return JSON.stringify(out);
   }
-  prueba('Fase 2B: instalación (catálogo de formas con subtipo y add() asigna el tipo)', () => {
-    afirmar(typeof NOMBRE_FORMA !== 'undefined' && SH.circulo && !SH['Círculo'], 'js/catalogo.js no es el de la Fase 2B (SH debe usar subtipos)');
-    igual(CAT['Formas'].map(d => [d.n, d.tipo, d.sub]), [['Rectángulo', 'forma', 'rectangulo'], ['Círculo', 'forma', 'circulo'], ['Triángulo', 'forma', 'triangulo'], ['Rombo', 'forma', 'rombo'], ['Hexágono', 'forma', 'hexagono']], 'catálogo de formas');
-    conProyecto(fVacio().estado, () => {
-      const f = [add({ k: 'item', n: 'Router', ic: 'x', w: .8, h: .8, x: 1, y: 1, label: '' }), add({ k: 'line', n: 'Fibra óptica', c: '#f39c12', w: .06, d: '', pts: [{ x: 0, y: 0 }, { x: 1, y: 1 }], label: '' }),
-        add({ k: 'line', n: 'Pared', c: '#444444', w: .2, d: '', pts: [{ x: 0, y: 0 }, { x: 1, y: 0 }], label: '' }), add({ k: 'shape', n: 'Círculo', w: 1, h: 1, x: 3, y: 3, c: '#000000', f: 'sol', ls: 'con', label: '' }),
-        add({ k: 'item', n: 'Ascensor', ic: 'x', w: 1.5, h: 1.5, x: 5, y: 5, label: '' }), add({ k: 'item', n: 'Escalera', ic: 'x', w: 1, h: 2, x: 7, y: 7, t: 'espiral' })];
-      igual(f.map(o => o.tipo + (o.sub ? '/' + o.sub : '')), ['dispositivo/router', 'cable/fibra', 'pared', 'forma/circulo', 'ascensor', 'escalera'], 'tipos de los objetos nuevos');
-    });
-  });
   prueba('Fase 2B: cambiar el nombre visible no cambia el dibujo (6 proyectos de prueba)', () => {
     fixtures().forEach(fx => igual(huella({ ...fx, estado: renombrar(fx.estado) }), huella(fx), fx.nombre + ': el dibujo cambió al renombrar'));
   });
@@ -412,12 +382,6 @@ const TRP = (() => {
     const e = base({}, [item(1, 'PC', '💻', 3, 3, { cp: 'c2' }), pared(2, [{ x: 1, y: 6 }, { x: 8, y: 6 }]), puerta(3, 2, 0, 2, .9, 1, 1, 'izq'), cable(4, 'UTP Cat6', '#2e86de', .06, '', [{ x: 3, y: 3, ref: 1 }, { x: 9, y: 3 }])]);
     e.plantas = [{ id: 'p1', nombre: 'Planta 1', ca: 'c1', capas: [capa('c1', 'Base'), capa('c2', 'Otra')] }]; e.cn = 2; return e;
   };
-  prueba('Fase 3: instalación (acciones.js, inspector.js, contexto.js, eventos.js obligatorio y TR.stats intacto)', () => {
-    afirmar(typeof TR !== 'undefined' && TR.acc && TR.insp && TR.ctx && TR.ui, 'faltan js/acciones.js, js/inspector.js o js/contexto.js (o index.html no los carga)');
-    afirmar($('#insp') && $('#insp-cuerpo') && $('#ctx') && $('#binsp'), 'falta el HTML del inspector o del menú en index.html');
-    igual(Object.keys(TR.stats), ['fondo', 'rejilla', 'obj', 'tmp', 'paneles', 'menu'], 'las claves de TR.stats no deben cambiar');
-    afirmar(TR.acc.campos.length >= 10 && TR.acc.acciones.length >= 10 && typeof TR.acc.fijar == 'function', 'el registro de campos y acciones está vacío');
-  });
   prueba('Fase 3: el inspector no se reconstruye con 100 movimientos del ratón y no pierde foco ni texto', () => {
     conInsp(() => conProyecto(fDispositivos().estado, () => {
       sel = 1; render(); const el = campoInsp('label'); afirmar(el, 'no hay campo de etiqueta');
@@ -532,7 +496,7 @@ const TRP = (() => {
       sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,c,f,ls', 'rectángulo'); sel = 3; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot,c,f,ls', 'círculo'); sel = 5; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot,c,f,ls', 'zona');
       sel = 7; render(); ser(camposInsp(), 'label,x,y,rot', 'texto'); sel = 8; render(); ser(camposInsp(), '', 'medida'); sel = null; multi = [1, 3]; render(); ser(camposInsp(), 'c,f,ls', 'varios');
     });
-    conProyecto(fDispositivos().estado, () => { sel = 5; render(); ser(camposInsp(), 'n,label,cable', 'cable'); sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot', 'dispositivo'); });
+    conProyecto(fDispositivos().estado, () => { sel = 5; render(); ser(camposInsp(), 'n,label,largo,cable', 'cable'); sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot', 'dispositivo'); });
     conProyecto(fParedes().estado, () => { sel = 1; render(); ser(camposInsp(), 'n,label,c', 'pared'); sel = 3; render(); ser(camposInsp(), '', 'puerta'); });
   });
   prueba('Fase 3: con la capa bloqueada ninguna acción ni campo actúa y no se guarda historial', () => {

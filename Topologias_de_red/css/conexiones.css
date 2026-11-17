@@ -26,3 +26,21 @@
 #dlg-red .dr-r button:hover{background:#eef2f4}
 #dlg-red .acc{flex-direction:row;justify-content:flex-end}
 #dr-add{margin-right:auto}
+/* F9B: diálogo «Presupuesto» (mismo aspecto que «Redes y VLAN») */
+#dlg-pres{width:min(820px,96vw);max-height:90vh;padding:22px;border:0;border-radius:12px;background:#fff;color:var(--texto);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#dlg-pres::backdrop{background:rgba(20,35,43,.55)}
+#dlg-pres h3{margin:0 0 6px;font-size:18px}
+#dlg-pres h4{margin:14px 0 4px;font-size:14px}
+#dp-c{max-height:68vh;overflow:auto;font-size:13px}
+#dlg-pres .dp-op{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+#dlg-pres table{width:100%;border-collapse:collapse}
+#dlg-pres th{text-align:left;color:#5d7078;font-weight:500;font-size:12px;padding:3px 6px}
+#dlg-pres td{padding:3px 6px;border-top:1px solid var(--borde)}
+#dlg-pres .dp-cat td{background:#eef2f4;font-weight:600}
+#dlg-pres input[type=number]{width:90px;padding:4px 6px;border:1px solid var(--borde);border-radius:6px;font:inherit}
+#dlg-pres select{padding:4px;border:1px solid var(--borde);border-radius:6px;font:inherit}
+#dlg-pres .pend,#dlg-pres .dp-n{color:#b06000;font-style:normal}
+#dlg-pres .dp-t{margin:6px 0 0;text-align:right}
+#dlg-pres .dp-g{margin:14px 0 0;font-size:15px;text-align:right}
+#dlg-pres .acc{flex-direction:row;justify-content:flex-end}
+#dp-csv{margin-right:auto}

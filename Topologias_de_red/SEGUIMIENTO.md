@@ -2,7 +2,7 @@
 
 Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript + SVG, sin servidor ni framework). Se abre `index.html` en el navegador; `index.html?pruebas=1` abre además el panel de pruebas. Los scripts se cargan en el orden de `index.html` y comparten variables globales. Todas las coordenadas del modelo están en **metros**.
 
-> **Última actualización: 17/11/2026** (F8 completa; los cuatro lotes de ajustes de dibujo verificados por el usuario y commiteados; ver sección 0).
+> **Última actualización: 17/11/2026** (F9 completa y verificada por el usuario; ver sección 0).
 > **Regla de mantenimiento:** al terminar una fase, o al avanzar dentro de la fase en curso, se actualiza este documento (qué se hizo, resultados reales de las pruebas, qué falta y cuál es el siguiente paso).
 
 ## 0. Resumen para retomar (leer primero)
@@ -17,20 +17,20 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 - **F8 (racks): completada. F8A (rack, montaje por unidades y vista del rack) verificada el 16/11/2026 y F8B (puertos y patch cords dentro del rack) el 17/11/2026.** Detalle en la sección 5.
 - Revisión thermo de la F8 (A y B) hecha (16/11/2026) y arreglos chicos aplicados; detalle en la sección 5.
 - **Ajustes de dibujo (10 pedidos del usuario, 17/11/2026), en cuatro lotes; no son una fase del plan. Los cuatro lotes (A, B, C y D) están implementados, verificados por el usuario y commiteados (17/11/2026). Sin revisión thermo todavía.** Detalle en la sección 7 («Ajustes de dibujo posteriores a la F8»).
-- Pruebas: 124 de 125 en el navegador integrado (17/11/2026). La única que falla es «el dibujo es idéntico a la referencia», porque la referencia vive en el `localStorage` del navegador del usuario (sección 8).
+- **F9 (longitud de cables y presupuesto): partida en F9A y F9B; diseño aprobado con las opciones recomendadas (17/11/2026). F9A (longitud de cables) y F9B (presupuesto y CSV) completadas y verificadas por el usuario (17/11/2026). Revisión thermo hecha y arreglos chicos aplicados (sección 5).** Detalle en la sección 5.
+- Pruebas: 126 de 126 en el navegador integrado (17/11/2026). A pedido del usuario se quitaron 6 pruebas viejas: las cinco de «instalación» (F0 a F3: comprobaban que se hubieran copiado los archivos de cada fase) y «el dibujo es idéntico a la referencia» (fallaba siempre porque el dibujo cambió a propósito; la comparación sigue disponible con el botón «Comparar con la referencia»).
 
 **Qué hacer al retomar (en este orden):**
 1. Los archivos están en la carpeta del proyecto. No hay acceso al navegador del usuario: nada se da por probado si no lo ejecutó él o no se ejecutó realmente.
 2. Leer las secciones 0, 1, 3, 4, 6 y 8, y de la 5 la fase que toque.
 3. El usuario commitea por su cuenta o lo pide; preguntar antes de commitear.
-4. **No empezar ninguna fase ni lote sin que el usuario diga cuál sigue.** La F5 está postergada. No queda ninguna verificación manual pendiente (los ajustes de dibujo de la sección 7 están cerrados; falta su revisión thermo, que lanza el usuario), cada uno con su confirmación. La siguiente fase del plan es la F9 (longitud de cables y presupuesto): antes de escribir código, presentar el diseño y esperar la orden.
+4. **No empezar ninguna fase ni lote sin que el usuario diga cuál sigue.** La F5 está postergada. No queda ninguna verificación manual pendiente. La siguiente fase del plan es la F10 (cables superpuestos, aislar cable y filtros): antes de escribir código, presentar el diseño y esperar la orden.
 5. Al terminar cada avance: actualizar este documento (qué se hizo, resultados reales separando pruebas simuladas y manuales, qué falta, siguiente paso).
 
 **Pendiente:**
 - La F7B y la F8 están commiteadas en `9ca8a49` y los ajustes de dibujo en el commit siguiente (rama `branch_branch`, 17/11/2026).
-- Los ajustes de dibujo no pasaron por la revisión thermo.
-- El usuario tiene que volver a guardar la referencia de dibujo (cambió el dibujo de las formas sin relleno).
-- **Decidir antes de la F9** (hallazgos thermo de la F8 sin aplicar, sección 5): los tres refactors medianos.
+- Los ajustes de dibujo no pasaron por la revisión thermo. La F9 sí (17/11/2026); falta commitearla.
+- Hallazgos thermo de la F8 sin aplicar (sección 5): el usuario decidió dejarlos (17/11/2026).
 - La regla de mesas superpuestas no pasó por la revisión thermo.
 - Confirmar el tamaño del texto bajo los equipos (0,28 m fijo: queda grande al lado de un equipo de 0,30 m).
 - Verificaciones menores que no bloquean: abrir un `.json` dañado y comprobar que el proyecto no cambia; deshacer justo después de abrir un archivo.
@@ -48,7 +48,8 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | F6 Jerarquía y mesas | Completada y verificada (13/11/2026) |
 | F7 Puertos, conexiones y redes | Completada y verificada (F7A 15/11/2026, F7B 16/11/2026) |
 | F8 Racks | Completada y verificada (F8A 16/11/2026, F8B 17/11/2026) |
-| F9 a F12 | No iniciadas (sección 5) |
+| F9 Longitud de cables y presupuesto | Completada y verificada (17/11/2026) |
+| F10 a F12 | No iniciadas (sección 5) |
 
 ## 2. Archivos del proyecto
 
@@ -92,6 +93,9 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 | `js/pruebas-f6.js` | Solo con `?pruebas=1`, después de `pruebas-f4.js`: pruebas de la Fase 6 |
 | `js/pruebas-f7.js` | Solo con `?pruebas=1`, después de `pruebas-f6.js`: pruebas de la Fase 7 (7A y 7B) |
 | `js/pruebas-f8.js` | Solo con `?pruebas=1`, después de `pruebas-f7.js`: pruebas de la Fase 8 (8A y 8B) |
+| `js/cables.js` | `TR.cab` (F9A): longitud de los cables (`medida`, `instalacion`), largo estimado de un patch cord (`estimada`), alto de planta (`altoDe`, 3 m por omisión) y holgura. Registra el campo de solo lectura «Longitud» y la línea `cab-largo` del menú |
+| `js/presupuesto.js` | `TR.pres` (F9B): `calcular` (cables por tipo, equipos por categoría y modelo, totales por moneda, pendientes), `csv`, `fijarHolgura`, `fijarConCables`, `fijarCable` y el diálogo «Presupuesto» (botón `#bpres`) |
+| `js/pruebas-f9.js` | Solo con `?pruebas=1`, después de `pruebas-ajustes.js`: pruebas de la Fase 9 (9A y 9B) |
 | `js/pruebas-ajustes.js` | Solo con `?pruebas=1`, después de `pruebas-f8.js`: pruebas de los ajustes de dibujo posteriores a la F8 (6 del lote A, 3 del lote B, 3 del lote C y 2 del lote D) |
 
 ## 3. Decisiones
@@ -299,7 +303,29 @@ Plan original de la F8. Archivos: `interaccion.js`, `controles.js`, `index.html`
 7. Dentro de la vista del rack, botón «PNG» que exporta su interior (D20).
 
 ### F9 — Longitud de cables y presupuesto
-Archivos: `escaleras.js`, `plantas.js`, `inspector.js`, `archivos.js`; nuevos `cables.js`, `presupuesto.js`.
+
+**Decisiones del usuario (17/11/2026):** partir en F9A y F9B; holgura única en porcentaje para todo el proyecto (sin holgura por cable); patch cord = distancia en U + 0,5 m; monedas en totales separados, sin tipo de cambio; los refactors thermo de la F8 se dejan.
+
+**F9A — longitud de cables (implementada y verificada por el usuario el 17/11/2026).** Cubre los puntos 1 y 2 del plan de abajo, salvo el total (va en el diálogo de la F9B).
+Archivos: nuevos `js/cables.js` (`TR.cab`: `medida`, `instalacion`, `estimada`, `altoDe`, `holgura`; se carga después de `vistarack.js`) y `js/pruebas-f9.js`; cambios chicos en `plantas.js` (botón «↕» de la planta activa), `esquema.js` (`alto` de la planta), `inspector.js` (campo de solo lectura `t: 'ro'`, un `<output>`), `index.html` y una afirmación de `pruebas.js` (el inspector de un cable ahora muestra «Longitud»).
+- **Alto de planta:** `p.alto` (1 a 100 m; sin el campo = 3 m, así los archivos viejos no cambian). Botón «↕ 3.00 m» en la fila de la planta activa; pide el valor con `prompt()`; un paso de historial. Es la distancia de su piso al de la planta de arriba.
+- **Medida:** suma de los tramos del cable + el alto de las plantas atravesadas (cada punto sabe su planta, D21). **Instalación:** medida × (1 + holgura); la holgura es `S.presupuesto.holgura` (llega con la F9B; hasta entonces 10 %).
+- **Dónde se ve:** campo «Longitud» del inspector («7.00 m (instalación 7.70 m)», se actualiza al estirar el cable) y una línea informativa, desactivada, en el menú contextual del cable. El cable inalámbrico no se mide; el de energía sí.
+- **Patch cord:** `TR.cab.estimada(c)` = distancia entre los centros de las unidades de sus dos equipos × 4,445 cm + 0,5 m. Todavía no se muestra en ningún lado: se usa en el presupuesto de la F9B.
+- **Pruebas automatizadas (navegador integrado, 17/11/2026): 128 de 129** (3 nuevas en `pruebas-f9.js`; falla solo la de la referencia). No se probó: el botón «↕» con un clic real ni `prompt()` real, ver el campo en una captura, Firefox ni Safari.
+
+**F9B — presupuesto y CSV (implementada y verificada por el usuario el 17/11/2026, incluida la apertura del CSV en Excel).** Cubre los puntos 3 a 8 del plan de abajo y el total de cables del punto 1.
+Archivos: nuevo `js/presupuesto.js` (`TR.pres`; se carga después de `imagenes.js`); cambios en `esquema.js` (`S.presupuesto`), `modelos.js` (exporta `MONEDAS`), `index.html` (botón «💲 Presupuesto»), `css/conexiones.css` y `pruebas-f9.js`.
+- **Datos:** `S.presupuesto = {holgura?, conCables?, cables?: {sub: {precio?, moneda?}}}` (sub = tipo de cable, o `parche` para los patch cords). Entra en el historial: cada cambio es un paso. Sin el campo = holgura 10 %, cables incluidos, sin precios. El escritor deja los campos en el orden de `esquema.js`.
+- **Diálogo «Presupuesto»** (botón de la barra): holgura (%), casilla «Incluir los cables en el total general»; **Cables**: por tipo, cantidad, medida, instalación, precio por metro y moneda (editables) y subtotal (instalación × precio); los patch cords van en un renglón «Patch cord (estimada)» sin holgura; **Equipos**: agrupados por categoría (con subtotal por moneda) y por modelo, con cantidad, precio unitario y moneda editables (se escriben en el modelo, como en el inspector: no son pasos de historial) y subtotal; los equipos sin modelo se agrupan por nombre («sin modelo»). Totales de cables, de equipos y general, **uno por moneda** (nunca se suman entre sí). Sin precio = «pendiente de cotización» y no suma; al pie dice cuántos renglones faltan.
+- **Qué cuenta:** dispositivos y racks de `S.objs`, de todo el proyecto (plantas y capas ocultas incluidas, D10). Un equipo en un rack o una mesa es el mismo objeto: se cuenta una vez. El cable inalámbrico no cuenta.
+- **CSV** («Exportar CSV», `presupuesto.csv`): BOM UTF-8, separador `;`, coma decimal, números sin comillas ni separador de miles. Columnas: Sección; Categoría; Concepto; Cantidad; Unidad; Precio unitario; Moneda; Subtotal; Estado. Renglones de cables, equipos, subtotales por categoría y totales por moneda.
+- **Revisión thermo de la F9 (17/11/2026), aplicados:** el CSV antepone `'` a los textos que empiezan con `=`, `+`, `-` o `@` (no se ejecutan como fórmula en Excel); un tipo de cable desconocido (archivo viejo, `sub` fuera de `SUB_CABLE`) se lista pero no lleva precio («tipo desconocido»: no se podría guardar); «Copiar planta» conserva el alto; un precio o una moneda dañados en `S.presupuesto` avisan al abrir; los equipos sin nombre ni modelo no rompen el diálogo («Sin nombre»); una sola constante `TR.cab.HOLGURA`; editar el precio de un modelo desde el diálogo actualiza el inspector (`TR.insp.reconstruir`). Una prueba más (126 en total). **No aplicados (decisión del usuario):** que el presupuesto y el alto usen el validador de `esquema.js` en lugar de repetir los rangos; armazón CSS común de los diálogos; un solo selector de moneda (`selMoneda`) en lugar de exportar `MONEDAS`; partir la prueba larga del presupuesto; sacar la línea informativa `cab-largo` del menú. **Decisiones anotadas:** un cable por escalera suma el largo en planta más el alto (no la diagonal: sobreestima, lo seguro para presupuestar); el inspector muestra «7.00 m» (punto, como toda la app) y el diálogo de presupuesto usa coma; los equipos viejos sin modelo se agrupan por su nombre visible.
+- **Fuera de la F9B:** tipo de cambio entre monedas; holgura por cable; precio por equipo (es del modelo, D17); PDF y XLSX (F12).
+- **Límites conocidos:** el precio de un modelo editado desde el diálogo no se deshace con Ctrl+Z (igual que en el inspector); un precio sin moneda suma en un total «sin moneda»; las monedas ofrecidas son ARS, USD y EUR.
+- **Pruebas automatizadas (navegador integrado, 17/11/2026): 125 de 125** (2 nuevas en `pruebas-f9.js`). Se vio en captura el diálogo abierto con un proyecto vacío. No se probó: el diálogo con datos en una captura, la descarga real del CSV ni su apertura en Excel, Firefox ni Safari.
+
+Plan original. Archivos: `escaleras.js`, `plantas.js`, `inspector.js`, `archivos.js`; nuevos `cables.js`, `presupuesto.js`.
 1. Longitud = horizontal de todas las rutas + vertical por altura de las plantas atravesadas + holgura; prueba con cifras conocidas; se muestra por cable (también en su menú contextual) y en total.
 2. Se distingue la longitud medida de la estimación de instalación; los cables sin ruta aparecen como «estimada».
 3. Precio por metro de cada tipo de cable; opción de incluir el costo de cable en el presupuesto general o mostrar solo metros y costo.
@@ -394,7 +420,7 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 
 ## 8. Mapa técnico para retomar
 
-**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `iconos` → `catalogo-pt` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `jerarquia` → `conexiones` → `redes` → `rack` → `vistarack` → `inspector` → `modelos` → `imagenes` → `contexto` → `archivos` → `main` (siempre el último). Con `?pruebas=1` se cargan además `pruebas` → `pruebas-f4` → `pruebas-f6` → `pruebas-f7` → `pruebas-f8`.
+**Orden de carga de scripts (`index.html`; comparten variables globales, no cambiarlo sin necesidad):** `estado` → `eventos` (define `TR`) → `tipos` → `recursos` → `esquema` → `iconos` → `catalogo-pt` → `catalogo` → `dibujo` → `reglas` → `rejilla` → `plantas` → `historial` → `iman` → `nodos` → `medidas` → `escaleras` → `trazas` → `formas` → `puertas` → `rotacion` → `seleccion` → `colocar` → `interaccion` → `controles` → `acciones` → `jerarquia` → `conexiones` → `redes` → `rack` → `vistarack` → `cables` → `inspector` → `modelos` → `imagenes` → `presupuesto` → `contexto` → `archivos` → `main` (siempre el último). Con `?pruebas=1` se cargan además `pruebas` → `pruebas-f4` → `pruebas-f6` → `pruebas-f7` → `pruebas-f8` → `pruebas-ajustes` → `pruebas-f9`.
 
 **Estado global (`estado.js`):** `S` (proyecto; entra al historial), `V` (vista: `ox`, `oy`, `z` px/m), `sel`, `multi`, `selEdge`, `tool`, `tmp`, `drag`, `nid`, `curP`. `R` (recursos, `recursos.js`) está fuera de `S`. Namespace `TR` (`eventos.js`). El código nuevo usa `TR`: las letras `I`, `L`, `T`, `S`, `V` ya están ocupadas.
 
@@ -411,8 +437,8 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 - Doble clic sobre un rack: abre su vista (no pide etiqueta).
 - El doble clic se detecta a mano (la página se redibuja en cada clic y el `dblclick` nativo se pierde).
 
-**Pruebas (`?pruebas=1`, botón «Ejecutar pruebas»):** 126 casos (14 de los ajustes de dibujo en `js/pruebas-ajustes.js`; 6 de la F8A, 2 de la F8B y 1 de la revisión thermo en `js/pruebas-f8.js`, con `rack`, `en`, `clicObj`, `f8`, `poner` y `clicP`; 63 de F0 a F3 y sus ajustes en `js/pruebas.js`; 8 de la F4A y 6 de la F4B en `js/pruebas-f4.js`; 8 de la F6 en `js/pruebas-f6.js`, con sus proyectos `mesa`/`pc` y `arrastrarObj`; 9 de la F7A y 9 de la F7B en `js/pruebas-f7.js`, con `f7`, `poner`, `cablear`, `elegirP`, `cambiar`, `enlazar` y `redes`). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar; las de la F4 usan `f4(fn)` (recursos vacíos, proyecto vacío y menú en «Dispositivos»). Para pruebas nuevas: archivo propio por fase, las utilidades de `TRP.util`, y no dejar pasos en el historial del usuario.
-- **Aviso importante:** la prueba «el dibujo es idéntico a la referencia» usa una referencia guardada en el `localStorage` del navegador (clave `topologias_ref_f0`). En otro navegador, otra cuenta o tras limpiar datos no existe y esa prueba falla por eso, no por un error del código. Se genera con «Guardar referencia de dibujo» usando una versión del código cuyo dibujo se considere correcto. No sobrescribir la del usuario sin avisarle.
+**Pruebas (`?pruebas=1`, botón «Ejecutar pruebas»):** 125 casos (3 de la F9A y 2 de la F9B en `js/pruebas-f9.js`; 14 de los ajustes de dibujo en `js/pruebas-ajustes.js`; 6 de la F8A, 2 de la F8B y 1 de la revisión thermo en `js/pruebas-f8.js`, con `rack`, `en`, `clicObj`, `f8`, `poner` y `clicP`; 57 de F0 a F3 y sus ajustes en `js/pruebas.js`; 8 de la F4A y 6 de la F4B en `js/pruebas-f4.js`; 8 de la F6 en `js/pruebas-f6.js`, con sus proyectos `mesa`/`pc` y `arrastrarObj`; 9 de la F7A y 9 de la F7B en `js/pruebas-f7.js`, con `f7`, `poner`, `cablear`, `elegirP`, `cambiar`, `enlazar` y `redes`). Usan proyectos de prueba (`fVacio`, `fDispositivos`, `fParedes`, `fFormas`, `fEscaleras`, `fCapas`, `fCruce`, `fDup`, estrés) con `conProyecto(...)`, que restaura el estado de la página al terminar; las de la F4 usan `f4(fn)` (recursos vacíos, proyecto vacío y menú en «Dispositivos»). Para pruebas nuevas: archivo propio por fase, las utilidades de `TRP.util`, y no dejar pasos en el historial del usuario.
+- **Referencia de dibujo:** ya no hay prueba automática (se quitó el 17/11/2026). Los botones «Guardar referencia de dibujo» y «Comparar con la referencia» siguen: la referencia vive en el `localStorage` del navegador (clave `topologias_ref_f0`). No sobrescribir la del usuario sin avisarle.
 - «Medir rendimiento» compara contra una base de la F0 (render ~50 ms, mover sin arrastrar ~44 ms con 3000 objetos). Última medición del usuario (01/11/2026): render 50,6 ms y mover sin arrastrar 0 ms.
 
 ## 9. Registro de cambios
@@ -444,4 +470,8 @@ Detección de habitaciones cerradas y relleno de recintos con un clic, historial
 - 17/11/2026: lote B implementado (Mayús para tramos rectos, formas cuadradas y proporción); 3 pruebas nuevas (120 en total). El usuario probó la capa bloqueada seleccionable y la descartó: nada de una capa bloqueada se selecciona (se quitó ese código y se corrigió que formas y líneas bloqueadas recibían clics). A su pedido, las formas sin relleno ya no se seleccionan con un clic adentro. El usuario verificó el lote B.
 - 17/11/2026: lote C implementado (las formas son un macro que tira un tramo por lado con la línea de «Dibujar con»; el círculo sigue siendo un objeto, sin relleno); 2 pruebas nuevas (122 en total). A pedido del usuario se quitó el desplegable «Dibujar con»: los lados usan el tipo de «Línea» del menú (pared de verdad con «Gruesa», y el tipo nuevo `linea` con los demás), y Color / Relleno / Línea solo se muestran cuando sirven; una prueba más (123 en total). El usuario verificó el lote C.
 - 17/11/2026: lote D implementado (copiar capas y plantas con «⧉»; la capa no copia escaleras ni mesas, y la planta se copia sin escaleras si chocan con las de abajo); 2 pruebas nuevas (125 en total). El usuario verificó el lote D y pidió commitear los cuatro lotes.
+- 17/11/2026: el usuario pidió seguir con la F9. Diseño presentado (F9A longitud de cables, F9B presupuesto y CSV) y aprobado con las opciones recomendadas. F9A implementada (alto de planta, longitud medida e instalación, estimación del patch cord); 3 pruebas nuevas (129 en total).
+- 17/11/2026: el usuario corrió las pruebas (128 de 129, falla solo la referencia) y pidió quitar las pruebas viejas y seguir. Se quitaron 6 (instalación de F0 a F3 y la referencia de dibujo). F9B implementada (diálogo «Presupuesto», totales por moneda, CSV); 2 pruebas nuevas (125 en total, todas pasan). Pendiente la verificación manual de la F9A y la F9B.
 - 18/11/2026: a pedido del usuario, al estirar una pared (o cualquier línea) las medidas de los tramos que toca la punta aparecen también junto al cursor; 1 prueba nueva (126 en total). Con el panel del navegador oculto fallan 22 pruebas que hacen clic, igual que sin el cambio; la nueva pasa. Pendiente la verificación manual.
+- 17/11/2026: el usuario verificó la F9A y la F9B (todas las comprobaciones manuales; se quitaron del documento). F9 completa.
+- 17/11/2026: revisión thermo de la F9 (dos pasadas): sin hallazgos críticos. El usuario eligió aplicar los 7 arreglos chicos (fórmulas en el CSV, precio de tipos desconocidos, alto al copiar planta, avisos, equipos sin nombre, constante de holgura, inspector al cambiar un precio); una prueba nueva (126 en total, todas pasan). Los refactors quedan sin aplicar.

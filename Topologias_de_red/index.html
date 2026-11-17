@@ -22,7 +22,7 @@
   <div class="grp"><label>Edificio <input id="bw" type="number" value="20" min="1" step="0.5"> × <input id="bh" type="number" value="12" min="1" step="0.5"> m</label><button id="bset">Aplicar</button></div>
   <div class="grp"><button id="bsel" title="Seleccionar y mover objetos (Esc)">🖱️ Seleccionar</button><button id="bmed" title="Medir de un punto a otro">📏 Medir</button><button id="bgrid" class="on" title="Mostrar u ocultar la grilla y ajustar los objetos a ella (G)">▦ Grilla</button><select id="gpaso" title="Paso de la grilla: a cuánto se ajusta lo que se coloca o se mueve (Auto = según el zoom)"><option value="0">Auto</option><option value="1">1 m</option><option value=".5">50 cm</option><option value=".25">25 cm</option><option value=".1">10 cm</option><option value=".05">5 cm</option><option value=".01">1 cm</option></select><button id="bmid" title="Imán al punto medio: el cursor se pega a la mitad de líneas, paredes y lados de formas (tecla M)">◇ Medio</button><button id="unit" title="Unidad de las PRÓXIMAS mediciones (las ya hechas no cambian)">Medir en: m</button></div>
   <div class="grp"><button id="bundo" title="Deshacer (Ctrl+Z)">↶</button><button id="bredo" title="Rehacer (Ctrl+Y)">↷</button><button id="bdel" title="Borrar el objeto seleccionado (Supr)">🗑️ Borrar</button></div>
-  <div class="grp"><button id="bredes" title="Redes (se crean solas) y VLAN del proyecto">🧩 Redes</button><button id="betq" aria-pressed="false" title="Mostrar u ocultar las etiquetas físicas de los puertos (salen en el PNG)">🏷️ Etiquetas</button></div>
+  <div class="grp"><button id="bredes" title="Redes (se crean solas) y VLAN del proyecto">🧩 Redes</button><button id="bpres" title="Presupuesto: equipos y cables, con exportación a CSV">💲 Presupuesto</button><button id="betq" aria-pressed="false" title="Mostrar u ocultar las etiquetas físicas de los puertos (salen en el PNG)">🏷️ Etiquetas</button></div>
   <span class="sp"></span>
   <div class="grp last"><button id="binsp" class="on" aria-pressed="true" title="Mostrar u ocultar el panel de propiedades">⚙️</button><button id="bnew" title="Empezar un archivo nuevo">📄 Nuevo</button><button id="save" class="prim" title="Descargar la topología como archivo .json">💾 Guardar</button><button id="load" title="Abrir un archivo .json guardado">📂 Abrir</button><button id="png" title="Exportar la topología como imagen PNG">🖼️ PNG</button></div>
   <input type="file" id="file" accept=".json" hidden>
@@ -95,9 +95,11 @@
 <script src="js/redes.js"></script>
 <script src="js/rack.js"></script>
 <script src="js/vistarack.js"></script>
+<script src="js/cables.js"></script>
 <script src="js/inspector.js"></script>
 <script src="js/modelos.js"></script>
 <script src="js/imagenes.js"></script>
+<script src="js/presupuesto.js"></script>
 <script src="js/contexto.js"></script>
 <script src="js/archivos.js"></script>
 <script src="js/main.js"></script>
@@ -107,7 +109,7 @@ if (typeof menu !== 'function') document.body.innerHTML = '<div style="padding:3
 </script>
 <script>
 // Pruebas de desarrollo: solo se cargan al abrir index.html?pruebas=1 (no afectan al uso normal)
-if (/[?&]pruebas(=|&|$)/.test(location.search) && typeof menu === 'function') ['js/pruebas.js', 'js/pruebas-f4.js', 'js/pruebas-f6.js', 'js/pruebas-f7.js', 'js/pruebas-f8.js', 'js/pruebas-ajustes.js'].forEach(src => { const s = document.createElement('script'); s.src = src; s.async = false; document.body.appendChild(s); });   // async = false: se ejecutan en este orden
+if (/[?&]pruebas(=|&|$)/.test(location.search) && typeof menu === 'function') ['js/pruebas.js', 'js/pruebas-f4.js', 'js/pruebas-f6.js', 'js/pruebas-f7.js', 'js/pruebas-f8.js', 'js/pruebas-ajustes.js', 'js/pruebas-f9.js'].forEach(src => { const s = document.createElement('script'); s.src = src; s.async = false; document.body.appendChild(s); });   // async = false: se ejecutan en este orden
 </script>
 </body>
 </html>

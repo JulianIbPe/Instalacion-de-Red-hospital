@@ -126,5 +126,5 @@ TR.mod = (() => {
   cuerpo.addEventListener('input', e => { const el = e.target.closest('[data-mod]'); if (el) fijarDato(el.dataset.mid, el.dataset.mod, el.value); });   // con 'input' no se pierde lo escrito si el plano cambia la selección antes de salir del campo
   cuerpo.addEventListener('click', e => { const b = e.target.closest('[data-mod-ed]'); if (b) abrir(null, b.dataset.modEd); });
 
-  return { equipo, abrir, cerrar, abierto: () => dlgM.open, guardar, borrarModelo, seccion, fijarDato, esPropio };
+  return { MONEDAS, equipo, abrir, cerrar, abierto: () => dlgM.open, guardar, borrarModelo, seccion, fijarDato, esPropio };
 })();

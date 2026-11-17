@@ -25,6 +25,7 @@ TR.insp = (() => {
     const ctl = def.t == 'texto' ? `<input type="text" ${a} maxlength="${def.max}" autocomplete="off">`
       : def.t == 'num' ? `<input type="number" ${a} step="0.05">`
       : def.t == 'color' ? `<input type="color" ${a}>`
+      : def.t == 'ro' ? `<output ${a}></output>`                         // F9A: solo lectura (p. ej. la longitud de un cable)
       : `<select ${a}>${def.opc.map(([v, n]) => `<option value="${v}">${esc(n)}</option>`).join('')}</select>`;
     return `<label class="fila"><span>${esc(et)}</span>${ctl}</label>`;
   }
@@ -94,5 +95,5 @@ TR.insp = (() => {
   }, true);
   btn.onclick = alternar; $('#insp-x').onclick = alternar;
   aplicarVisible(false);
-  return { refrescar, abrir, alternar, enfocar, commit, visible: () => visible, ids: () => ids.slice() };
+  return { refrescar, reconstruir: () => { firma = null; refrescar(); }, abrir, alternar, enfocar, commit, visible: () => visible, ids: () => ids.slice() };
 })();
