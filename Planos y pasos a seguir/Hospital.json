@@ -41,13 +41,13 @@
       "id": "c17",
       "nombre": "Canalizacion metalica",
       "visible": true,
-      "bloqueada": false
+      "bloqueada": true
      },
      {
       "id": "c11",
       "nombre": "Dispositivos",
       "visible": true,
-      "bloqueada": false
+      "bloqueada": true
      }
     ]
    },
@@ -84,19 +84,19 @@
       "id": "c15",
       "nombre": "Canalizacion metalica",
       "visible": true,
-      "bloqueada": false
+      "bloqueada": true
      },
      {
       "id": "c10",
       "nombre": "Dispositivos",
       "visible": true,
-      "bloqueada": false
+      "bloqueada": true
      }
     ]
    }
   ],
-  "plantaAct": "p5",
-  "capaAct": "c10",
+  "plantaAct": "p1",
+  "capaAct": "c11",
   "pn": 5,
   "cn": 17,
   "objs": [
@@ -6597,7 +6597,7 @@
      },
      {
       "x": 9,
-      "y": 5.2
+      "y": 4.7
      },
      {
       "x": 9.5,
@@ -9846,6 +9846,7 @@
     "sub": "energia"
    },
    {
+    "id": 722,
     "k": "line",
     "n": "Cable de energía",
     "c": "#e74c3c",
@@ -9878,11 +9879,11 @@
     "label": "",
     "pl": "p1",
     "cp": "c8",
-    "id": 722,
     "tipo": "cable",
     "sub": "energia"
    },
    {
+    "id": 723,
     "k": "line",
     "n": "Cable de energía",
     "c": "#e74c3c",
@@ -9919,11 +9920,11 @@
     "label": "",
     "pl": "p1",
     "cp": "c8",
-    "id": 723,
     "tipo": "cable",
     "sub": "energia"
    },
    {
+    "id": 724,
     "k": "line",
     "n": "Cable de energía",
     "c": "#e74c3c",
@@ -9960,11 +9961,11 @@
     "label": "",
     "pl": "p1",
     "cp": "c8",
-    "id": 724,
     "tipo": "cable",
     "sub": "energia"
    },
    {
+    "id": 725,
     "k": "item",
     "n": "Tablero",
     "ic": "⚡",
@@ -9973,13 +9974,13 @@
     "x": 16.62,
     "y": 22.44,
     "label": "",
-    "id": 725,
     "pl": "p1",
     "cp": "c8",
     "tipo": "dispositivo",
     "sub": "tablero"
    },
    {
+    "id": 732,
     "k": "line",
     "n": "Cable de energía",
     "c": "#e74c3c",
@@ -10001,11 +10002,11 @@
     "label": "",
     "pl": "p1",
     "cp": "c8",
-    "id": 732,
     "tipo": "cable",
     "sub": "energia"
    },
    {
+    "id": 733,
     "k": "item",
     "n": "Escalera",
     "tipo": "escalera",
@@ -10016,13 +10017,13 @@
     "label": "",
     "c": "#444444",
     "t": "mv",
-    "id": 733,
     "x": 19,
     "y": 21,
     "pl": "p1",
     "cp": "c8"
    },
    {
+    "id": 734,
     "k": "line",
     "n": "Canalización metálica",
     "c": "#7f8c8d",
@@ -10043,10 +10044,10 @@
     "label": "",
     "pl": "p5",
     "cp": "c15",
-    "id": 734,
     "tipo": "canal"
    },
    {
+    "id": 742,
     "k": "line",
     "n": "STP Cat6A (blindado)",
     "c": "#1e3799",
@@ -10123,11 +10124,11 @@
     "label": "",
     "pl": "p1",
     "cp": "c11",
-    "id": 742,
     "tipo": "cable",
     "sub": "stp6a"
    },
    {
+    "id": 743,
     "k": "line",
     "n": "STP Cat6A (blindado)",
     "c": "#1e3799",
@@ -10204,11 +10205,11 @@
     "label": "",
     "pl": "p1",
     "cp": "c11",
-    "id": 743,
     "tipo": "cable",
     "sub": "stp6a"
    },
    {
+    "id": 744,
     "k": "line",
     "n": "Canalización metálica",
     "c": "#7f8c8d",
@@ -10227,10 +10228,10 @@
     "label": "",
     "pl": "p1",
     "cp": "c17",
-    "id": 744,
     "tipo": "canal"
    },
    {
+    "id": 746,
     "k": "item",
     "n": "Escalera",
     "tipo": "escalera",
@@ -10241,13 +10242,13 @@
     "label": "",
     "c": "#444444",
     "t": "mv",
-    "id": 746,
     "x": 3.5,
     "y": 13.75,
     "pl": "p1",
     "cp": "c8"
    },
    {
+    "id": 747,
     "k": "line",
     "n": "Canalización metálica",
     "c": "#7f8c8d",
@@ -10268,10 +10269,10 @@
     "label": "",
     "pl": "p1",
     "cp": "c17",
-    "id": 747,
     "tipo": "canal"
    },
    {
+    "id": 749,
     "k": "line",
     "n": "Canalización metálica",
     "c": "#7f8c8d",
@@ -10290,93 +10291,93 @@
     "label": "",
     "pl": "p5",
     "cp": "c15",
-    "id": 749,
     "tipo": "canal"
    },
    {
-    "k": "line",
-    "n": "UTP Cat6",
-    "c": "#2e86de",
-    "w": 0.06,
-    "d": "",
-    "pts": [
-     {
-      "x": 4.9,
-      "y": 29,
-      "ref": 405
-     },
-     {
-      "x": 4.9,
-      "y": 20
-     },
-     {
-      "x": 2.5,
-      "y": 20
-     },
-     {
-      "x": 2.5,
-      "y": 13.75
-     },
-     {
-      "x": 3.75,
-      "y": 13.71,
-      "pl": "p5",
-      "cp": "c10",
-      "es": 746,
-      "ed": -1
-     },
-     {
-      "x": 3.5,
-      "y": 13.71,
-      "pl": "p5",
-      "cp": "c10",
-      "es": 746,
-      "ed": -1
-     },
-     {
-      "x": 3.5,
-      "y": 13.71,
-      "pl": "p1",
-      "cp": "c11",
-      "es": 746,
-      "ed": -1
-     },
-     {
-      "x": 3.25,
-      "y": 13.71,
-      "pl": "p1",
-      "cp": "c11",
-      "es": 746,
-      "ed": -1
-     },
-     {
-      "x": 2.5,
-      "y": 13.71,
-      "pl": "p1",
-      "cp": "c11"
-     },
-     {
-      "x": 2.5,
-      "y": 3.5,
-      "pl": "p1",
-      "cp": "c11"
-     },
-     {
-      "x": 2.5,
-      "y": 3.5,
-      "ref": 624,
-      "pl": "p1",
-      "cp": "c11"
-     }
-    ],
-    "label": "",
-    "pl": "p5",
-    "cp": "c10",
     "id": 754,
+    "k": "line",
+    "n": "UTP Cat6",
+    "c": "#2e86de",
+    "w": 0.06,
+    "d": "",
+    "pts": [
+     {
+      "x": 4.9,
+      "y": 29,
+      "ref": 405
+     },
+     {
+      "x": 4.9,
+      "y": 20
+     },
+     {
+      "x": 2.5,
+      "y": 20
+     },
+     {
+      "x": 2.5,
+      "y": 13.75
+     },
+     {
+      "x": 3.75,
+      "y": 13.71,
+      "pl": "p5",
+      "cp": "c10",
+      "es": 746,
+      "ed": -1
+     },
+     {
+      "x": 3.5,
+      "y": 13.71,
+      "pl": "p5",
+      "cp": "c10",
+      "es": 746,
+      "ed": -1
+     },
+     {
+      "x": 3.5,
+      "y": 13.71,
+      "pl": "p1",
+      "cp": "c11",
+      "es": 746,
+      "ed": -1
+     },
+     {
+      "x": 3.25,
+      "y": 13.71,
+      "pl": "p1",
+      "cp": "c11",
+      "es": 746,
+      "ed": -1
+     },
+     {
+      "x": 2.5,
+      "y": 13.71,
+      "pl": "p1",
+      "cp": "c11"
+     },
+     {
+      "x": 2.5,
+      "y": 3.5,
+      "pl": "p1",
+      "cp": "c11"
+     },
+     {
+      "x": 2.5,
+      "y": 3.5,
+      "ref": 624,
+      "pl": "p1",
+      "cp": "c11"
+     }
+    ],
+    "label": "",
+    "pl": "p5",
+    "cp": "c10",
     "tipo": "cable",
     "sub": "utp6"
    },
    {
+    "id": 755,
     "k": "line",
     "n": "UTP Cat6",
     "c": "#2e86de",
@@ -10449,11 +10450,11 @@
     "label": "",
     "pl": "p5",
     "cp": "c10",
-    "id": 755,
     "tipo": "cable",
     "sub": "utp6"
    },
    {
+    "id": 756,
     "k": "line",
     "n": "UTP Cat6",
     "c": "#2e86de",
@@ -10526,11 +10527,11 @@
     "label": "",
     "pl": "p5",
     "cp": "c10",
-    "id": 756,
     "tipo": "cable",
     "sub": "utp6"
    },
    {
+    "id": 757,
     "k": "line",
     "n": "UTP Cat6",
     "c": "#2e86de",
@@ -10603,7 +10604,6 @@
     "label": "",
     "pl": "p5",
     "cp": "c10",
-    "id": 757,
     "tipo": "cable",
     "sub": "utp6"
    }
