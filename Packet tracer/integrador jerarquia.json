@@ -1,6 +1,6 @@
 {
   "v": 4,
-  "savedAt": 1793818437144,
+  "savedAt": 1794977560517,
   "title": "Integrador jerarquia",
   "devices": [
     {
@@ -50,7 +50,7 @@
         },
         {
           "ip": "136.24.4.73",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -2434,7 +2434,7 @@
         },
         {
           "ip": "136.24.4.50",
-          "mask": "29",
+          "mask": "255.255.255.248",
           "desc": "",
           "active": true,
           "mode": "",
@@ -2470,7 +2470,7 @@
         },
         {
           "ip": "136.24.4.58",
-          "mask": "29",
+          "mask": "255.255.255.248",
           "desc": "",
           "active": true,
           "mode": "",
@@ -2959,7 +2959,7 @@
         },
         {
           "ip": "136.24.4.78",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -3520,7 +3520,7 @@
         },
         {
           "ip": "136.24.4.97",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -4735,7 +4735,7 @@
         },
         {
           "ip": "136.24.4.93",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -6094,7 +6094,7 @@
         },
         {
           "ip": "136.24.4.105",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -6130,7 +6130,7 @@
         },
         {
           "ip": "136.24.4.109",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -7129,7 +7129,7 @@
       "ifaces": [
         {
           "ip": "136.24.4.102",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -7309,7 +7309,7 @@
         },
         {
           "ip": "136.24.4.117",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -9570,7 +9570,7 @@
       "ifaces": [
         {
           "ip": "136.24.4.126",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -9606,7 +9606,7 @@
         },
         {
           "ip": "136.24.4.133",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -9678,7 +9678,7 @@
         },
         {
           "ip": "136.24.4.53",
-          "mask": "29",
+          "mask": "255.255.255.248",
           "desc": "",
           "active": true,
           "mode": "",
@@ -10785,7 +10785,7 @@
       "ifaces": [
         {
           "ip": "136.24.4.125",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -10821,7 +10821,7 @@
         },
         {
           "ip": "136.24.4.129",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -10893,7 +10893,7 @@
         },
         {
           "ip": "136.24.4.62",
-          "mask": "29",
+          "mask": "255.255.255.248",
           "desc": "",
           "active": true,
           "mode": "",
@@ -12000,7 +12000,7 @@
       "ifaces": [
         {
           "ip": "136.24.4.137",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -12036,7 +12036,7 @@
         },
         {
           "ip": "136.24.4.130",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -12180,7 +12180,7 @@
         },
         {
           "ip": "136.24.4.141",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -13215,7 +13215,7 @@
       "ifaces": [
         {
           "ip": "136.24.4.138",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -13251,7 +13251,7 @@
         },
         {
           "ip": "136.24.4.134",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -13395,7 +13395,7 @@
         },
         {
           "ip": "136.24.4.153",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -13431,7 +13431,7 @@
         },
         {
           "ip": "136.24.4.149",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -15692,7 +15692,7 @@
         },
         {
           "ip": "136.24.4.106",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -16059,7 +16059,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "n1c1p53",
           "encap": "10",
           "media": "virtual",
@@ -16095,7 +16095,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "1mrvyku",
           "encap": "40",
           "media": "virtual",
@@ -16131,7 +16131,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "1mrvyku",
           "encap": "50",
           "media": "virtual",
@@ -16167,7 +16167,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "ll4u5qm",
           "encap": "60",
           "media": "virtual",
@@ -16196,14 +16196,14 @@
         },
         {
           "ip": "136.24.4.162",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "ll4u5qm",
           "encap": "110",
           "media": "virtual",
@@ -16518,7 +16518,7 @@
         },
         {
           "ip": "136.24.4.118",
-          "mask": "30",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -18543,8 +18543,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "40",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -18579,8 +18579,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "40",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -18615,8 +18615,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "40",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -18651,8 +18651,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "50",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -18687,8 +18687,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "50",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -18723,8 +18723,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "50",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -18759,8 +18759,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "50",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -19484,8 +19484,8 @@
       "kind": "pc",
       "role": "",
       "name": "PC1",
-      "x": 160,
-      "y": 1080,
+      "x": 140,
+      "y": 1060,
       "ifaces": [
         {
           "ip": "",
@@ -19563,7 +19563,7 @@
       "gw": "",
       "dns": "",
       "notes": "",
-      "dhcp": false,
+      "dhcp": true,
       "ospf": {
         "on": false,
         "pid": "1",
@@ -19666,7 +19666,7 @@
       "kind": "pc",
       "role": "",
       "name": "PC2",
-      "x": 0,
+      "x": 30,
       "y": 1080,
       "ifaces": [
         {
@@ -19853,7 +19853,7 @@
       "ifaces": [
         {
           "ip": "",
-          "mask": "",
+          "mask": "255.255.254.0",
           "desc": "",
           "active": true,
           "mode": "",
@@ -19998,8 +19998,8 @@
       "y": 1080,
       "ifaces": [
         {
-          "ip": "",
-          "mask": "",
+          "ip": "136.24.4.162",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -20070,8 +20070,8 @@
           "id": "gt8r3md"
         }
       ],
-      "gw": "",
-      "dns": "",
+      "gw": "136.24.4.161",
+      "dns": "136.24.4.6",
       "notes": "",
       "dhcp": false,
       "ospf": {
@@ -20255,7 +20255,7 @@
       "gw": "",
       "dns": "",
       "notes": "",
-      "dhcp": false,
+      "dhcp": true,
       "ospf": {
         "on": false,
         "pid": "1",
@@ -21859,7 +21859,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "0bvgin3",
           "encap": "20",
           "media": "virtual",
@@ -21895,7 +21895,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "gic3dm3",
           "encap": "30",
           "media": "virtual",
@@ -21931,7 +21931,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "n1c1p53",
           "encap": "70",
           "media": "virtual",
@@ -21967,7 +21967,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "n1c1p53",
           "encap": "80",
           "media": "virtual",
@@ -22003,7 +22003,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "0bvgin3",
           "encap": "90",
           "media": "virtual",
@@ -22039,7 +22039,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "gic3dm3",
           "encap": "100",
           "media": "virtual",
@@ -22075,7 +22075,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "n1c1p53",
           "encap": "120",
           "media": "virtual",
@@ -22787,7 +22787,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "0bvgin3",
           "encap": "20",
           "media": "virtual",
@@ -22823,7 +22823,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "gic3dm3",
           "encap": "30",
           "media": "virtual",
@@ -22859,7 +22859,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "n1c1p53",
           "encap": "70",
           "media": "virtual",
@@ -22895,7 +22895,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "n1c1p53",
           "encap": "80",
           "media": "virtual",
@@ -22931,7 +22931,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "0bvgin3",
           "encap": "90",
           "media": "virtual",
@@ -22967,7 +22967,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "gic3dm3",
           "encap": "100",
           "media": "virtual",
@@ -23003,7 +23003,7 @@
           "vlan": "",
           "allowed": "",
           "native": "",
-          "helper": "",
+          "helper": "136.24.4.5",
           "parent": "n1c1p53",
           "encap": "120",
           "media": "virtual",
@@ -23527,8 +23527,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "90",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -23563,8 +23563,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "90",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -23599,8 +23599,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "90",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -24620,8 +24620,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "100",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -24656,8 +24656,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "100",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -24692,8 +24692,8 @@
           "mask": "",
           "desc": "",
           "active": true,
-          "mode": "",
-          "vlan": "",
+          "mode": "access",
+          "vlan": "30",
           "allowed": "",
           "native": "",
           "helper": "",
@@ -25484,370 +25484,6 @@
       }
     },
     {
-      "id": "xiww7v4",
-      "model": "PC-PT",
-      "kind": "pc",
-      "role": "",
-      "name": "PC5",
-      "x": 1120,
-      "y": 1080,
-      "ifaces": [
-        {
-          "ip": "",
-          "mask": "",
-          "desc": "",
-          "active": true,
-          "mode": "",
-          "vlan": "",
-          "allowed": "",
-          "native": "",
-          "helper": "",
-          "parent": "",
-          "encap": "",
-          "media": "copper",
-          "bw": 100,
-          "hw": true,
-          "mod": "",
-          "legacy": false,
-          "speed": "auto",
-          "duplex": "auto",
-          "routed": false,
-          "chan": "",
-          "po": false,
-          "ecMode": "active",
-          "psOn": false,
-          "psMax": "1",
-          "psViol": "shutdown",
-          "psSticky": false,
-          "psMacs": "",
-          "ospfNet": "",
-          "nameif": "",
-          "sec": "",
-          "aclIn": "",
-          "aclOut": "",
-          "name": "FastEthernet0",
-          "id": "0j85mrn"
-        },
-        {
-          "ip": "",
-          "mask": "",
-          "desc": "",
-          "active": true,
-          "mode": "",
-          "vlan": "",
-          "allowed": "",
-          "native": "",
-          "helper": "",
-          "parent": "",
-          "encap": "",
-          "media": "console",
-          "bw": 0,
-          "hw": true,
-          "mod": "",
-          "legacy": false,
-          "speed": "auto",
-          "duplex": "auto",
-          "routed": false,
-          "chan": "",
-          "po": false,
-          "ecMode": "active",
-          "psOn": false,
-          "psMax": "1",
-          "psViol": "shutdown",
-          "psSticky": false,
-          "psMacs": "",
-          "ospfNet": "",
-          "nameif": "",
-          "sec": "",
-          "aclIn": "",
-          "aclOut": "",
-          "name": "RS232",
-          "id": "b3r5aks"
-        }
-      ],
-      "gw": "",
-      "dns": "",
-      "notes": "",
-      "dhcp": false,
-      "ospf": {
-        "on": false,
-        "pid": "1",
-        "rid": "",
-        "passive": [],
-        "defOrig": false,
-        "nets": []
-      },
-      "hsrp": [],
-      "vlans": [],
-      "svc": {
-        "dhcp": {
-          "on": false,
-          "pools": []
-        },
-        "dns": {
-          "on": false,
-          "records": []
-        },
-        "http": {
-          "on": false,
-          "https": false,
-          "title": "",
-          "body": ""
-        },
-        "aaa": {
-          "on": false,
-          "clients": [],
-          "users": []
-        }
-      },
-      "sec": {
-        "spe": false,
-        "enablePass": "",
-        "enableSecret": "",
-        "enableAlg": "5",
-        "enableHash": "",
-        "users": [],
-        "con": {
-          "pass": "",
-          "login": ""
-        },
-        "vty": {
-          "pass": "",
-          "login": "",
-          "transport": ""
-        }
-      },
-      "realCfg": {
-        "text": "",
-        "at": 0
-      },
-      "dhcpd": {
-        "pools": [],
-        "excl": []
-      },
-      "aaa": {
-        "on": false,
-        "list": "AAA",
-        "servers": [],
-        "login": [
-          "radius",
-          "local"
-        ],
-        "authz": {
-          "on": false,
-          "m": [
-            "radius",
-            "local"
-          ]
-        },
-        "acct": {
-          "on": false,
-          "m": "radius"
-        },
-        "con": false,
-        "vty": true
-      },
-      "modules": [],
-      "hwv": 1,
-      "vlsm": {
-        "reqs": [],
-        "skip": []
-      },
-      "fw": {
-        "routes": [],
-        "nat": [],
-        "acl": [],
-        "vpn": [],
-        "icmp": true
-      },
-      "acl": {
-        "lists": [],
-        "vty": ""
-      }
-    },
-    {
-      "id": "p5bpd3l",
-      "model": "PC-PT",
-      "kind": "pc",
-      "role": "",
-      "name": "PC6",
-      "x": 940,
-      "y": 1080,
-      "ifaces": [
-        {
-          "ip": "",
-          "mask": "",
-          "desc": "",
-          "active": true,
-          "mode": "",
-          "vlan": "",
-          "allowed": "",
-          "native": "",
-          "helper": "",
-          "parent": "",
-          "encap": "",
-          "media": "copper",
-          "bw": 100,
-          "hw": true,
-          "mod": "",
-          "legacy": false,
-          "speed": "auto",
-          "duplex": "auto",
-          "routed": false,
-          "chan": "",
-          "po": false,
-          "ecMode": "active",
-          "psOn": false,
-          "psMax": "1",
-          "psViol": "shutdown",
-          "psSticky": false,
-          "psMacs": "",
-          "ospfNet": "",
-          "nameif": "",
-          "sec": "",
-          "aclIn": "",
-          "aclOut": "",
-          "name": "FastEthernet0",
-          "id": "9yfu7vi"
-        },
-        {
-          "ip": "",
-          "mask": "",
-          "desc": "",
-          "active": true,
-          "mode": "",
-          "vlan": "",
-          "allowed": "",
-          "native": "",
-          "helper": "",
-          "parent": "",
-          "encap": "",
-          "media": "console",
-          "bw": 0,
-          "hw": true,
-          "mod": "",
-          "legacy": false,
-          "speed": "auto",
-          "duplex": "auto",
-          "routed": false,
-          "chan": "",
-          "po": false,
-          "ecMode": "active",
-          "psOn": false,
-          "psMax": "1",
-          "psViol": "shutdown",
-          "psSticky": false,
-          "psMacs": "",
-          "ospfNet": "",
-          "nameif": "",
-          "sec": "",
-          "aclIn": "",
-          "aclOut": "",
-          "name": "RS232",
-          "id": "5io7om4"
-        }
-      ],
-      "gw": "",
-      "dns": "",
-      "notes": "",
-      "dhcp": false,
-      "ospf": {
-        "on": false,
-        "pid": "1",
-        "rid": "",
-        "passive": [],
-        "defOrig": false,
-        "nets": []
-      },
-      "hsrp": [],
-      "vlans": [],
-      "svc": {
-        "dhcp": {
-          "on": false,
-          "pools": []
-        },
-        "dns": {
-          "on": false,
-          "records": []
-        },
-        "http": {
-          "on": false,
-          "https": false,
-          "title": "",
-          "body": ""
-        },
-        "aaa": {
-          "on": false,
-          "clients": [],
-          "users": []
-        }
-      },
-      "sec": {
-        "spe": false,
-        "enablePass": "",
-        "enableSecret": "",
-        "enableAlg": "5",
-        "enableHash": "",
-        "users": [],
-        "con": {
-          "pass": "",
-          "login": ""
-        },
-        "vty": {
-          "pass": "",
-          "login": "",
-          "transport": ""
-        }
-      },
-      "realCfg": {
-        "text": "",
-        "at": 0
-      },
-      "dhcpd": {
-        "pools": [],
-        "excl": []
-      },
-      "aaa": {
-        "on": false,
-        "list": "AAA",
-        "servers": [],
-        "login": [
-          "radius",
-          "local"
-        ],
-        "authz": {
-          "on": false,
-          "m": [
-            "radius",
-            "local"
-          ]
-        },
-        "acct": {
-          "on": false,
-          "m": "radius"
-        },
-        "con": false,
-        "vty": true
-      },
-      "modules": [],
-      "hwv": 1,
-      "vlsm": {
-        "reqs": [],
-        "skip": []
-      },
-      "fw": {
-        "routes": [],
-        "nat": [],
-        "acl": [],
-        "vpn": [],
-        "icmp": true
-      },
-      "acl": {
-        "lists": [],
-        "vty": ""
-      }
-    },
-    {
       "id": "3ardcyw",
       "model": "AccessPoint-PT",
       "kind": "ap",
@@ -25858,7 +25494,7 @@
       "ifaces": [
         {
           "ip": "",
-          "mask": "",
+          "mask": "255.255.255.0",
           "desc": "",
           "active": true,
           "mode": "",
@@ -25994,199 +25630,17 @@
       }
     },
     {
-      "id": "0m7uwel",
-      "model": "PC-PT",
-      "kind": "pc",
-      "role": "",
-      "name": "PC7",
-      "x": 1410,
-      "y": 1080,
-      "ifaces": [
-        {
-          "ip": "",
-          "mask": "",
-          "desc": "",
-          "active": true,
-          "mode": "",
-          "vlan": "",
-          "allowed": "",
-          "native": "",
-          "helper": "",
-          "parent": "",
-          "encap": "",
-          "media": "copper",
-          "bw": 100,
-          "hw": true,
-          "mod": "",
-          "legacy": false,
-          "speed": "auto",
-          "duplex": "auto",
-          "routed": false,
-          "chan": "",
-          "po": false,
-          "ecMode": "active",
-          "psOn": false,
-          "psMax": "1",
-          "psViol": "shutdown",
-          "psSticky": false,
-          "psMacs": "",
-          "ospfNet": "",
-          "nameif": "",
-          "sec": "",
-          "aclIn": "",
-          "aclOut": "",
-          "name": "FastEthernet0",
-          "id": "y6i21ff"
-        },
-        {
-          "ip": "",
-          "mask": "",
-          "desc": "",
-          "active": true,
-          "mode": "",
-          "vlan": "",
-          "allowed": "",
-          "native": "",
-          "helper": "",
-          "parent": "",
-          "encap": "",
-          "media": "console",
-          "bw": 0,
-          "hw": true,
-          "mod": "",
-          "legacy": false,
-          "speed": "auto",
-          "duplex": "auto",
-          "routed": false,
-          "chan": "",
-          "po": false,
-          "ecMode": "active",
-          "psOn": false,
-          "psMax": "1",
-          "psViol": "shutdown",
-          "psSticky": false,
-          "psMacs": "",
-          "ospfNet": "",
-          "nameif": "",
-          "sec": "",
-          "aclIn": "",
-          "aclOut": "",
-          "name": "RS232",
-          "id": "gt8r3md"
-        }
-      ],
-      "gw": "",
-      "dns": "",
-      "notes": "",
-      "dhcp": false,
-      "ospf": {
-        "on": false,
-        "pid": "1",
-        "rid": "",
-        "passive": [],
-        "defOrig": false,
-        "nets": []
-      },
-      "hsrp": [],
-      "vlans": [],
-      "svc": {
-        "dhcp": {
-          "on": false,
-          "pools": []
-        },
-        "dns": {
-          "on": false,
-          "records": []
-        },
-        "http": {
-          "on": false,
-          "https": false,
-          "title": "",
-          "body": ""
-        },
-        "aaa": {
-          "on": false,
-          "clients": [],
-          "users": []
-        }
-      },
-      "sec": {
-        "spe": false,
-        "enablePass": "",
-        "enableSecret": "",
-        "enableAlg": "5",
-        "enableHash": "",
-        "users": [],
-        "con": {
-          "pass": "",
-          "login": ""
-        },
-        "vty": {
-          "pass": "",
-          "login": "",
-          "transport": ""
-        }
-      },
-      "realCfg": {
-        "text": "",
-        "at": 0
-      },
-      "dhcpd": {
-        "pools": [],
-        "excl": []
-      },
-      "aaa": {
-        "on": false,
-        "list": "AAA",
-        "servers": [],
-        "login": [
-          "radius",
-          "local"
-        ],
-        "authz": {
-          "on": false,
-          "m": [
-            "radius",
-            "local"
-          ]
-        },
-        "acct": {
-          "on": false,
-          "m": "radius"
-        },
-        "con": false,
-        "vty": true
-      },
-      "modules": [],
-      "hwv": 1,
-      "vlsm": {
-        "reqs": [],
-        "skip": []
-      },
-      "fw": {
-        "routes": [],
-        "nat": [],
-        "acl": [],
-        "vpn": [],
-        "icmp": true
-      },
-      "acl": {
-        "lists": [],
-        "vty": ""
-      }
-    },
-    {
       "id": "2jfyqed",
       "model": "PC-PT",
       "kind": "pc",
       "role": "",
       "name": "PC8",
-      "x": 1230,
+      "x": 1310,
       "y": 1080,
       "ifaces": [
         {
-          "ip": "",
-          "mask": "",
+          "ip": "136.24.4.166",
+          "mask": "255.255.255.252",
           "desc": "",
           "active": true,
           "mode": "",
@@ -26257,8 +25711,8 @@
           "id": "p94kdtg"
         }
       ],
-      "gw": "",
-      "dns": "",
+      "gw": "136.24.4.165",
+      "dns": "136.24.4.6",
       "notes": "",
       "dhcp": false,
       "ospf": {
@@ -27540,7 +26994,7 @@
       "gw": "",
       "dns": "",
       "notes": "",
-      "dhcp": false,
+      "dhcp": true,
       "ospf": {
         "on": false,
         "pid": "1",
@@ -27648,7 +27102,7 @@
       "ifaces": [
         {
           "ip": "",
-          "mask": "",
+          "mask": "24",
           "desc": "",
           "active": true,
           "mode": "",
@@ -27789,8 +27243,8 @@
       "kind": "pc",
       "role": "",
       "name": "PC10",
-      "x": 760,
-      "y": 1080,
+      "x": 750,
+      "y": 1060,
       "ifaces": [
         {
           "ip": "",
@@ -27868,7 +27322,7 @@
       "gw": "",
       "dns": "",
       "notes": "",
-      "dhcp": false,
+      "dhcp": true,
       "ospf": {
         "on": false,
         "pid": "1",
@@ -27971,7 +27425,7 @@
       "kind": "ap",
       "role": "",
       "name": "AP4",
-      "x": 860,
+      "x": 940,
       "y": 1080,
       "ifaces": [
         {
@@ -28117,7 +27571,7 @@
       "kind": "ap",
       "role": "",
       "name": "AP5",
-      "x": 1040,
+      "x": 1120,
       "y": 1080,
       "ifaces": [
         {
@@ -28262,13 +27716,13 @@
       "model": "Server-PT",
       "kind": "server",
       "role": "",
-      "name": "SRV1",
-      "x": 1320,
+      "name": "DHCP",
+      "x": 1400,
       "y": 1080,
       "ifaces": [
         {
-          "ip": "",
-          "mask": "",
+          "ip": "136.24.4.5",
+          "mask": "255.255.255.240",
           "desc": "",
           "active": true,
           "mode": "",
@@ -28303,8 +27757,8 @@
           "id": "fcu93u5"
         }
       ],
-      "gw": "",
-      "dns": "",
+      "gw": "136.24.4.1",
+      "dns": "136.24.4.6",
       "notes": "",
       "dhcp": false,
       "ospf": {
@@ -28319,8 +27773,90 @@
       "vlans": [],
       "svc": {
         "dhcp": {
-          "on": false,
-          "pools": []
+          "on": true,
+          "pools": [
+            {
+              "id": "x0bzmiy",
+              "name": "Espera",
+              "gw": "136.24.0.1",
+              "dns": "136.24.4.6",
+              "start": "136.24.0.10",
+              "mask": "255.255.254.0",
+              "max": "500"
+            },
+            {
+              "id": "gz72uvi",
+              "name": "Internaciones",
+              "gw": "136.24.2.1",
+              "dns": "136.24.4.6",
+              "start": "136.24.2.10",
+              "mask": "255.255.255.0",
+              "max": "200"
+            },
+            {
+              "id": "3jbomex",
+              "name": "Esterilizacion y cocina",
+              "gw": "136.24.3.1",
+              "dns": "136.24.4.6",
+              "start": "136.24.3.5",
+              "mask": "255.255.255.128",
+              "max": "100"
+            },
+            {
+              "id": "3zapcyo",
+              "name": "Admicion y consultorios",
+              "gw": "136.24.3.129",
+              "dns": "136.24.4.6",
+              "start": "136.24.3.135",
+              "mask": "255.255.255.192",
+              "max": "50"
+            },
+            {
+              "id": "p9zmuh0",
+              "name": "Diagnostico y laboratorio",
+              "gw": "136.24.3.193",
+              "dns": "136.24.4.6",
+              "start": "136.24.3.200",
+              "mask": "255.255.255.224",
+              "max": "20"
+            },
+            {
+              "id": "p3dwj9u",
+              "name": "Seguridad PB",
+              "gw": "136.24.3.225",
+              "dns": "136.24.4.6",
+              "start": "136.24.3.228",
+              "mask": "255.255.255.240",
+              "max": "10"
+            },
+            {
+              "id": "pp0tha6",
+              "name": "Seguridad PA",
+              "gw": "136.24.3.241",
+              "dns": "136.24.4.6",
+              "start": "136.24.3.244",
+              "mask": "255.255.255.240",
+              "max": "10"
+            },
+            {
+              "id": "ymxhje8",
+              "name": "Quirofano y urgencias",
+              "gw": "136.24.4.17",
+              "dns": "136.24.4.6",
+              "start": "136.24.4.20",
+              "mask": "255.255.255.248",
+              "max": "6"
+            },
+            {
+              "id": "ndqwcz8",
+              "name": "Terapia intensiva",
+              "gw": "136.24.4.65",
+              "dns": "136.24.4.6",
+              "start": "136.24.4.66",
+              "mask": "255.255.255.248",
+              "max": "6"
+            }
+          ]
         },
         "dns": {
           "on": false,
@@ -28402,6 +27938,2853 @@
         "lists": [],
         "vty": ""
       }
+    },
+    {
+      "id": "49r7byo",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC11",
+      "x": -60,
+      "y": 1080,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "2mg1vl3"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "qn97b5m"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "gka7mbe",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC12",
+      "x": -60,
+      "y": 1160,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "oanpik3"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "o93qbyi"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "hzq8wiu",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC13",
+      "x": 30,
+      "y": 1160,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "udqnrds"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "cju92en"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "usiax7e",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC14",
+      "x": 220,
+      "y": 1060,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "n7mjio4"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "bl16tor"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": false,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "5g5c0cp",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC15",
+      "x": 140,
+      "y": 1130,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "xj8hbso"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "zf7nuru"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "ua1so98",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC16",
+      "x": 220,
+      "y": 1130,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "crbzw0k"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "sejbiv6"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "7cmen9m",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC17",
+      "x": 300,
+      "y": 1130,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "lww5cg6"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "qzyprdu"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "rdi4uyc",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC18",
+      "x": 840,
+      "y": 1060,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "3rgjamz"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "uifceg1"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "umlk15n",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC19",
+      "x": 750,
+      "y": 1130,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "orvbph9"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "gzkqkko"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "6j5a7pr",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC21",
+      "x": 1020,
+      "y": 1160,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "67ftnt0"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "oxr6ew8"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "0virmc3",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC6",
+      "x": 1020,
+      "y": 1080,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "bzlrh7j"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "knaf1dw"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "b7zfjcf",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC5",
+      "x": 1200,
+      "y": 1080,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "6ru70wv"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "jmbpuho"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "byo2pib",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC20",
+      "x": 1200,
+      "y": 1150,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "u9z98sg"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "5zhuj0i"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "hjbxl1b",
+      "model": "Server-PT",
+      "kind": "server",
+      "role": "dns",
+      "name": "DNS1",
+      "x": 1400,
+      "y": 1150,
+      "ifaces": [
+        {
+          "ip": "136.24.4.6",
+          "mask": "255.255.255.240",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "w3wukha"
+        }
+      ],
+      "gw": "136.24.4.1",
+      "dns": "",
+      "notes": "",
+      "dhcp": false,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": true,
+          "records": [
+            {
+              "id": "qpakwgj",
+              "name": "hospital.com",
+              "type": "A",
+              "addr": "136.24.4.7"
+            }
+          ]
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "pqi34oq",
+      "model": "Server-PT",
+      "kind": "server",
+      "role": "http",
+      "name": "WEB1",
+      "x": 1400,
+      "y": 1220,
+      "ifaces": [
+        {
+          "ip": "136.24.4.7",
+          "mask": "255.255.255.240",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "2zo8hxv"
+        }
+      ],
+      "gw": "136.24.4.1",
+      "dns": "136.24.4.6",
+      "notes": "",
+      "dhcp": false,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": true,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
+    },
+    {
+      "id": "c3uezt7",
+      "model": "PC-PT",
+      "kind": "pc",
+      "role": "",
+      "name": "PC7",
+      "x": 1490,
+      "y": 1070,
+      "ifaces": [
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "copper",
+          "bw": 100,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "FastEthernet0",
+          "id": "yqvl91c"
+        },
+        {
+          "ip": "",
+          "mask": "",
+          "desc": "",
+          "active": true,
+          "mode": "",
+          "vlan": "",
+          "allowed": "",
+          "native": "",
+          "helper": "",
+          "parent": "",
+          "encap": "",
+          "media": "console",
+          "bw": 0,
+          "hw": true,
+          "mod": "",
+          "legacy": false,
+          "speed": "auto",
+          "duplex": "auto",
+          "routed": false,
+          "chan": "",
+          "po": false,
+          "ecMode": "active",
+          "psOn": false,
+          "psMax": "1",
+          "psViol": "shutdown",
+          "psSticky": false,
+          "psMacs": "",
+          "ospfNet": "",
+          "nameif": "",
+          "sec": "",
+          "aclIn": "",
+          "aclOut": "",
+          "name": "RS232",
+          "id": "d2h4i7v"
+        }
+      ],
+      "gw": "",
+      "dns": "",
+      "notes": "",
+      "dhcp": true,
+      "ospf": {
+        "on": false,
+        "pid": "1",
+        "rid": "",
+        "passive": [],
+        "defOrig": false,
+        "nets": []
+      },
+      "hsrp": [],
+      "vlans": [],
+      "svc": {
+        "dhcp": {
+          "on": false,
+          "pools": []
+        },
+        "dns": {
+          "on": false,
+          "records": []
+        },
+        "http": {
+          "on": false,
+          "https": false,
+          "title": "",
+          "body": ""
+        },
+        "aaa": {
+          "on": false,
+          "clients": [],
+          "users": []
+        }
+      },
+      "sec": {
+        "spe": false,
+        "enablePass": "",
+        "enableSecret": "",
+        "enableAlg": "5",
+        "enableHash": "",
+        "users": [],
+        "con": {
+          "pass": "",
+          "login": ""
+        },
+        "vty": {
+          "pass": "",
+          "login": "",
+          "transport": ""
+        }
+      },
+      "vlsm": {
+        "reqs": [],
+        "skip": []
+      },
+      "realCfg": {
+        "text": "",
+        "at": 0
+      },
+      "fw": {
+        "routes": [],
+        "nat": [],
+        "acl": [],
+        "vpn": [],
+        "icmp": true
+      },
+      "acl": {
+        "lists": [],
+        "vty": ""
+      },
+      "dhcpd": {
+        "pools": [],
+        "excl": []
+      },
+      "aaa": {
+        "on": false,
+        "list": "AAA",
+        "servers": [],
+        "login": [
+          "radius",
+          "local"
+        ],
+        "authz": {
+          "on": false,
+          "m": [
+            "radius",
+            "local"
+          ]
+        },
+        "acct": {
+          "on": false,
+          "m": "radius"
+        },
+        "con": false,
+        "vty": true
+      },
+      "modules": [],
+      "hwv": 1
     }
   ],
   "links": [
@@ -29077,28 +31460,12 @@
       "bi": "ghuk3v9"
     },
     {
-      "id": "fpi2fu0",
-      "kind": "copper",
-      "a": "yw7t3n9",
-      "ai": "alfvtxd",
-      "b": "p5bpd3l",
-      "bi": "9yfu7vi"
-    },
-    {
       "id": "43o0bna",
       "kind": "copper",
       "a": "yw7t3n9",
       "ai": "h4xeohr",
       "b": "rf6tcf8",
       "bi": "5t7dia5"
-    },
-    {
-      "id": "f73oxgg",
-      "kind": "copper",
-      "a": "yw7t3n9",
-      "ai": "ir23pc8",
-      "b": "xiww7v4",
-      "bi": "0j85mrn"
     },
     {
       "id": "chrwhcm",
@@ -29109,12 +31476,116 @@
       "bi": "fcu93u5"
     },
     {
-      "id": "79w0k24",
+      "id": "uww9ucl",
+      "kind": "copper",
+      "a": "2yutbu8",
+      "ai": "h4xeohr",
+      "b": "49r7byo",
+      "bi": "2mg1vl3"
+    },
+    {
+      "id": "8a0y6hh",
+      "kind": "copper",
+      "a": "2yutbu8",
+      "ai": "ir23pc8",
+      "b": "gka7mbe",
+      "bi": "oanpik3"
+    },
+    {
+      "id": "u9xzxzc",
+      "kind": "copper",
+      "a": "2yutbu8",
+      "ai": "jh5ycnw",
+      "b": "hzq8wiu",
+      "bi": "udqnrds"
+    },
+    {
+      "id": "dsxbbh7",
+      "kind": "copper",
+      "a": "2yutbu8",
+      "ai": "ti4mvfo",
+      "b": "usiax7e",
+      "bi": "n7mjio4"
+    },
+    {
+      "id": "l0f9v9y",
+      "kind": "copper",
+      "a": "2yutbu8",
+      "ai": "z81p9qm",
+      "b": "5g5c0cp",
+      "bi": "xj8hbso"
+    },
+    {
+      "id": "9kkt6wx",
+      "kind": "copper",
+      "a": "2yutbu8",
+      "ai": "iug81fn",
+      "b": "ua1so98",
+      "bi": "crbzw0k"
+    },
+    {
+      "id": "humdnzd",
+      "kind": "copper",
+      "a": "2yutbu8",
+      "ai": "xxt8exq",
+      "b": "7cmen9m",
+      "bi": "lww5cg6"
+    },
+    {
+      "id": "52qbmhq",
+      "kind": "copper",
+      "a": "srqun26",
+      "ai": "jh5ycnw",
+      "b": "rdi4uyc",
+      "bi": "3rgjamz"
+    },
+    {
+      "id": "ci1h77a",
+      "kind": "copper",
+      "a": "srqun26",
+      "ai": "ti4mvfo",
+      "b": "umlk15n",
+      "bi": "orvbph9"
+    },
+    {
+      "id": "t2vogz9",
+      "kind": "copper",
+      "a": "yw7t3n9",
+      "ai": "jh5ycnw",
+      "b": "6j5a7pr",
+      "bi": "67ftnt0"
+    },
+    {
+      "id": "89371ff",
+      "kind": "copper",
+      "a": "yw7t3n9",
+      "ai": "alfvtxd",
+      "b": "0virmc3",
+      "bi": "bzlrh7j"
+    },
+    {
+      "id": "psb56zw",
+      "kind": "copper",
+      "a": "yw7t3n9",
+      "ai": "ir23pc8",
+      "b": "b7zfjcf",
+      "bi": "6ru70wv"
+    },
+    {
+      "id": "1x9i5un",
+      "kind": "copper",
+      "a": "yw7t3n9",
+      "ai": "ti4mvfo",
+      "b": "byo2pib",
+      "bi": "u9z98sg"
+    },
+    {
+      "id": "7f5092h",
       "kind": "copper",
       "a": "67nh5a4",
       "ai": "h4xeohr",
-      "b": "0m7uwel",
-      "bi": "y6i21ff"
+      "b": "c3uezt7",
+      "bi": "yqvl91c"
     }
   ],
   "shapes": [
@@ -29155,10 +31626,10 @@
     {
       "id": "c3qefat",
       "type": "rect",
-      "x": -558,
+      "x": -555,
       "y": 704,
-      "w": 2011,
-      "h": 442,
+      "w": 2133,
+      "h": 503,
       "color": "#C0392B",
       "fill": true,
       "dash": "solid",
@@ -29293,8 +31764,8 @@
       "type": "rect",
       "x": -272,
       "y": 1024,
-      "w": 136,
-      "h": 106,
+      "w": 113,
+      "h": 111,
       "color": "#0A6C8C",
       "fill": false,
       "dash": "solid",
@@ -29308,7 +31779,7 @@
     {
       "id": "7md0gi7",
       "type": "text",
-      "x": -202,
+      "x": -272,
       "y": 997,
       "w": 66,
       "h": 28,
@@ -29325,10 +31796,10 @@
     {
       "id": "id7a5ox",
       "type": "rect",
-      "x": -69,
+      "x": -116,
       "y": 1023,
-      "w": 127,
-      "h": 110,
+      "w": 201,
+      "h": 179,
       "color": "#0A6C8C",
       "fill": false,
       "dash": "solid",
@@ -29344,8 +31815,8 @@
       "type": "rect",
       "x": 89,
       "y": 1023,
-      "w": 137,
-      "h": 110,
+      "w": 271,
+      "h": 156,
       "color": "#0A6C8C",
       "fill": false,
       "dash": "solid",
@@ -29427,10 +31898,10 @@
     {
       "id": "vinphm7",
       "type": "rect",
-      "x": 705,
+      "x": 704,
       "y": 1025,
-      "w": 108,
-      "h": 100,
+      "w": 185,
+      "h": 147,
       "color": "#0A6C8C",
       "fill": false,
       "dash": "solid",
@@ -29445,9 +31916,9 @@
       "id": "s8lh4en",
       "type": "text",
       "x": 739,
-      "y": 970,
-      "w": 97,
-      "h": 45,
+      "y": 993,
+      "w": 172,
+      "h": 33,
       "color": "ink",
       "fill": false,
       "dash": "solid",
@@ -29461,10 +31932,10 @@
     {
       "id": "eld5fy9",
       "type": "rect",
-      "x": 819,
+      "x": 899,
       "y": 1027,
-      "w": 173,
-      "h": 104,
+      "w": 175,
+      "h": 179,
       "color": "#0A6C8C",
       "fill": false,
       "dash": "solid",
@@ -29478,10 +31949,10 @@
     {
       "id": "muq52wv",
       "type": "text",
-      "x": 827,
-      "y": 973,
-      "w": 82,
-      "h": 38,
+      "x": 917,
+      "y": 993,
+      "w": 163,
+      "h": 51,
       "color": "ink",
       "fill": false,
       "dash": "solid",
@@ -29495,10 +31966,10 @@
     {
       "id": "ajkiup0",
       "type": "rect",
-      "x": 1001,
+      "x": 1077,
       "y": 1031,
-      "w": 166,
-      "h": 99,
+      "w": 175,
+      "h": 174,
       "color": "#0A6C8C",
       "fill": false,
       "dash": "solid",
@@ -29512,10 +31983,10 @@
     {
       "id": "hfydmlu",
       "type": "text",
-      "x": 1072,
-      "y": 976,
-      "w": 119,
-      "h": 54,
+      "x": 1082,
+      "y": 1006,
+      "w": 195,
+      "h": 52,
       "color": "ink",
       "fill": false,
       "dash": "solid",
@@ -29529,10 +32000,10 @@
     {
       "id": "7clsi0p",
       "type": "rect",
-      "x": 1180,
+      "x": 1266,
       "y": 1033,
-      "w": 92,
-      "h": 99,
+      "w": 86,
+      "h": 97,
       "color": "#0A6C8C",
       "fill": false,
       "dash": "solid",
@@ -29546,8 +32017,8 @@
     {
       "id": "lpevnts",
       "type": "text",
-      "x": 1184,
-      "y": 991,
+      "x": 1284,
+      "y": 1001,
       "w": 60,
       "h": 26,
       "color": "ink",
@@ -29563,10 +32034,10 @@
     {
       "id": "lap0hv7",
       "type": "rect",
-      "x": 1283,
+      "x": 1360,
       "y": 1035,
       "w": 81,
-      "h": 95,
+      "h": 223,
       "color": "#0A6C8C",
       "fill": false,
       "dash": "solid",
@@ -29580,7 +32051,7 @@
     {
       "id": "6utyvzi",
       "type": "rect",
-      "x": 1369,
+      "x": 1449,
       "y": 1036,
       "w": 80,
       "h": 95,
@@ -29597,7 +32068,7 @@
     {
       "id": "feby4n1",
       "type": "text",
-      "x": 1283,
+      "x": 1353,
       "y": 995,
       "w": 90,
       "h": 54,
@@ -29614,8 +32085,8 @@
     {
       "id": "sz2w1f9",
       "type": "text",
-      "x": 1353.7950317459338,
-      "y": 994.2792918385761,
+      "x": 1443.7950317459338,
+      "y": 1004.2792918385761,
       "w": 180,
       "h": 40,
       "color": "ink",
@@ -30109,9 +32580,9 @@
     "p2pLen": "24"
   },
   "view": {
-    "k": 0.85133935542467,
-    "x": -243.69781959346727,
-    "y": -558.5777487973291
+    "x": -411.02445719105197,
+    "y": -895.7191488438068,
+    "k": 1.1145884665901067
   },
   "bg": null
 }
