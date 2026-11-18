@@ -174,4 +174,60 @@
       afirmar(!$('#g-tmp').innerHTML.includes('translate(4 1) scale(1)'), 'al soltar ya no está junto al cursor');
     });
   });
+  prueba('Empalme: un cable de energía sobre el tramo o un vértice de otro se une a él (vértice nuevo, mismo paso de historial); los índices de otras uniones se corren; un UTP no empalma', () => {
+    const { clic } = TRP.util, E = CAT['Eléctrico'].find(c => c.n == 'Cable de energía'), U = CAT.Cables.find(c => c.n == 'UTP Cat6');
+    con([], () => {
+      V.z = 60; V.ox = 40; V.oy = 40; rejilla = false; render();
+      setTool(E); clic(1, 2); clic(8, 2); finishLine(); clic(8, 6); clic(8.03, 2.02); finishLine();   // B termina en la punta de A (índice 1)
+      const [A, B] = S.objs; igual([B.pts[1].rl, B.pts[1].ri], [A.id, 1], 'unido a la punta');
+      const h0 = hist.length; clic(4.5, 5); clic(4.52, 2.05); finishLine(); const C = S.objs[2];
+      ser(A.pts.length, 3, 'A tiene un vértice nuevo'); igual([C.pts[1].rl, C.pts[1].ri, A.pts[1].x, A.pts[1].y], [A.id, 1, 4.52, 2], 'C unido al vértice nuevo');
+      ser(B.pts[1].ri, 2, 'la unión de B se corrió y sigue en la punta'); ser(hist.length, h0 + 1, 'un solo paso'); afirmar(!C.pts.some(q => 'emp' in q), 'sin campos transitorios');
+      A.pts[1].x = 5; ser(pt(C.pts[1]).x, 5, 'el empalme sigue al vértice');
+      deshacer(); ser(S.objs.length, 2); ser(byId(A.id).pts.length, 2, 'deshacer quita el cable y el vértice'); ser(byId(B.id).pts[1].ri, 1);
+      setTool(U); clic(3, 5); clic(3, 2.03); finishLine(); setTool(null); const D = S.objs[2]; afirmar(!D.pts[1].rl, 'un UTP no se empalma a un cable de energía'); ser(byId(A.id).pts.length, 2);
+    });
+  });
+  prueba('Canalización metálica: tipo propio (ni pared ni cable, sin conexión), se dibuja debajo de los cables y un cable se pega a su eje sin quedar unido', () => {
+    const { clic } = TRP.util, K = CAT.Edificio.find(c => c.n == 'Canalización metálica'), U = CAT.Cables.find(c => c.n == 'UTP Cat6');
+    con([], () => {
+      V.z = 60; V.ox = 40; V.oy = 40; rejilla = false; render();
+      setTool(K); clic(1, 2); clic(8, 2); finishLine(); setTool(U); clic(3, 5); clic(3.04, 2.12); clic(6, 2.1); finishLine(); setTool(null);
+      const [C, A] = S.objs; igual([tipoDe(C), esCable(C), esPared(C)], ['canal', false, false], 'tipo');
+      igual(A.pts.slice(1).map(q => [q.x, q.y, q.rl]), [[3.04, 2, undefined], [6, 2, undefined]], 'el cable sigue el eje sin unirse');
+      const g = [...$('#c').querySelectorAll('[data-id]')].map(e => +e.dataset.id); afirmar(g.indexOf(C.id) < g.indexOf(A.id), 'la canalización debe dibujarse debajo del cable');
+      const h0 = hist.length; setTool(K); clic(4.5, 6); clic(4.52, 2.05); finishLine(); clic(8, 6); clic(8.03, 2.02); finishLine(); setTool(null); const [, , D, F] = S.objs;
+      ser(C.pts.length, 3, 'la canalización tiene un vértice nuevo'); igual([D.pts[1].rl, D.pts[1].ri, C.pts[1].x, C.pts[1].y], [C.id, 1, 4.52, 2], 'empalme sobre el tramo');
+      igual([F.pts[1].rl, F.pts[1].ri], [C.id, 2], 'unión al nodo de la punta'); ser(hist.length, h0 + 2, 'un paso por canalización');
+    });
+  });
+  prueba('Botón «Nombres»: oculta y vuelve a mostrar el modelo y el nombre de los equipos (no los de otros objetos) sin tocar el proyecto', () => {
+    con([{ id: 1, k: 'item', n: 'PC', ic: '💻', x: 3, y: 3, w: .4, h: .3, label: 'PC-Guardia', tipo: 'dispositivo', sub: 'pc' }, { id: 2, k: 'item', n: 'Ventana', ic: '🪟', x: 6, y: 3, w: 1.2, h: .4, label: 'V-Norte', tipo: 'ventana' }], () => {
+      const txt = () => $('#c').textContent, h0 = hist.length;
+      afirmar(txt().includes('PC-Guardia'), 'se ve el nombre'); $('#bnom').click();
+      afirmar(!txt().includes('PC-Guardia'), 'el nombre debe ocultarse'); afirmar(txt().includes('V-Norte'), 'la etiqueta de la ventana no se oculta'); ser($('#bnom').getAttribute('aria-pressed'), 'false');
+      $('#bnom').click(); afirmar(txt().includes('PC-Guardia'), 'vuelve a verse'); ser(hist.length, h0, 'no guarda historial'); ser(byId(1).label, 'PC-Guardia');
+    });
+  });
+  prueba('Capa en el inspector: mueve lo seleccionado a otra capa visible y desbloqueada de la planta (un paso); la puerta va con su pared; los equipos de una mesa no lo ofrecen', () => {
+    con([{ id: 1, k: 'line', n: 'Pared', c: '#444444', w: .2, d: '', label: '', pts: [{ x: 1, y: 1 }, { x: 6, y: 1 }], tipo: 'pared' }, { id: 2, k: 'puerta', n: 'Puerta', pared: 1, si: 0, s: 2, w: .9, lado: 1, hojas: 1, bis: 'izq' }, { id: 3, k: 'item', n: 'Mesa', ic: '🪑', x: 3, y: 4, w: 1.2, h: .7, puestos: 2, tipo: 'mesa' }, { id: 4, k: 'item', n: 'PC', ic: '💻', x: 3, y: 4, w: .4, h: .3, tipo: 'dispositivo', sub: 'pc', parent: 3, puesto: 0 }], () => {
+      const P = plantaActual(), c1 = P.capas[0].id; P.capas.push({ id: 'c8', nombre: 'Datos', visible: true, bloqueada: false }, { id: 'c9', nombre: 'Bloqueada', visible: true, bloqueada: true }); render();
+      sel = 1; multi = []; render(); const opc = [...document.querySelectorAll('[data-campo="cp"] option')].map(o => o.value); igual(opc.sort(), [c1, 'c8'].sort(), 'solo capas visibles y desbloqueadas');
+      const h0 = hist.length; afirmar(TR.acc.fijar([1], 'cp', 'c8').ok); igual([byId(1).cp, byId(2).cp], ['c8', 'c8'], 'la pared y su puerta'); ser(hist.length, h0 + 1, 'un paso');
+      afirmar(!TR.acc.fijar([1], 'cp', 'c9').ok, 'acepta una capa bloqueada'); afirmar(TR.acc.fijar([3], 'cp', 'c8').ok); render(); ser(byId(4).cp, 'c8', 'el equipo sigue a su mesa');
+      afirmar(!TR.acc.campo('cp').aplica(byId(4)), 'un equipo sobre una mesa no ofrece capa'); deshacer(); deshacer(); igual([byId(1).cp, byId(2).cp, byId(3).cp], [c1, c1, c1], 'deshacer');
+    });
+  });
+  prueba('Nodo con doble clic: doble clic en el tramo de un cable agrega un vértice ahí, ya agarrado para plegarlo (un paso; deshacer lo quita); las uniones a vértices posteriores se corren', () => {
+    const { clic } = TRP.util, U = CAT.Cables.find(c => c.n == 'UTP Cat6');
+    con([], () => {
+      V.z = 60; V.ox = 40; V.oy = 40; rejilla = false; render();
+      setTool(U); clic(1, 2); clic(8, 2); finishLine(); clic(8, 6); clic(8.03, 2.02); finishLine(); setTool(null);   // B termina en la punta de A (índice 1)
+      const [A, B] = S.objs, h0 = hist.length, a = pant(4, 2), b = pant(4, 4);
+      sinCaptura(() => { lastDown.t = 0; for (let i = 0; i < 2; i++) { const el = document.elementFromPoint(a.x, a.y); ptr(el, 'pointerdown', a.x, a.y); if (!i) ptr(svg, 'pointerup', a.x, a.y); } ptr(svg, 'pointermove', b.x, b.y); ptr(svg, 'pointerup', b.x, b.y); });
+      ser(A.pts.length, 3, 'A tiene un vértice nuevo'); igual([A.pts[1].x, A.pts[1].y], [4, 4], 'el vértice nuevo se arrastró y plegó el cable'); ser(B.pts[1].ri, 2, 'la unión de B se corrió');
+      ser(hist.length, h0 + 1, 'un solo paso'); afirmar(!A.label, 'no pide etiqueta');
+      deshacer(); ser(byId(A.id).pts.length, 2, 'deshacer quita el vértice'); ser(byId(B.id).pts[1].ri, 1);
+    });
+  });
 })();

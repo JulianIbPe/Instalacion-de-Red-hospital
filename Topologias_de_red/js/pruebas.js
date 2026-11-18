@@ -493,11 +493,11 @@ const TRP = (() => {
   });
   prueba('Fase 3: el inspector muestra los campos del tipo (cable sin color, texto sin tamaño, círculo con giro, varios objetos solo lo común)', () => {
     conProyecto(fFormas().estado, () => {
-      sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,c,f,ls', 'rectángulo'); sel = 3; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot,c,f,ls', 'círculo'); sel = 5; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot,c,f,ls', 'zona');
-      sel = 7; render(); ser(camposInsp(), 'label,x,y,rot', 'texto'); sel = 8; render(); ser(camposInsp(), '', 'medida'); sel = null; multi = [1, 3]; render(); ser(camposInsp(), 'c,f,ls', 'varios');
+      sel = 1; render(); ser(camposInsp(), 'n,label,cp,x,y,w,h,c,f,ls', 'rectángulo'); sel = 3; render(); ser(camposInsp(), 'n,label,cp,x,y,w,h,rot,c,f,ls', 'círculo'); sel = 5; render(); ser(camposInsp(), 'n,label,cp,x,y,w,h,rot,c,f,ls', 'zona');
+      sel = 7; render(); ser(camposInsp(), 'label,cp,x,y,rot', 'texto'); sel = 8; render(); ser(camposInsp(), 'cp', 'medida'); sel = null; multi = [1, 3]; render(); ser(camposInsp(), 'cp,c,f,ls', 'varios');
     });
-    conProyecto(fDispositivos().estado, () => { sel = 5; render(); ser(camposInsp(), 'n,label,largo,cable', 'cable'); sel = 1; render(); ser(camposInsp(), 'n,label,x,y,w,h,rot', 'dispositivo'); });
-    conProyecto(fParedes().estado, () => { sel = 1; render(); ser(camposInsp(), 'n,label,c', 'pared'); sel = 3; render(); ser(camposInsp(), '', 'puerta'); });
+    conProyecto(fDispositivos().estado, () => { sel = 5; render(); ser(camposInsp(), 'n,label,cp,largo,cable', 'cable'); sel = 1; render(); ser(camposInsp(), 'n,label,cp,x,y,w,h,rot,ruh', 'dispositivo'); });
+    conProyecto(fParedes().estado, () => { sel = 1; render(); ser(camposInsp(), 'n,label,cp,c', 'pared'); sel = 3; render(); ser(camposInsp(), '', 'puerta'); });
   });
   prueba('Fase 3: con la capa bloqueada ninguna acción ni campo actúa y no se guarda historial', () => {
     conProyecto(fDispositivos().estado, () => {

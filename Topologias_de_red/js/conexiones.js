@@ -1,5 +1,5 @@
 // ===== conexiones.js: puertos y conexiones (Fase 7A, D1) =====
-// S.conex = [{id, a, b, rutas}]: una conexión por cada cable de red (el «Cable de energía» no lleva). a / b = null (la punta no está sobre un equipo)
+// S.conex = [{id, a, b, rutas}]: una conexión por cada cable (el «Cable de energía» también: va al puerto «Energía», pero no forma red, ver redes.js). a / b = null (la punta no está sobre un equipo)
 //   o {d: id del equipo, p?: id del puerto}. rutas = ids de sus líneas (hoy una; es lista para la F9).
 // F8B: una conexión SIN ruta (rutas = []) es un patch cord entre dos equipos montados en el mismo rack (parche / quitar): no tiene línea en el plano,
 //   se ve en la vista del rack y vive mientras sus dos equipos sigan en ese rack con esos puertos. Un extremo de cable sobre un rack con equipos pide
@@ -13,8 +13,9 @@
 // Una conexión está incompleta si a una punta le falta el equipo, o el puerto cuando el equipo tiene puertos (falta): se marca con un círculo rojo
 //   en la capa #g-inc (fuera de #c: no sale en el PNG), que solo se rehace con los objetos.
 TR.con = (() => {
-  const MEDIO = { utp6: 'utp', fibra: 'fibra', coaxial: 'coaxial', serial: 'serial', inalambrico: 'inalambrico', consola: 'consola', usb: 'usb' };   // subtipo del cable -> medio del puerto
-  const esRed = o => o.k == 'line' && esCable(o) && subDe(o) != 'energia';
+  const MEDIO = { utp6: 'utp', utp5: 'utp', stp6a: 'utp', fibra: 'fibra', coaxial: 'coaxial', serial: 'serial', inalambrico: 'inalambrico', consola: 'consola', usb: 'usb', energia: 'energia' };   // subtipo del cable -> medio del puerto
+  const esRed = o => o.k == 'line' && esCable(o) && subDe(o) != 'energia';   // cable de datos (tipo de cable editable, etiquetas físicas)
+  const conecta = o => o.k == 'line' && esCable(o);                          // cable que lleva conexión con puertos (los de datos y el de energía)
   const nombre = o => o.label || o.n || 'Equipo';
   const grupos = o => { const m = o && modeloDe(o); return m && m.puertos || []; };
   const sirve = (p, cable) => { const m = MEDIO[subDe(cable)]; return !m || !p.tipo || p.tipo == m; };
@@ -44,12 +45,12 @@ TR.con = (() => {
 
   let htmlMarcas = [];                    // [{L, h}]: marcas de las puntas incompletas; marcas() las pasa por el filtro (F10) al dibujarlas
   function sincronizar() {
-    const cx = S.conex || [], cables = S.objs.filter(esRed); htmlMarcas = [];
+    const cx = S.conex || [], cables = S.objs.filter(conecta); htmlMarcas = [];
     if (!cables.length && !cx.length) return;
     const porId = new Map(S.objs.map(o => [o.id, o])), con = new Set(), usados = new Set();
     const vivas = cx.filter(c => {          // R8 (decisión del 13/11/2026): al borrar el cable se borra su conexión
       if (esParche(c)) return true;         // F8B: nació sin ruta (se valida más abajo)
-      c.rutas = c.rutas.filter(id => { const L = porId.get(id); if (!L || !esRed(L) || con.has(id)) return false; con.add(id); return true; });
+      c.rutas = c.rutas.filter(id => { const L = porId.get(id); if (!L || !conecta(L) || con.has(id)) return false; con.add(id); return true; });
       return c.rutas.length;
     });
     let n = vivas.reduce((m, c) => Math.max(m, c.id), 0);
@@ -67,7 +68,7 @@ TR.con = (() => {
       if (!dev) { c[k] = null; delete c['etq' + k.toUpperCase()]; }      // R7: sin equipo en la punta (su etiqueta propia tampoco queda)
       else if (!e || e.d != dev.id) { c[k] = { d: dev.id }; delete c['etq' + k.toUpperCase()]; }   // la punta pasó a otro equipo: el puerto y la etiqueta propia se limpian
       else if (e.p) { const p = puerto(dev, e.p), u = dev.id + '/' + e.p; if (!p || !sirve(p, L) || usados.has(u)) delete e.p; else usados.add(u); }
-      if (!falta(c, k, id => porId.get(id)) || !puntoVisible(L, q)) continue;
+      if (!falta(c, k, id => porId.get(id)) || !puntoVisible(L, q) || !esRed(L)) continue;   // el cable de energía no lleva marca de incompleto
       const p = dev || pt(q); htmlMarcas.push({ L, h: `<circle class="inc" cx="${p.x}" cy="${p.y}" r=".17" fill="none" stroke="#e74c3c" stroke-width=".05" stroke-dasharray=".1 .07" pointer-events="none"/>` });
     } }
     const fin = vivas.filter(c => !rotas.has(c)); if (fin.length) S.conex = fin; else delete S.conex;
@@ -111,7 +112,7 @@ TR.con = (() => {
     }, sinPaso);
     return menuPuertos(dev, byId(idLinea), c[k].p, e || en(dev), p => asignar(c.id, k, p == '-' ? null : p, sinPaso), sinPaso);   // recién dibujado: quien termina con doble clic no debe cerrar el menú ni empezar otro cable
   }
-  const conPuertos = (cable, it) => !!it && esRed(cable) && pidePuerto(it);   // con ese cable, un clic sobre el equipo pide el puerto
+  const conPuertos = (cable, it) => !!it && conecta(cable) && pidePuerto(it);   // con ese cable, un clic sobre el equipo pide el puerto
   function alEmpezar(it, e) {              // primera punta de un cable nuevo (tmp); it = equipo con puertos bajo el clic, si lo hay
     const t = tmp, pedir = o => menuPuertos(o, t, null, e, p => { if (p != '-') t.p0 = p; else delete t.p0; });
     if (it && enRack(it).length) menuEquipos(it, e, o => { t.pts[0].ref = o.id; pedir(o); });   // F8B: sobre un rack, primero el equipo
@@ -157,10 +158,10 @@ TR.con = (() => {
     const c = conexDe(idLinea), e = c && c[k], d = e && byId(e.d); if (!d) return 'sin equipo';
     const p = e.p && puerto(d, e.p); return nombre(d) + ' · ' + (p ? p.nombre : grupos(d).length ? 'sin puerto' : 'no tiene puertos');
   }
-  const firma = o => esRed(o) ? txtExt(o.id, 'a') + '|' + txtExt(o.id, 'b') : '';   // el inspector rehace sus botones cuando cambian los extremos
+  const firma = o => conecta(o) ? txtExt(o.id, 'a') + '|' + txtExt(o.id, 'b') : '';   // el inspector rehace sus botones cuando cambian los extremos
   TR.acc.registrar({ id: 'con-ifs', grupo: 'editar', donde: ['menu', 'insp'], texto: 'Interfaces…', aplica: os => os.length == 1 && os[0].k == 'item' && grupos(os[0]).length > 0, ejecutar: os => abrir(os[0].id) });
   for (const k of ['a', 'b']) TR.acc.registrar({
-    id: 'con-' + k, grupo: 'editar', donde: ['menu', 'insp'], texto: os => `Extremo ${k.toUpperCase()}: ${txtExt(os[0].id, k)}`, aplica: os => os.length == 1 && esRed(os[0]),
+    id: 'con-' + k, grupo: 'editar', donde: ['menu', 'insp'], texto: os => `Extremo ${k.toUpperCase()}: ${txtExt(os[0].id, k)}`, aplica: os => os.length == 1 && conecta(os[0]),
     habilitada: os => { const c = conexDe(os[0].id), d = c && c[k] && byId(c[k].d); return !!d && pidePuerto(d); }, ejecutar: (os, extra) => elegir(os[0].id, k, extra && extra.punto && en(extra.punto))
   });
   // Tipo de cable: un campo como los demás (inspector y menú); cambia nombre, subtipo y trazo (D16: el color es el de su tipo). Los puertos que no sirven para el tipo nuevo se limpian al sincronizar

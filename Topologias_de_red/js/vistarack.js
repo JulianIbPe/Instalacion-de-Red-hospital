@@ -11,10 +11,10 @@ TR.vr = (() => {
   const PX = 196, PS = 7, PP = 9, COLS = 34, NOM = 28;   // puertos: x del primero, lado, paso y cuántos entran por fila; NOM = largo máximo del nombre (lo que entra antes de los puertos)
   const F = 'font-family="Segoe UI,Arial,sans-serif"';
   const el = document.createElement('div'); el.id = 'vrack'; el.hidden = true; el.setAttribute('role', 'dialog'); el.setAttribute('aria-labelledby', 'vr-t');
-  el.innerHTML = '<div class="vr-h"><b id="vr-t"></b><span id="vr-n"></span><button id="vr-png" title="Exportar el interior del rack como imagen PNG">🖼️ PNG</button><button id="vr-x" title="Volver al plano (Esc)">✕ Cerrar</button></div><div id="vr-c"></div>';
+  el.innerHTML = '<div class="vr-h"><b id="vr-t"></b><span id="vr-n"></span><button id="vr-menos" title="Alejar (Ctrl + rueda)">−</button><button id="vr-mas" title="Acercar (Ctrl + rueda)">+</button><button id="vr-png" title="Exportar el interior del rack como imagen PNG">🖼️ PNG</button><button id="vr-x" title="Volver al plano (Esc)">✕ Cerrar</button></div><div id="vr-c"></div>';
   $('#work').appendChild(el);
   const cuerpo = el.querySelector('#vr-c');
-  let id = null, antes = null, mv = null, pend = null;   // id del rack abierto; selección que había al abrir; mv = equipo que se arrastra a otra unidad; pend = {d, p}: primer puerto de un patch cord
+  let id = null, antes = null, mv = null, pend = null, z = 1;   // z = zoom de la vista (1 = entra a lo ancho)   // id del rack abierto; selección que había al abrir; mv = equipo que se arrastra a otra unidad; pend = {d, p}: primer puerto de un patch cord
   const yDe = (n, u, h) => MY + (n - u - h + 1) * UH;   // borde de arriba de un equipo de alto h cuya unidad de abajo es u (la U 1 está abajo)
   const nombre = o => o.label || o.n || 'Equipo';
 
@@ -50,11 +50,20 @@ TR.vr = (() => {
     const oc = TR.rack.ocupadas(r);
     el.querySelector('#vr-t').textContent = 'Rack' + (r.label ? ' · ' + r.label : '');
     el.querySelector('#vr-n').textContent = `${oc}/${TR.rack.usDe(r)} U ocupadas · ` + (pend ? 'elegí el puerto del otro equipo para unirlos con un patch cord' : oc ? 'arrastrá un equipo para cambiarlo de unidad · clic en un puerto y después en otro: patch cord · clic derecho: opciones' : 'para montar un equipo, cerrá esta vista y soltalo sobre el rack en el plano');
-    const s = svgDe(r, true); cuerpo.innerHTML = s.xml; cuerpo.firstElementChild.style.minHeight = s.h / K + 'px';   // nunca más chico que 20 px por unidad: en una ventana baja la vista se desplaza en lugar de achicarse
+    const s = svgDe(r, true); cuerpo.innerHTML = s.xml; aplicarZoom(s.h);
+  }
+  function aplicarZoom(h = cuerpo.firstElementChild.height.baseVal.value) {   // h = alto del PNG; nunca más chico que 20 px por unidad: en una ventana baja la vista se desplaza en lugar de achicarse
+    const sv = cuerpo.firstElementChild; if (!sv) return;
+    Object.assign(sv.style, { minHeight: h / K * z + 'px', width: 100 * z + '%', maxWidth: 1100 * z + 'px', height: z > 1 ? 'auto' : '' });
+  }
+  function zoom(f, cx = cuerpo.clientWidth / 2, cy = cuerpo.clientHeight / 2) {   // cambia el zoom dejando quieto el punto (cx, cy) del panel
+    const nz = Math.min(4, Math.max(1, Math.round(z * f * 100) / 100)); if (nz == z) return;
+    const fx = (cuerpo.scrollLeft + cx) / cuerpo.scrollWidth, fy = (cuerpo.scrollTop + cy) / cuerpo.scrollHeight;
+    z = nz; aplicarZoom(); cuerpo.scrollLeft = fx * cuerpo.scrollWidth - cx; cuerpo.scrollTop = fy * cuerpo.scrollHeight - cy;
   }
   function abrir(rid) {
     const r = byId(rid); if (id != null || !r || !TR.rack.esRack(r) || !esEditable(r)) return false;
-    TR.ctx.cerrar(); antes = { sel, multi }; id = rid; sel = rid; multi = []; selEdge = null; pend = null; el.hidden = false; render(); cuerpo.scrollTop = cuerpo.scrollHeight; return true;   // el rack queda seleccionado: el inspector muestra su etiqueta y sus unidades; se empieza por abajo, donde está la U 1
+    TR.ctx.cerrar(); antes = { sel, multi }; id = rid; z = 1; sel = rid; multi = []; selEdge = null; pend = null; el.hidden = false; render(); cuerpo.scrollTop = cuerpo.scrollHeight; return true;   // el rack queda seleccionado: el inspector muestra su etiqueta y sus unidades; se empieza por abajo, donde está la U 1
   }
   function cerrar() {
     if (id == null) return; id = null; mv = null; pend = null; el.hidden = true;
@@ -86,7 +95,9 @@ TR.vr = (() => {
   const soltar = () => { if (!mv) return; const { o, u } = mv; mv = null; if (byId(o.id) && o.ru && u != o.ru.u) TR.acc.fijar([o.id], 'ruu', u); refrescar(); };   // fijar valida (unidad ocupada = aviso) y guarda un paso; si se rechaza, el dibujo vuelve
   cuerpo.addEventListener('pointerup', soltar); cuerpo.addEventListener('pointercancel', () => { mv = null; refrescar(); });   // arrastre cancelado: no se mueve nada
   el.addEventListener('contextmenu', e => e.preventDefault());
+  cuerpo.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); const b = cuerpo.getBoundingClientRect(); zoom(e.deltaY < 0 ? 1.2 : 1 / 1.2, e.clientX - b.left, e.clientY - b.top); }, { passive: false });   // Ctrl + rueda (o pellizco): la rueda sola sigue desplazando
+  el.querySelector('#vr-mas').onclick = () => zoom(1.5); el.querySelector('#vr-menos').onclick = () => zoom(1 / 1.5);
   el.querySelector('#vr-x').onclick = cerrar; el.querySelector('#vr-png').onclick = png;
 
-  return { abrir, cerrar, refrescar, rack: () => id, svg: () => svgDe(byId(id), false), pendiente: () => pend };
+  return { abrir, cerrar, refrescar, rack: () => id, svg: () => svgDe(byId(id), false), pendiente: () => pend, zoom: () => z };
 })();

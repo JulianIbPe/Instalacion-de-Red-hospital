@@ -2,13 +2,28 @@
 function download(url, name) { const a = document.createElement('a'); a.href = url; a.download = name; a.click(); }
 // Guardar: archivo de proyecto versión 2 (estado + recursos que el proyecto usa). Si el proyecto no pasaría la validación al volver a abrirlo
 // (o las imágenes superan los límites), NO se descarga nada y se explica el motivo; el trabajo en pantalla no se toca.
-function guardarJson() {
+// Pide dónde y con qué nombre guardar (diálogo «Guardar como» del navegador; donde no existe, solo el nombre y la carpeta la decide el navegador).
+// Devuelve true solo si se guardó: cancelar no guarda nada (y «Nuevo» no borra el proyecto).
+let nombreArchivo = 'topologia.json';           // el último usado (o el del archivo abierto): se propone la próxima vez
+async function guardarJson() {
   const r = ESQ.serializar(S, R);
   if (!r.ok) { alert('No se pudo guardar el proyecto.\n\n' + r.error); return false; }
   if (r.avisos.length) console.warn('Al guardar se omitirían campos o valores no válidos:', r.avisos);
-  download(URL.createObjectURL(new Blob([r.texto], { type: 'application/json' })), 'topologia.json'); return true;
+  const blob = new Blob([r.texto], { type: 'application/json' });
+  if (window.showSaveFilePicker) {
+    try {
+      const h = await showSaveFilePicker({ suggestedName: nombreArchivo, types: [{ description: 'Proyecto de topología (.json)', accept: { 'application/json': ['.json'] } }] });
+      const w = await h.createWritable(); await w.write(blob); await w.close(); nombreArchivo = h.name; return true;
+    } catch (e) {
+      if (e.name == 'AbortError') return false;   // canceló el diálogo
+      console.warn('«Guardar como» no disponible, se usa la descarga:', e);
+    }
+  }
+  let n = prompt('Nombre del archivo:', nombreArchivo); if (n === null) return false;
+  n = n.replace(/[\\/:*?"<>|]+/g, '_').trim() || 'topologia'; if (!/\.json$/i.test(n)) n += '.json';
+  nombreArchivo = n; download(URL.createObjectURL(blob), n); return true;
 }
-$('#save').onclick = guardarJson;
+$('#save').onclick = () => { guardarJson(); };
 
 // ---------- Archivo nuevo ----------
 function nuevoArchivo() {                       // vacía todo y deja la página como al abrirla (la unidad de medición se conserva)
@@ -18,7 +33,7 @@ function nuevoArchivo() {                       // vacía todo y deja la página
 }
 const dlg = $('#dlg'), cerrarDlg = () => { dlg.hidden = true; };
 $('#bnew').onclick = () => { if (!S.objs.length) return nuevoArchivo(); dlg.hidden = false; $('#dcancel').focus(); };   // si no hay nada dibujado, no pregunta
-$('#dsave').onclick = () => { if (!guardarJson()) return; cerrarDlg(); nuevoArchivo(); };   // si no se pudo guardar, no se borra nada
+$('#dsave').onclick = async () => { if (!(await guardarJson())) return; cerrarDlg(); nuevoArchivo(); };   // si no se pudo guardar, no se borra nada
 $('#ddisc').onclick = () => { cerrarDlg(); nuevoArchivo(); };
 $('#dcancel').onclick = cerrarDlg;
 dlg.onclick = e => { if (e.target == dlg) cerrarDlg(); };
@@ -49,7 +64,7 @@ function abrirTexto(t) {                        // devuelve {ok, avisos} o {ok:f
 $('#file').onchange = e => {
   const f = e.target.files[0]; if (!f) return;
   f.text().then(t => {
-    const r = abrirTexto(t);
+    const r = abrirTexto(t); if (r.ok) nombreArchivo = f.name;   // al volver a guardar se propone el mismo nombre
     if (!r.ok) alert('No se pudo abrir el archivo. Tu proyecto actual no se modificó.\n\n' + r.errores.slice(0, 8).join('\n'));
     else if (r.avisos.length) alert('El archivo se abrió, pero se corrigieron algunos valores:\n\n' + r.avisos.slice(0, 8).join('\n'));
   }).catch(() => alert('No se pudo leer el archivo. Tu proyecto actual no se modificó.'));

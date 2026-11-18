@@ -8,8 +8,8 @@
 TR.mod = (() => {
   const CTRL = ESQ.CTRL, CORTO = ESQ.LIM.corto, MAX_PUERTOS = 96, MAX_PROPIOS = 200, MONEDAS = ['ARS', 'USD', 'EUR'];   // los valores los valida esquema.js (ESQ.campoModelo); aquí solo hay límites de interfaz, más estrictos
   // Tipos de puerto del diálogo (lista aprobada el 11/11/2026): [clave, nombre visible, medio, velocidad]
-  const TP = [['fe', 'FastEthernet', 'utp', '100M'], ['ge', 'GigabitEthernet', 'utp', '1G'], ['serial', 'Serial', 'serial'], ['fibra', 'Fibra', 'fibra'], ['consola', 'Consola/RS-232', 'consola'],
-    ['usb', 'USB', 'usb'], ['coaxial', 'Coaxial', 'coaxial'], ['wifi', 'Inalámbrico', 'inalambrico'], ['bt', 'Bluetooth', 'bluetooth'], ['cel', '3G/4G', 'celular'], ['libre', 'Nombre libre', 'utp']];
+  const TP = [['fe', 'FastEthernet', 'utp', '100M'], ['ge', 'GigabitEthernet', 'utp', '1G'], ['mge', 'Ethernet Multigigabit', 'utp', 'mGig'], ['serial', 'Serial', 'serial'], ['fibra', 'Fibra', 'fibra'], ['consola', 'Consola/RS-232', 'consola'],
+    ['usb', 'USB', 'usb'], ['coaxial', 'Coaxial', 'coaxial'], ['wifi', 'Inalámbrico', 'inalambrico'], ['bt', 'Bluetooth', 'bluetooth'], ['cel', '3G/4G', 'celular'], ['energia', 'Energía', 'energia'], ['libre', 'Nombre libre', 'utp']];
   const tpDe = p => TP.find(t => t[2] == p.tipo && (t[3] || '') == (p.vel || '')) || TP[TP.length - 1];
   const catDe = id => CATS.find(c => c.id == id);
   const usan = id => S.objs.filter(o => o.modelo == id);

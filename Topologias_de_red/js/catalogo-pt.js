@@ -2,7 +2,7 @@
 // CATS: subsecciones de la pestaña «Dispositivos». `uno` = nombre en singular: solo las categorías de red lo tienen, y con él su «… Empty»
 //       (modelos propios, ver modelos.js); también es el prefijo del nombre de los equipos de un modelo propio. `sub` = subtipo estable de esos equipos; `ic` = icono con que se dibujan.
 // PT:   plantillas. `orig` = clave del modelo (igual al nombre de su icono en iconos/); `corto` = línea que se ve bajo el equipo; `pre` = prefijo del
-//       nombre automático («Router1»); puertos = grupos {g, n, tipo (medio), vel, pref (nombre visible)}. Al colocar un equipo, su plantilla se copia
+//       nombre automático («Router1»); puertos = grupos {g, n, tipo (medio), vel, pref (nombre visible)}; todos llevan al final un puerto «Energía» (tipo 'energia') para el cable de energía. Al colocar un equipo, su plantilla se copia
 //       una sola vez a R.modelos (modelos.js): el proyecto queda completo aunque esta lista cambie.
 // Tamaños: medidas reales promedio en metros (SEGUIMIENTO.md, sección 5); ningún equipo nace con su lado mayor menor a 0,30 m (se agranda en proporción).
 const CATS = [
@@ -14,7 +14,7 @@ const PT = (() => {
   const P = (n, pref, tipo = 'utp', vel) => ({ n, tipo, ...(vel ? { vel } : {}), pref });   // mismo orden de campos que deja esquema.js al abrir un archivo
   const FE = n => P(n, 'FastEthernet', 'utp', '100M'), GE = n => P(n, 'GigabitEthernet', 'utp', '1G');
   const r2 = v => +v.toFixed(2), MIN = .3;
-  const M = (orig, cat, nombre, corto, pre, sub, w, h, puertos) => { const k = Math.max(1, MIN / Math.max(w, h)); return { orig, cat, nombre, corto, pre, tipo: 'dispositivo', sub, w: r2(w * k), h: r2(h * k), puertos: puertos.map((p, i) => ({ g: 'g' + i, ...p })), v: 1 }; };
+  const M = (orig, cat, nombre, corto, pre, sub, w, h, puertos) => { const k = Math.max(1, MIN / Math.max(w, h)); return { orig, cat, nombre, corto, pre, tipo: 'dispositivo', sub, w: r2(w * k), h: r2(h * k), puertos: [...puertos, P(1, 'Energía', 'energia')].map((p, i) => ({ g: 'g' + i, ...p })), v: 1 }; };
   const pc = () => [P(1, 'RS-232', 'consola'), P(2, 'USB', 'usb'), FE(1)], movil = () => [P(1, 'Wireless0', 'inalambrico'), P(1, '3G/4G Cell1', 'celular'), P(1, 'Bluetooth', 'bluetooth')];
   const iot = (orig, nombre, w, h, corto = nombre) => M('iot-' + orig, 'iot', nombre, corto, 'IoT', 'iot', w, h, [P(1, 'Wireless0', 'inalambrico'), P(1, 'Bluetooth', 'bluetooth')]);
   return [

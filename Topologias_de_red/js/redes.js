@@ -19,7 +19,7 @@
 TR.red = (() => {
   const COLORES = ['#2e86de', '#27ae60', '#e67e22', '#8e44ad', '#c0392b', '#16a085', '#7f8c8d', '#d35400'], MAX = 500, MAX_ID = 999999;   // MAX_ID: el esquema admite ids hasta r999999
   const nombre = o => o.label || o.n || 'Equipo';
-  const corto = p => p.nombre.replace(/^GigabitEthernet ?/, 'Gi').replace(/^FastEthernet ?/, 'Fa');
+  const corto = p => p.nombre.replace(/^GigabitEthernet ?/, 'Gi').replace(/^FastEthernet ?/, 'Fa').replace(/^Ethernet Multigigabit ?/, 'mGig');
 
   // ---------- Redes automáticas ----------
   const ENRUTAN = ['router', 'firewall'], CONMUTAN = ['switch', 'punto-acceso', 'inalambrico'];
@@ -30,7 +30,7 @@ TR.red = (() => {
     if (s == 'router-hogar') return pid && String(pid).startsWith('g0:') ? 'l3' : 'l2';   // por el grupo del puerto, no por su nombre visible
     return CONMUTAN.includes(s) ? 'l2' : 'fin';
   }
-  const cuenta = (c, get = byId) => !TR.con.falta(c, 'a', get) && !TR.con.falta(c, 'b', get) && !['consola', 'usb'].includes(TR.con.esParche(c) ? (TR.con.puerto(get(c.a.d), c.a.p) || {}).tipo : subDe(get(c.rutas[0])));   // la conexión forma red: completa y por un cable que no es de consola ni USB
+  const cuenta = (c, get = byId) => !TR.con.falta(c, 'a', get) && !TR.con.falta(c, 'b', get) && !['consola', 'usb', 'energia'].includes(TR.con.esParche(c) ? (TR.con.puerto(get(c.a.d), c.a.p) || {}).tipo : subDe(get(c.rutas[0])));   // la conexión forma red: completa y por un cable que no es de consola, USB ni energía
   function automaticas() {                 // {redes: [{nombre, puertos: [{d, p}], equipos: [ids], texto}], redDe(o, pid) -> nombre de la red de ese puerto}
     const porId = new Map(S.objs.map(o => [o.id, o])), get = id => porId.get(id), padre = new Map(), l3 = new Map(), enlaces = [];
     const raiz = k => { while (padre.get(k) !== k) k = padre.get(k); return k; };

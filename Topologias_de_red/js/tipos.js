@@ -5,10 +5,10 @@
 // sub  = variante estable (p. ej. 'router', 'utp6', 'circulo'). Las escaleras mantienen su variante en o.t (sin t = recta, 'descanso', 'espiral').
 // derivarTipo() es el ÚNICO lugar donde los nombres visibles se traducen a tipos (objetos de proyectos antiguos y piezas aún sin tipo).
 const TIPOS = {
-  pared: { k: 'line' }, cable: { k: 'line' }, linea: { k: 'line' }, dispositivo: { k: 'item' }, rack: { k: 'item' }, escalera: { k: 'item' }, ascensor: { k: 'item' }, ventana: { k: 'item' }, imagen: { k: 'item' }, mesa: { k: 'item' },   // imagen = imagen suelta en el plano (F4B); linea = lado de una forma que no es pared (lote C): ni pared ni cable, su sub es el tipo de línea (LINEAS de formas.js)
+  pared: { k: 'line' }, canal: { k: 'line' }, cable: { k: 'line' }, linea: { k: 'line' }, dispositivo: { k: 'item' }, rack: { k: 'item' }, escalera: { k: 'item' }, ascensor: { k: 'item' }, ventana: { k: 'item' }, imagen: { k: 'item' }, mesa: { k: 'item' },   // imagen = imagen suelta en el plano (F4B); linea = lado de una forma que no es pared (lote C): ni pared ni cable, su sub es el tipo de línea (LINEAS de formas.js)
   puerta: { k: 'puerta' }, forma: { k: 'shape' }, zona: { k: 'zona' }, texto: { k: 'texto' }, medida: { k: 'medida' }
 };
-const SUB_CABLE = { 'UTP Cat6': 'utp6', 'Fibra óptica': 'fibra', 'Coaxial': 'coaxial', 'Serial': 'serial', 'Inalámbrico': 'inalambrico', 'Consola': 'consola', 'USB': 'usb', 'Cable de energía': 'energia' };
+const SUB_CABLE = { 'UTP Cat6': 'utp6', 'UTP Cat5': 'utp5', 'STP Cat6A (blindado)': 'stp6a', 'Fibra óptica': 'fibra', 'Coaxial': 'coaxial', 'Serial': 'serial', 'Inalámbrico': 'inalambrico', 'Consola': 'consola', 'USB': 'usb', 'Cable de energía': 'energia' };
 const SUB_FORMA = { 'Rectángulo': 'rectangulo', 'Círculo': 'circulo', 'Triángulo': 'triangulo', 'Rombo': 'rombo', 'Hexágono': 'hexagono' };
 const SUB_DISPOSITIVO = {
   'Router': 'router', 'Switch': 'switch', 'Servidor': 'servidor', 'PC': 'pc', 'Firewall': 'firewall', 'Punto de acceso': 'punto-acceso', 'Impresora': 'impresora',
@@ -16,7 +16,7 @@ const SUB_DISPOSITIVO = {
 };
 function derivarTipo(o) {                // {tipo, sub?} a partir de la clase k y, solo para objetos sin tipo, del nombre visible
   switch (o.k) {
-    case 'line': return o.n == 'Pared' ? { tipo: 'pared' } : { tipo: 'cable', sub: SUB_CABLE[o.n] || 'otro' };
+    case 'line': return o.n == 'Pared' ? { tipo: 'pared' } : o.n == 'Canalización metálica' ? { tipo: 'canal' } : { tipo: 'cable', sub: SUB_CABLE[o.n] || 'otro' };
     case 'shape': return { tipo: 'forma', sub: SUB_FORMA[o.n] || 'otro' };
     case 'zona': return { tipo: 'zona', sub: o.s == 'e' ? 'e' : 'r' };
     case 'texto': return { tipo: 'texto' };
@@ -37,10 +37,11 @@ const tipoDe = o => o.tipo || derivarTipo(o).tipo;
 const subDe = o => o.sub || derivarTipo(o).sub;
 const esPared = o => tipoDe(o) == 'pared';
 const esCable = o => tipoDe(o) == 'cable';
+const esCanal = o => tipoDe(o) == 'canal';      // bandeja o canalización metálica: los cables pasan por encima (ni pared ni cable: sin puertos ni red)
 const esEscalera = o => tipoDe(o) == 'escalera';
 const esAscensor = o => tipoDe(o) == 'ascensor';
 const esImagen = o => tipoDe(o) == 'imagen';     // imagen suelta en el plano (imagenes.js)
 const esMesa = o => tipoDe(o) == 'mesa';       // mesa con puestos (jerarquia.js)
 const esCirculo = o => o.k == 'shape' && subDe(o) == 'circulo';
-const claveLinea = o => esPared(o) ? 'pared' : subDe(o);   // las líneas del mismo tipo comparten nodos (ver nodos.js)
+const claveLinea = o => esPared(o) ? 'pared' : esCanal(o) ? 'canal' : subDe(o);   // las líneas del mismo tipo comparten nodos (ver nodos.js)
 function normalizarTipos() { S.objs.forEach(completarTipo); }

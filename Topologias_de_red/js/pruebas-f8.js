@@ -36,6 +36,23 @@
       TR.vr.cerrar(); afirmar(!esEditable(byId(2)), 'al cerrar la vista deja de ser editable');
     });
   });
+  prueba('Alto en rack: un equipo suelto ofrece «Alto en rack (U)», se monta con ese alto y lo conserva al desmontarse', () => {
+    con([rack(1, 4, 4, { us: 6 }), pc(2, 8, 4)], () => {
+      const e = byId(2); afirmar(TR.acc.campo('ruh').aplica(e), 'el equipo suelto no ofrece el campo'); afirmar(!TR.acc.campo('ruh').aplica(byId(1)), 'el rack no debe ofrecerlo');
+      afirmar(TR.acc.fijar([2], 'ruh', '3').ok); ser(e.uh, 3, 'guarda el alto elegido'); afirmar(!TR.acc.fijar([2], 'ruh', '0').ok, 'acepta 0 U');
+      arrastrarObj(2, 4, 4.1); igual([e.ru, e.uh], [{ u: 1, h: 3 }, undefined], 'se monta con 3 U');
+      afirmar(TR.vr.abrir(1), 'no abrió la vista'); sel = 2; multi = []; afirmar(TR.acc.ejecutar('rack-sacar'), 'no desmontó'); igual([e.ru, e.uh], [undefined, 3], 'al desmontarse conserva el alto');
+    });
+  });
+  prueba('Zoom del rack: Ctrl + rueda y los botones agrandan la vista (de 1 a 4), la rueda sola no; al reabrir vuelve a 1', () => {
+    con([rack(1, 4, 4), en(2, 1)], () => {
+      afirmar(TR.vr.abrir(1)); const c = $('#vr-c'), w0 = c.firstElementChild.getBoundingClientRect().width, rueda = ctrlKey => c.dispatchEvent(new WheelEvent('wheel', { deltaY: -100, ctrlKey, bubbles: true, cancelable: true }));
+      rueda(false); ser(TR.vr.zoom(), 1, 'la rueda sola no hace zoom'); rueda(true); ser(TR.vr.zoom(), 1.2, 'Ctrl + rueda acerca');
+      afirmar(c.firstElementChild.getBoundingClientRect().width > w0 * 1.1, 'el dibujo no se agrandó');
+      for (let i = 0; i < 6; i++) $('#vr-mas').click(); ser(TR.vr.zoom(), 4, 'tope de 4'); for (let i = 0; i < 6; i++) $('#vr-menos').click(); ser(TR.vr.zoom(), 1, 'piso de 1');
+      $('#vr-mas').click(); TR.vr.cerrar(); TR.vr.abrir(1); ser(TR.vr.zoom(), 1, 'al reabrir vuelve a 1');
+    });
+  });
   prueba('Fase 8A: doble clic abre la vista del rack; arrastrar cambia de unidad; Ctrl+Z / Ctrl+Y actúan con la vista abierta y R no; «Desmontar» devuelve el equipo al plano; al cerrar vuelven selección, vista y herramienta (R10)', () => {
     con([rack(1, 4, 4, { us: 6, label: 'R1' }), en(2, 1, { label: 'PC-A' }), pc(3, 8, 4)], () => {
       lastDown.t = 0; clicObj(1); clicObj(1); ser(TR.vr.rack(), 1, 'el doble clic no abrió la vista'); afirmar(!$('#vrack').hidden && $('#vr-t').textContent.includes('R1'), 'vista'); ser(sel, 1, 'el inspector muestra el rack'); TR.vr.cerrar();

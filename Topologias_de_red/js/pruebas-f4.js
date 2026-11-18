@@ -89,7 +89,7 @@
       delete R.modelos.m4; const ab = abrirTexto(a.texto); afirmar(ab.ok, (ab.errores || []).join(' | ')); ser(Object.keys(R.modelos).length, 3, 'reabrir el mismo archivo no debe duplicar modelos');
       const orden = t => JSON.stringify(JSON.parse(t), (k, v) => v && typeof v == 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort()) : v), b = ESQ.serializar(S, R).texto;   // al abrir, cada objeto queda con id y k primero: se compara sin mirar el orden de los campos
       ser(orden(b), orden(a.texto), 'la ida y vuelta perdió o cambió algún campo'); ser(ESQ.serializar(ESQ.leer(b).estado, R).texto, b, 'guardar → abrir → guardar debe dar el mismo archivo'); afirmar($('#items [data-m="m1"]'), 'el modelo propio debe volver al menú al abrir');
-      R.vaciar(); const ab2 = abrirTexto(a.texto); afirmar(ab2.ok); igual([R.modelos.m2.precio, R.modelos.m2.puertos.length, R.modelos.m1.nombre], [250, 2, 'Sin uso'], 'abrir en limpio');
+      R.vaciar(); const ab2 = abrirTexto(a.texto); afirmar(ab2.ok); igual([R.modelos.m2.precio, R.modelos.m2.puertos.length, R.modelos.m1.nombre], [250, 3, 'Sin uso'], 'abrir en limpio');
       d.estado.propios = ['m1', 'm9', 'x']; afirmar(!ESQ.leer(JSON.stringify(d)).estado.propios, 'una lista de modelos propios inválida se omite'); d.estado.propios = ['m1', 'm9'];
       const r2 = ESQ.leer(JSON.stringify(d)); afirmar(r2.ok && r2.avisos.length == 1, 'debe avisar'); igual(r2.estado.propios, ['m1'], 'modelo propio inexistente');
     });

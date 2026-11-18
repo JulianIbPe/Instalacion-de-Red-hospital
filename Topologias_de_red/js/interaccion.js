@@ -19,13 +19,13 @@ function orto(a, p) {                    // Mayús: lleva p a la horizontal, la 
 }
 function soltarArrastre() {              // fin de un arrastre (soltar o puntero cancelado): una escalera que quedó en un lugar no válido descarta el paso del arrastre
   if (drag && drag.pu && drag.antes && revisarEscalerasMovidas(drag.os, drag.antes)) descartarPaso(drag.fut);
-  else if (drag && drag.pu) TR.jer.alSoltarArrastre(drag);   // F6: anclar o desanclar equipos de las mesas; un giro que no entra en su mesa se descarta
+  else if (drag && drag.pu) { if (drag.m == 'h' && drag.o.k == 'line') empalmar(drag.o); TR.jer.alSoltarArrastre(drag); }   // F6: anclar o desanclar equipos de las mesas; un giro que no entra en su mesa se descarta
   drag = null; render();
 }
 function finishLine() {
   if (!tmp || tmp.k != 'line') return; const q = tmp.pts, a = q[q.length - 1], b = q[q.length - 2];
   if (b && Math.hypot(a.x - b.x, a.y - b.y) < .05 && !a.ref && !a.es) q.pop();
-  if (q.length > 1) { delete tmp.cur; add(tmp); } tmp = null; render();
+  if (q.length > 1) { delete tmp.cur; add(tmp); empalmar(tmp); } tmp = null; render();   // empalmar después de add: el vértice nuevo del otro cable entra en el mismo paso
 }
 svg.addEventListener('pointerdown', e => {
   svg.setPointerCapture(e.pointerId); let p = toW(e); avisoMsg = '';
@@ -45,6 +45,10 @@ svg.addEventListener('pointerdown', e => {
     if (fl) { drag = null; irPlanta(fl == 'baja' ? -1 : 1); return; }
     if (!tool && o && esAscensor(o) && !e.altKey) {                 // ascensor: sube (o baja si ya es la planta más alta); Alt+doble clic = etiqueta
       const i = S.plantas.findIndex(p => p.id == S.plantaAct); drag = null; irPlanta(i < S.plantas.length - 1 || i < 1 ? 1 : -1); return;
+    }
+    if (!tool && o && o.k == 'line' && esCable(o) && !e.target.closest('[data-h]')) {   // doble clic en un tramo de cable: nodo nuevo ahí, ya agarrado para plegar el cable (un paso)
+      const t = tramoEnergia(p, 18 / V.z, [o]);
+      if (t) { push(); const i = insertarVertice(o, t); sel = o.id; multi = []; arrastrar({ m: 'h', o, h: String(i), p0: p, pu: 1 }); render(); return; }
     }
     if (!tool && o && TR.rack.esRack(o)) { drag = null; TR.vr.abrir(o.id); return; }   // F8: doble clic en un rack abre su vista (la etiqueta se edita en el menú o el inspector)
     if (!tool && o && o.k != 'medida') { const v = prompt('Etiqueta:', o.label || ''); if (v !== null && v !== (o.label || '')) { push(); o.label = v; drag = null; render(); } return; }
@@ -83,7 +87,7 @@ svg.addEventListener('pointerdown', e => {
   }
   else if (tool.k == 'line') {
     snapPt = null; snapNodo = null; snapMedio = false; imanNodos(rawW(e)); if (!snapPt) imanMedio(rawW(e));   // los imanes miden la distancia con el cursor real, no con el punto ya ajustado a la grilla
-    const it = itemAt(e); let q = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p;   // nodo del mismo tipo > dispositivo > punto libre
+    const it = itemAt(e); let q = snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : snapPt ? { x: snapPt.x, y: snapPt.y } : p;   // nodo del mismo tipo > dispositivo > eje de una canalización > punto libre
     if (e.shiftKey && tmp && tmp.k == 'line') q = orto(pt(tmp.pts[tmp.pts.length - 1]), p);   // Mayús: tramo recto (punto libre, sin uniones)
     { const m = q.ref && byId(q.ref); if (m && m.ru) q.ref = m.parent; }   // F8B: el nodo de otro cable que termina en un equipo montado está en el centro del rack: se une al rack, que pregunta a cuál de sus equipos
     const dev = q.ref ? byId(q.ref) : null, conP = TR.con.conPuertos(tool, dev);   // F7A: un cable de red unido a un equipo con puertos pide el puerto (conexiones.js); el equipo es el de la unión, no el que está bajo el cursor (el imán de nodos puede unir desde fuera del icono)
@@ -126,7 +130,7 @@ svg.addEventListener('pointermove', e => {
       else if (o.k == 'item') (esImagen(o) || e.shiftKey ? redimProporcional : redimensionarRot)(o, d.h, p, d.ar ||= o.w / o.h);   // escaleras e imágenes sueltas (las esquinas de una imagen conservan la proporción que tenía al empezar el arrastre)
       else if (o.k == 'shape') { if (String(d.h)[0] == 'v') moverVertice(o, +String(d.h).slice(1), snapMedio ? q : p); else (e.shiftKey ? redimProporcional : redimensionarRot)(o, d.h, p, d.ar ||= o.w / o.h); }   // Mayús en una esquina: conserva la proporción
       else if (o.k == 'medida') { if (d.h == 'o') o.off = offDe(o, p); else o[d.h] = q; }
-      else { const it = itemAt(e), nb = o.pts[d.h - 1] || o.pts[d.h + 1], v = e.shiftKey && nb ? orto(pt(nb), p) : snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : p, antes = o.pts[d.h];   // Mayús: el tramo hasta el punto vecino queda recto (punto libre)
+      else { const it = itemAt(e), nb = o.pts[d.h - 1] || o.pts[d.h + 1], v = e.shiftKey && nb ? orto(pt(nb), p) : snapNodo ? enlaceDe(snapNodo, snapPt) : snapMedio ? { x: snapPt.x, y: snapPt.y } : it ? { x: it.x, y: it.y, ref: it.id } : snapPt ? { x: snapPt.x, y: snapPt.y } : p, antes = o.pts[d.h];   // Mayús: el tramo hasta el punto vecino queda recto (punto libre)
         if (antes.pl) { v.pl = antes.pl; v.cp = antes.cp; }
         if (d.r0 === undefined) d.r0 = antes.ref || null;                 // unión que tenía la punta al empezar el arrastre
         if (v.ref != null && d.r0 && (byId(d.r0) || {}).parent == v.ref) v.ref = d.r0;   // F8: sigue sobre el rack de su equipo montado (que no está en el plano): conserva el equipo y, con él, el puerto

@@ -19,10 +19,10 @@ function draw(o) {
     else if (im || m) {                                             // F4A: equipo con modelo = su icono sin recuadro (el rect transparente solo recibe los clics) y debajo dos líneas: modelo y nombre del equipo. F4B: si hay imagen (del equipo o de su modelo), va en lugar del icono, sin deformarse
       const ri = esImagen(o) && R.imgs[im];               // la imagen suelta sí se estira: llena todo su rectángulo (ver asas más abajo)
       h = `<g ${id} transform="translate(${o.x} ${o.y}) rotate(${o.rot || 0})"><rect x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}" fill="transparent"/>${ri ? `<use href="#im-${im}" width="${ri.w}" height="${ri.h}" transform="translate(${-o.w / 2} ${-o.h / 2}) scale(${o.w / ri.w} ${o.h / ri.h})"/>` : `<use href="#${im ? 'im-' + im : 'ic-' + iconoDe(m)}" x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}"/>`}</g>`;
-      let y = bboxDe(o).y1 + .3; if (m) { h += T(o.x, y, m.corto || m.nombre); y += .32; } if (o.label) h += T(o.x, y, o.label);
+      let y = bboxDe(o).y1 + .3; if (conNombre(o)) { if (m) { h += T(o.x, y, m.corto || m.nombre); y += .32; } if (o.label) h += T(o.x, y, o.label); }
     } else {
     h = `<g ${id} transform="translate(${o.x} ${o.y}) rotate(${o.rot || 0})"><rect x="${-o.w / 2}" y="${-o.h / 2}" width="${o.w}" height="${o.h}" rx=".08" fill="#fff" stroke="#34495e" stroke-width=".04"/><text font-size="${Math.min(o.w, o.h) * .65}" text-anchor="middle" dominant-baseline="central">${o.ic || ''}</text></g>`;
-    if (o.label) h += T(o.x, bboxDe(o).y1 + .3, o.label);
+    if (o.label && conNombre(o)) h += T(o.x, bboxDe(o).y1 + .3, o.label);
     }
     h += TR.rack.rotulo(o);   // F8: unidades ocupadas de un rack con equipos
     if (on && !esEscalera(o)) h += `<rect x="${o.x - o.w / 2 - .1}" y="${o.y - o.h / 2 - .1}" width="${o.w + .2}" height="${o.h + .2}" fill="none" stroke="#e0a030" stroke-dasharray=".15 .1" stroke-width=".04" transform="rotate(${o.rot || 0} ${o.x} ${o.y})" pointer-events="none"/>`;
@@ -33,6 +33,7 @@ function draw(o) {
     const P = o.pts.map(pt); if (o.cur) P.push(o.cur);
     const s = P.map(q => `${q.x},${q.y}`).join(' ');
     h = `<polyline points="${s}" fill="none" stroke="${o.c}" stroke-width="${o.w}" stroke-dasharray="${o.d}" stroke-linecap="round" stroke-linejoin="round"/><polyline ${id} points="${s}" fill="none" stroke="transparent" stroke-width="${Math.max(.3, o.w)}" pointer-events="stroke"/>`;
+    if (esCanal(o)) h = `<polyline points="${canalPts(o, P, .5)}" fill="none" stroke="${o.c}" stroke-width="${o.w}" stroke-linejoin="round"/>${o === tmp ? canalInterior(o, P) : ''}<polyline ${id} points="${s}" fill="none" stroke="transparent" stroke-width="${o.w}" pointer-events="stroke"/>`;   // bandeja: solo el borde; el fondo claro va encima de todas las del grupo (canalInterior)
     const runs = esPared(o) ? tramosPared(o) : null; if (runs) h = paredConHuecos(o, runs, id);   // paredes con puertas: se dibujan con huecos
     if (o.label) { const m = P[P.length >> 1]; h += T(m.x, m.y - .2, o.label); }
     if (on) h += P.map((q, i) => hd(q.x, q.y, i)).join('');
@@ -45,13 +46,35 @@ function draw(o) {
   }
   return h;
 }
+let verNombres = true;                    // botón «Nombres»: muestra u oculta el modelo y el nombre de los equipos (vista: no se guarda en el proyecto)
+const conNombre = o => verNombres || !['dispositivo', 'rack'].includes(tipoDe(o));
+$('#bnom').onclick = () => { verNombres = !verNombres; const b = $('#bnom'); b.classList.toggle('on', verNombres); b.setAttribute('aria-pressed', verNombres); render(); };
 const modeloDe = o => o.modelo ? R.modelos[o.modelo] : undefined;       // plantilla del equipo (recursos.js), si tiene
 const iconoDe = m => Object.hasOwn(ICONOS, m.orig || '') ? m.orig : m.orig == 'propio' ? (CATS.find(c => c.id == m.cat) || {}).ic || 'empty' : 'generico';   // clave de su dibujo en iconos.js; un modelo propio usa el icono de su categoría
 const imagenDe = o => { const m = modeloDe(o); return [o.img, m && m.img].find(i => i && R.imgs[i]); };   // F4B: imagen que se dibuja (la del equipo le gana a la de su modelo); undefined = icono o emoji
 // Las imágenes usadas se definen una sola vez en este <defs>, que se conserva entre redibujos (solo se rehace si cambia qué imágenes se usan): así no se vuelven a procesar al arrastrar
 const defsImg = document.createElementNS('http://www.w3.org/2000/svg', 'defs'); let claveImg = '';
 const ORD = { zona: 0, shape: 1, line: 2, puerta: 2.5, item: 3, texto: 4, medida: 5 };
-const ordDe = o => esImagen(o) ? -1 : esMesa(o) ? 1.5 : ORD[o.k];   // la imagen suelta va debajo de todo lo de su capa (sirve de fondo: no tapa paredes ni cables ni les quita los clics); la mesa, debajo de cables y equipos (sus equipos se ven encima)
+// Canalizaciones: en cada grupo seguido (misma capa) se pintan primero todos los bordes y después todos los fondos claros, así las uniones se ven como una sola bandeja.
+// Las puntas unidas a otra canalización se alargan (el borde medio ancho, el fondo hasta su borde) para cerrar esquinas y T.
+function canalPts(o, P, f) {
+  const unida = i => !!(o.pts[i] && (o.pts[i].rl || o.pts[i].emp)) || o.id != null && S.objs.some(L => L.k == 'line' && esCanal(L) && L.pts.some(q => q.rl == o.id && q.ri == i));
+  const Q = P.map(q => ({ ...q })), n = Q.length - 1;
+  for (const [i, j] of [[0, 1], [n, n - 1]]) {
+    if (n < 1 || !unida(i)) continue; const dx = Q[i].x - P[j].x, dy = Q[i].y - P[j].y, l = Math.hypot(dx, dy); if (!l) continue;
+    Q[i].x += dx / l * o.w * f; Q[i].y += dy / l * o.w * f;
+  }
+  return Q.map(q => `${q.x},${q.y}`).join(' ');
+}
+const aclarar = c => '#' + [1, 3, 5].map(i => Math.round(parseInt(c.slice(i, i + 2), 16) * .45 + 255 * .55).toString(16).padStart(2, '0')).join('');   // opaco: los fondos que se pisan no se ven más claros
+const canalInterior = (o, P = o.pts.map(pt)) => `<polyline points="${canalPts(o, P, .3)}" fill="none" stroke="${aclarar(o.c)}" stroke-width="${o.w * .6}" stroke-linejoin="round" pointer-events="none"/>`;
+function fondosCanal(all, i) {            // al terminar un grupo seguido de canalizaciones de la misma capa: los fondos claros de todo el grupo
+  const mismo = (a, b) => a && b && esCanal(a) && esCanal(b) && rangoCapa(a) == rangoCapa(b);
+  if (!esCanal(all[i]) || mismo(all[i], all[i + 1])) return '';
+  let k = i; while (mismo(all[k - 1], all[i])) k--;
+  return all.slice(k, i + 1).map(o => TR.fil.envolver(o, esEditable(o) ? canalInterior(o) : `<g opacity=".55">${canalInterior(o)}</g>`)).join('');
+}
+const ordDe = o => esImagen(o) ? -1 : esMesa(o) ? 1.5 : esCanal(o) ? 1.8 : ORD[o.k];   // la canalización, debajo de los cables que pasan por ella; la imagen suelta va debajo de todo lo de su capa (sirve de fondo: no tapa paredes ni cables ni les quita los clics); la mesa, debajo de cables y equipos (sus equipos se ven encima)
 let asasOut = [], hitsOut = [];           // asas de edición de lo seleccionado y zonas de clic de los cables dentro de escaleras (se agregan después de todos los objetos, para quedar por encima)
 
 // ---------- Renderizado en capas (Fase 1) ----------
@@ -94,7 +117,7 @@ function renderObjetos() {                // objetos del proyecto (lo que se exp
   const pats = all.filter(o => o.f == 'hat').map(patronHat).join('')   // cada icono usado se define una sola vez dentro de #c (así el PNG exportado lo incluye) y los equipos lo reutilizan con <use>
     + [...new Set(all.map(modeloDe).filter(Boolean).map(iconoDe))].map(k => `<symbol id="ic-${k}" viewBox="0 0 96 96">${ICONOS[k]}</symbol>`).join('');
   const edif = `<rect x="0" y="0" width="${E.w}" height="${E.h}" fill="none" stroke="#17262c" stroke-width=".08" stroke-dasharray=".4 .2"/>` + T(E.w / 2, -.25, E.w + ' m', .4) + `<text x="-.3" y="${E.h / 2}" font-size=".4" text-anchor="middle" transform="rotate(-90 -.3 ${E.h / 2})" fill="#17262c" font-family="Segoe UI,Arial,sans-serif">${E.h} m</text>`;
-  capas.c.innerHTML = `<defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map(o => esEditable(o) ? TR.fil.envolver(o, draw(o)) + resaltar(o) : TR.fil.envolver(o, `<g pointer-events="none" opacity=".55">${draw(o) + resaltar(o)}</g>`)).join('')}${TR.red.etiquetas()}${hitsOut.join('')}${asasOut.join('')}`;
+  capas.c.innerHTML = `<defs>${pats}</defs>${edif}${escalerasFantasma()}${all.map((o, i) => (esEditable(o) ? TR.fil.envolver(o, draw(o)) + resaltar(o) : TR.fil.envolver(o, `<g pointer-events="none" opacity=".55">${draw(o) + resaltar(o)}</g>`)) + fondosCanal(all, i)).join('')}${TR.red.etiquetas()}${hitsOut.join('')}${asasOut.join('')}`;
   const imgs = [...new Set(all.map(imagenDe).filter(Boolean))], clave = imgs.join();
   if (clave !== claveImg) { defsImg.innerHTML = imgs.map(i => { const im = R.imgs[i]; return `<symbol id="im-${i}" viewBox="0 0 ${im.w} ${im.h}"><image href="${im.data}" width="${im.w}" height="${im.h}"/></symbol>`; }).join(''); claveImg = clave; }
   capas.inc.innerHTML = TR.con.marcas();

@@ -9,7 +9,8 @@ TR.rack = (() => {
   const usDe = r => r.us || (modeloDe(r) || {}).uTotal || US;
   const hijosDe = (r, v = x => x, extra = []) => S.objs.map(v).concat(extra).filter(o => o.ru && o.parent == r.id).sort((a, b) => a.ru.u - b.ru.u);
   const nom = o => o.label || o.n || 'El equipo';
-  const soltar = o => { delete o.parent; delete o.ru; delete o.puesto; delete o.lrot; };
+  const soltar = o => { if (o.ru) o.uh = o.ru.h; delete o.parent; delete o.ru; delete o.puesto; delete o.lrot; };   // al desmontarse conserva su alto en U (uh)
+  const altoDe = o => o.ru ? o.ru.h : o.uh || (modeloDe(o) || {}).uAlto || 1;   // alto en U: el montado el suyo; el suelto el elegido (uh) o el de su modelo
   const ocupadas = r => hijosDe(r).reduce((a, o) => a + o.ru.h, 0);
 
   function sincronizar() {                 // lo llama renderObjetos: posición, planta y capa de cada equipo montado salen de su rack (R5)
@@ -39,11 +40,11 @@ TR.rack = (() => {
   }
   const en = p => TR.jer.contEn(p, esRack);   // rack editable de la planta actual bajo el punto p
   function montar(o, r) {                  // o a la primera unidad libre de r, desde abajo; devuelve el aviso si no hay lugar (y no cambia nada)
-    const h = (modeloDe(o) || {}).uAlto || 1, n = usDe(r);
+    const h = altoDe(o), n = usDe(r);
     for (let u = 1; u + h - 1 <= n; u++) {
       const c = { ...o, parent: r.id, ru: { u, h } };
       if (problemaRack(r, x => x, [c])) continue;
-      Object.assign(o, c); delete o.puesto; delete o.lrot;
+      Object.assign(o, c); delete o.puesto; delete o.lrot; delete o.uh;
       if (o.id != null && (sel == o.id || multi.includes(o.id))) fijarSeleccion(multi.filter(i => i != o.id));   // deja de verse en el plano: no queda seleccionado
       return null;
     }
@@ -55,14 +56,14 @@ TR.rack = (() => {
   }
   function rotulo(o) {                     // en el plano, debajo del rack: cuántas unidades tiene ocupadas (nada si está vacío: el dibujo de un rack vacío no cambia)
     const n = esRack(o) ? ocupadas(o) : 0; if (!n) return '';
-    return T(o.x, bboxDe(o).y1 + .3 + (modeloDe(o) ? .32 : 0) + (o.label ? .32 : 0), `${n}/${usDe(o)} U`);
+    return T(o.x, bboxDe(o).y1 + .3 + (conNombre(o) ? (modeloDe(o) ? .32 : 0) + (o.label ? .32 : 0) : 0), `${n}/${usDe(o)} U`);
   }
 
   const entero = v => { const n = Number(String(v).replace(',', '.')); return Number.isInteger(n) && n >= 1 && n <= MAX ? n : undefined; };
   const uno = f => os => os.length == 1 && !!f(os[0]), mover = d => os => TR.acc.fijar([os[0].id], 'ruu', os[0].ru.u + d).ok;
   TR.acc.registrarCampo({ id: 'us', sec: 'geo', et: 'Unidades (U)', t: 'num', aplica: esRack, leer: usDe, parse: entero, poner: (o, v) => { o.us = v; } });
   TR.acc.registrarCampo({ id: 'ruu', sec: 'geo', et: 'Unidad (U)', t: 'num', aplica: o => !!o.ru, leer: o => o.ru.u, parse: entero, poner: (o, v) => { o.ru.u = v; } });
-  TR.acc.registrarCampo({ id: 'ruh', sec: 'geo', et: 'Alto (U)', t: 'num', aplica: o => !!o.ru, leer: o => o.ru.h, parse: entero, poner: (o, v) => { o.ru.h = v; } });
+  TR.acc.registrarCampo({ id: 'ruh', sec: 'geo', et: 'Alto en rack (U)', t: 'num', aplica: o => tipoDe(o) == 'dispositivo', leer: altoDe, parse: entero, poner: (o, v) => { if (o.ru) o.ru.h = v; else o.uh = v; } });   // también en un equipo suelto: el alto con que se montará
   TR.acc.registrar({ id: 'rack-abrir', grupo: 'editar', donde: ['menu', 'insp'], texto: 'Abrir rack…', aplica: os => uno(esRack)(os) && TR.vr.rack() == null, ejecutar: os => TR.vr.abrir(os[0].id) });
   TR.acc.registrar({ id: 'rack-subir', grupo: 'transformar', donde: ['menu', 'insp'], texto: '▲ Subir 1 U', aplica: uno(o => o.ru), ejecutar: mover(1) });
   TR.acc.registrar({ id: 'rack-bajar', grupo: 'transformar', donde: ['menu', 'insp'], texto: '▼ Bajar 1 U', aplica: uno(o => o.ru), ejecutar: mover(-1) });

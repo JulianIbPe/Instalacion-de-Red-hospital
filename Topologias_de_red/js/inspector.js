@@ -26,7 +26,7 @@ TR.insp = (() => {
       : def.t == 'num' ? `<input type="number" ${a} step="0.05">`
       : def.t == 'color' ? `<input type="color" ${a}>`
       : def.t == 'ro' ? `<output ${a}></output>`                         // F9A: solo lectura (p. ej. la longitud de un cable)
-      : `<select ${a}>${def.opc.map(([v, n]) => `<option value="${v}">${esc(n)}</option>`).join('')}</select>`;
+      : `<select ${a}>${(typeof def.opc == 'function' ? def.opc(os) : def.opc).map(([v, n]) => `<option value="${v}">${esc(n)}</option>`).join('')}</select>`;
     return `<label class="fila"><span>${esc(et)}</span>${ctl}</label>`;
   }
   function construir(os) {                                                // única función que reescribe el DOM del inspector

@@ -5,6 +5,6 @@
 #vr-n{flex:1;color:#5d7078;font-size:12.5px}
 #vrack .vr-h button{padding:6px 10px;border:1px solid var(--borde);border-radius:8px;background:#fff;color:var(--texto);white-space:nowrap}
 #vrack .vr-h button:hover{background:#eef2f4}
-#vr-c{flex:1;min-height:0;overflow-y:auto;padding:12px;touch-action:pan-y;user-select:none}
+#vr-c{flex:1;min-height:0;overflow:auto;padding:12px;touch-action:pan-x pan-y;user-select:none}
 #vr-c svg{display:block;width:100%;max-width:1100px;height:100%;margin:0 auto}
 #vr-c [data-id]{cursor:grab;touch-action:none}

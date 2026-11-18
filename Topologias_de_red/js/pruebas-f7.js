@@ -22,16 +22,20 @@
       deshacer(); ser(S.conex, undefined, 'deshacer quita el cable y su conexión'); rehacer(); ser(S.conex[0].b.p, 'g1:0', 'rehacer');
     });
   });
-  prueba('Fase 7A: una conexión incompleta (sin equipo o sin puerto) se marca fuera de #c; solo se ofrecen los puertos que sirven para el cable; el de energía no lleva conexión', () => {
+  prueba('Fase 7A: una conexión incompleta (sin equipo o sin puerto) se marca fuera de #c; solo se ofrecen los puertos que sirven para el cable; el de energía va al puerto «Energía»', () => {
     f7(() => {
       const r = poner('router-2911', 3, 3), pc = poner('pc-pt', 7, 3), c0 = $('#c').innerHTML.length;
       tool = CABLE('UTP Cat6'); render(); clic(3, 3); elegirP('-'); clic(5, 5); finishLine(); tool = null; render();
       igual([S.conex[0].a, S.conex[0].b], [{ d: r.id }, null], 'extremos'); ser(marcas(), 2, 'faltan las marcas de las dos puntas'); afirmar(!$('#c').innerHTML.includes('class="inc"'), 'las marcas no deben salir en el PNG');
       afirmar(!construirSvgExport().xml.includes('class="inc"'), 'las marcas no deben exportarse');
       tool = CABLE('Consola'); render(); clic(7, 3); igual([...document.querySelectorAll('#ctx [data-a^="g"]')].map(b => b.textContent), ['RS-232'], 'el cable de consola solo ofrece el puerto de consola'); TR.ctx.cerrar(); tmp = null;
+      const utp = () => [...document.querySelectorAll('#ctx [data-a^="g"]')].map(b => b.textContent);
+      tool = CABLE('UTP Cat6'); render(); clic(7, 3); const p6 = utp(); TR.ctx.cerrar(); tmp = null; afirmar(p6.length > 0, 'el UTP Cat6 ofrece puertos');
+      for (const n of ['UTP Cat5', 'STP Cat6A (blindado)']) { tool = CABLE(n); render(); clic(7, 3); igual(utp(), p6, n + ' ofrece los mismos puertos que el UTP Cat6'); TR.ctx.cerrar(); tmp = null; }
+      tool = CAT['Eléctrico'].find(c => c.n == 'Cable de energía'); render(); clic(7, 3); igual([...document.querySelectorAll('#ctx [data-a^="g"]')].map(b => b.textContent), ['Energía'], 'el cable de energía solo ofrece el puerto de energía'); TR.ctx.cerrar(); tmp = null;
       tool = CABLE('Coaxial'); render(); clic(7, 3); afirmar(!TR.ctx.abierto(), 'una PC no tiene puertos coaxiales'); tmp = null; tool = null; render();
-      S.objs.push({ id: nid++, k: 'line', n: 'Cable de energía', c: '#e74c3c', w: .05, d: '', label: '', pl: 'p1', cp: 'c1', pts: [{ x: 1, y: 1 }, { x: 2, y: 1 }] }, { id: nid++, k: 'line', n: 'Pared', c: '#444444', w: .2, d: '', label: '', pl: 'p1', cp: 'c1', pts: [{ x: 1, y: 2 }, { x: 2, y: 2 }] });
-      render(); ser(S.conex.length, 1, 'ni el cable de energía ni la pared llevan conexión'); afirmar(c0 > 0);
+      const mE = marcas(); S.objs.push({ id: nid++, k: 'line', n: 'Cable de energía', c: '#e74c3c', w: .05, d: '', label: '', pl: 'p1', cp: 'c1', pts: [{ x: 1, y: 1 }, { x: 2, y: 1 }] }, { id: nid++, k: 'line', n: 'Pared', c: '#444444', w: .2, d: '', label: '', pl: 'p1', cp: 'c1', pts: [{ x: 1, y: 2 }, { x: 2, y: 2 }] });
+      render(); ser(S.conex.length, 2, 'el cable de energía lleva conexión; la pared no'); ser(marcas(), mE, 'el cable de energía suelto no lleva marcas rojas'); const ce = S.objs.find(o => o.k == 'line' && subDe(o) == 'energia'); afirmar(!TR.red.cuenta({ a: { d: pc.id, p: 'g3:0' }, b: { d: r.id, p: 'g1:0' }, rutas: [ce.id] }), 'una conexión de energía completa no forma red'); afirmar(c0 > 0);
       const viejo = item(nid++, 'PC', '💻', 9, 6); S.objs.push(viejo, { id: nid++, k: 'line', n: 'UTP Cat6', c: '#2e86de', w: .06, d: '', label: '', pl: 'p1', cp: 'c1', pts: [{ x: 9, y: 6, ref: viejo.id }, { x: 3, y: 3, ref: r.id }] });
       const m0 = marcas(); render(); ser(marcas(), m0 + 1, 'un equipo sin puertos (proyecto viejo) no pide puerto: solo falta el del router');
     });
@@ -53,7 +57,7 @@
       const { r, s, L } = red();
       sel = s.id; multi = []; borrar(); afirmar(byId(L.id), 'el cable debe conservarse'); igual([S.conex[0].a, S.conex[0].b], [{ d: r.id, p: 'g0:1' }, null], 'extremo del equipo borrado');
       deshacer(); igual(S.conex[0].b, { d: s.id, p: 'g1:0' }, 'deshacer restituye el puerto');
-      sel = L.id; borrar(); ser(S.conex, undefined, 'la conexión se borra con su cable'); ser(TR.con.puertosDe(byId(r.id)).length, 3);
+      sel = L.id; borrar(); ser(S.conex, undefined, 'la conexión se borra con su cable'); ser(TR.con.puertosDe(byId(r.id)).length, 4);
       deshacer(); ser(S.conex.length, 1); sel = L.id; multi = []; TR.acc.copiar(); TR.acc.pegar({ punto: { x: 5, y: 6 } }); render();
       ser(S.conex.length, 2, 'el cable pegado tiene su propia conexión'); igual([S.conex[1].a, S.conex[1].b], [null, null], 'y queda incompleta');
     });
@@ -75,7 +79,7 @@
     f7(() => {
       const { r } = red(); sel = r.id; multi = []; render(); afirmar(TR.acc.ejecutar('con-ifs') && TR.con.abierto(), 'no abrió el diálogo');
       const fila = p => document.querySelector('#dlg-if [data-p="' + p + '"]'), cambiar = (el, v) => { if (el.type == 'checkbox') el.checked = v; else el.value = v; el.dispatchEvent(new Event('change', { bubbles: true })); };
-      ser(document.querySelectorAll('#dlg-if .di-r').length, 3, 'filas'); ser(fila('g0:1').querySelector('select').selectedOptions[0].textContent, 'Cable a Switch1 · GigabitEthernet 1', 'cable del puerto');
+      ser(document.querySelectorAll('#dlg-if .di-r').length, 4, 'filas (3 GigabitEthernet y Energía)'); ser(fila('g0:1').querySelector('select').selectedOptions[0].textContent, 'Cable a Switch1 · GigabitEthernet 1', 'cable del puerto');
       const hv = hist.length; cambiar(fila('g0:0').querySelector('[type=text]'), '   '); ser(hist.length, hv, 'una descripción que no cambia nada no guarda historial');
       const h0 = hist.length; cambiar(fila('g0:0').querySelector('select'), '1a'); ser(S.conex[0].a.p, 'g0:0', 'pasar el cable a otro puerto'); ser(fila('g0:1').querySelector('select').value, '', 'el puerto anterior queda libre'); ser(hist.length, h0 + 1);
       cambiar(fila('g0:0').querySelector('select'), ''); igual(S.conex[0].a, { d: r.id }, 'desconectar');

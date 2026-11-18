@@ -1,5 +1,5 @@
 // ===== escaleras.js: tres escaleras en planta (borde igual al de una pared, escalables con 8 asas, con medidas y color editable) =====
-// Todas son objetos {k:'item', n:'Escalera'}; el campo `t` dice cuál es: sin t = recta, 'descanso' = con descanso, 'espiral' = espiral.
+// Todas son objetos {k:'item', n:'Escalera'}; el campo `t` dice cuál es: sin t = recta, 'descanso' = con descanso, 'espiral' = espiral, 'mv' = montante eléctrico vertical (solo lleva cables entre plantas).
 // (Así los archivos antiguos y todo lo que ya trataba "Escalera" siguen funcionando.)
 const PELDANO = .28;                      // separación entre peldaños (m): al alargar la escalera aparecen más
 const BORDE = .2, SEP = .08;              // BORDE = grosor de una pared; SEP = separación de los peldaños al borde
@@ -7,7 +7,7 @@ const DV = .11, DW = .16;                 // escalera con descanso: dos líneas 
 const COL_SUBE = '#1d2a2f', COL_BAJA = '#2e86de';
 const tipoEsc = o => o.t || 'recta';
 const esEsc = o => o.k == 'item' && esEscalera(o);
-const NOMBRE_ESC = { recta: 'recta', descanso: 'con descanso', espiral: 'espiral' };
+const NOMBRE_ESC = { recta: 'recta', descanso: 'con descanso', espiral: 'espiral', mv: 'montante vertical (MV)' };
 
 // ---------- Flechas de recorrido ----------
 function punta(x, y, dx, dy, col, k = 1) {   // cabeza de flecha con la punta en (x,y) apuntando en la dirección (dx,dy)
@@ -78,9 +78,20 @@ function gEspiral(o, baja, doble) {
   return [g, top];
 }
 
+// ---------- Montante vertical (MV): caja chica por la que los cables pasan de planta (mismas reglas que una escalera con descanso: solo apila sobre otro MV igual) ----------
+function gMV(o, baja, doble) {
+  const w = o.w, h = o.h, m = Math.min(w, h), k = m / 1.6;
+  const g = `<rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="${m * .18}" fill="#1d2a3a" stroke="#3a8de0" stroke-width="${m * .08}" pointer-events="all"/>`;
+  let top = `<text x="0" y="0" font-size="${m * .3}" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#fff" font-family="Segoe UI,Arial,sans-serif" pointer-events="none">MV</text>`;
+  const ya = h * .3, xa = w * .36;
+  if (!baja) top += flecha(`M${-xa} ${ya}V${-ya}`, '#fff', -xa, -ya, 0, -1, k);   // blanca: se ve sobre el fondo oscuro (data-flecha = 'sube')
+  if (baja || doble) top += flecha(`M${xa} ${-ya}V${ya}`, COL_BAJA, xa, ya, 0, 1, k);
+  return [g, top];
+}
+
 function dibujarEscalera(o, id, on, hd, baja = false) {   // baja = true: reflejo de la planta de abajo (flecha hacia abajo)
   const tipo = tipoEsc(o), w = o.w, h = o.h, doble = !baja && tipo != 'recta' && igualAbajo(o);   // doble = hay una igual justo debajo: se añade la flecha hacia abajo
-  const [cuerpo, top] = tipo == 'descanso' ? gDescanso(o, baja, doble) : tipo == 'espiral' ? gEspiral(o, baja, doble) : gRecta(o, baja);
+  const [cuerpo, top] = tipo == 'descanso' ? gDescanso(o, baja, doble) : tipo == 'espiral' ? gEspiral(o, baja, doble) : tipo == 'mv' ? gMV(o, baja, doble) : gRecta(o, baja);
   const g = cuerpo + top;
   let r = `<g ${id} transform="translate(${o.x} ${o.y}) rotate(${o.rot || 0})">${g}</g>`;
   if (o.label) r += T(o.x, bboxDe(o).y1 + .3, o.label);
