@@ -1,6 +1,6 @@
 {
   "v": 4,
-  "savedAt": 1794977560517,
+  "savedAt": 1794978026267,
   "title": "Integrador jerarquia",
   "devices": [
     {
@@ -19745,7 +19745,7 @@
       "gw": "",
       "dns": "",
       "notes": "",
-      "dhcp": false,
+      "dhcp": true,
       "ospf": {
         "on": false,
         "pid": "1",
@@ -28570,7 +28570,7 @@
       "gw": "",
       "dns": "",
       "notes": "",
-      "dhcp": false,
+      "dhcp": true,
       "ospf": {
         "on": false,
         "pid": "1",
@@ -32580,8 +32580,8 @@
     "p2pLen": "24"
   },
   "view": {
-    "x": -411.02445719105197,
-    "y": -895.7191488438068,
+    "x": -847.0244571910521,
+    "y": -618.7191488438068,
     "k": 1.1145884665901067
   },
   "bg": null
