@@ -32,6 +32,7 @@ const PT = (() => {
     M('tv-pt', 'finales', 'TV-PT', 'TV-PT', 'TV', 'tv', 1.10, .65, [P(1, 'Port0', 'coaxial')]),
     M('tablet-pt', 'finales', 'TabletPC-PT', 'TabletPC-PT', 'Tablet', 'tablet', .25, .17, movil()),
     M('smartphone-pt', 'finales', 'SmartPhone-PT', 'SmartPhone-PT', 'Smartphone', 'smartphone', .07, .15, movil()),
+    M('ip-camera', 'finales', 'Cámara IP', 'IP Camera', 'Camera', 'camara-ip', .12, .09, [FE(1), P(1, 'Port0', 'coaxial')]),   // un conector RJ-45 (FastEthernet, UTP) + un puerto coaxial (como el de la TV) + el puerto de alimentación «Energía» que M agrega a todos
     iot('aire-acondicionado', 'Aire acondicionado', .60, .40), iot('electrodomestico', 'Electrodoméstico', .20, .25), iot('humidificador', 'Humidificador', .20, .20),
     iot('ventilador', 'Ventilador', 1.20, 1.20), iot('caldera', 'Caldera', .80, .60), iot('termostato', 'Termostato', .12, .09), iot('luz', 'Luz', .06, .11),
     iot('sirena', 'Sirena', .10, .15), iot('parlante-bluetooth', 'Parlante Bluetooth', .10, .18), iot('detector-co2', 'Detector de CO₂', .12, .12),

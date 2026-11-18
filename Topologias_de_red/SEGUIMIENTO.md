@@ -59,7 +59,7 @@ Editor web de topologías de red y planos de edificios (HTML + CSS + JavaScript 
 |---|---|
 | `index.html` | Barra superior, menú izquierdo, área de trabajo con reglas, panel de plantas, inspector, barra de estado y aviso de «Nuevo». Carga las pruebas solo con `?pruebas=1` |
 | `css/` | `base`, `barra`, `menu`, `lienzo`, `plantas`, `dialogo`, `inspector`, `contexto`, `modelos`, `conexiones`, `rack` |
-| `iconos/` | 34 SVG de dibujo propio (`viewBox` 96×96) y `vista-previa.png`. **Para cambiar un dibujo:** editar su SVG y correr `node iconos/generar.js` desde `Topologias_de_red` (regenera `js/iconos.js`) |
+| `iconos/` | 35 SVG de dibujo propio (`viewBox` 96×96) y `vista-previa.png`. **Para cambiar un dibujo:** editar su SVG y correr `node iconos/generar.js` desde `Topologias_de_red` (regenera `js/iconos.js`) |
 | `js/estado.js` | Estado global (`S`, `V`, `tool`, `sel`, `tmp`, `drag`…) y utilidades (`byId`, `pt`, `toW`, `fmt`, `T`, `itemAt`) |
 | `js/eventos.js` | Namespace `TR`: `TR.stats` (contadores del render) y `TR.ui`. Obligatorio: aloja `TR.acc`, `TR.insp`, `TR.ctx`, `TR.mod`, `TR.img` |
 | `js/tipos.js` | Tipo estable por objeto: `tipo` (pared, cable, linea, dispositivo, rack, escalera, ascensor, ventana, puerta, forma, zona, texto, medida, imagen, mesa) y `sub`. `derivarTipo` es el único lugar donde un nombre visible se traduce a tipo. Predicados `esPared`, `esCable`, `esEscalera`, `esAscensor`, `esImagen`, `esMesa`, `esCirculo`. Escaleras: variante en `o.t` (sin `t` = recta, `descanso`, `espiral`) |
@@ -181,7 +181,7 @@ Los filtros van en la F10 porque usan redes, cables y conexiones (existen desde 
 ### F4 — Catálogo, imágenes y modelos (implementada)
 
 **F4A — catálogo, iconos y modelos propios (verificada por el usuario el 12/11/2026).**
-- **Catálogo:** los modelos y sus puertos están en `js/catalogo-pt.js` (lista del usuario; referencia de aspecto: Packet Tracer, con dibujos propios). Subsecciones: Routers, Switches, Multilayer, Inalámbricos, Seguridad, Finales, IoT (plegada al empezar) y Otros (Rack). Se quitó «Cámara IP». Buscador que no distingue mayúsculas ni acentos.
+- **Catálogo:** los modelos y sus puertos están en `js/catalogo-pt.js` (lista del usuario; referencia de aspecto: Packet Tracer, con dibujos propios). Subsecciones: Routers, Switches, Multilayer, Inalámbricos, Seguridad, Finales, IoT (plegada al empezar) y Otros (Rack). «Cámara IP» se quitó y se volvió a agregar el 18/11/2026 como final (`ip-camera`: un puerto RJ-45 FastEthernet + coaxial + «Energía»). Buscador que no distingue mayúsculas ni acentos.
 - **Tamaños:** cada modelo nace con su tamaño real aproximado (en `PT`); ninguno con el lado mayor menor a 0,30 m. Editable por equipo.
 - **Colocar:** la plantilla se copia una sola vez a `R.modelos` (`m1`, `m2`…) y el objeto guarda `modelo`, `tipo`, `sub` y su nombre automático («Router1», «Switch4») en `label`. La plantilla se busca solo entre los modelos que usa el proyecto.
 - **Dibujo:** icono sin recuadro (`<symbol>` definido una vez dentro de `#c` + `<use>`; un rectángulo transparente recibe los clics) y debajo dos líneas: modelo (`corto`) y nombre. Los equipos sin modelo de proyectos viejos se dibujan como antes (emoji).

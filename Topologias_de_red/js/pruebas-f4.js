@@ -9,7 +9,7 @@
   prueba('Fase 4A: cada modelo del catálogo pasa la validación del formato, tiene su icono y respeta el tamaño mínimo', () => {
     afirmar(typeof PT !== 'undefined' && typeof ICONOS !== 'undefined' && TR.mod, 'faltan js/catalogo-pt.js, js/iconos.js o js/modelos.js (o index.html no los carga)');
     PT.forEach(m => { afirmar(ICONOS[m.orig], m.orig + ': sin icono'); afirmar(Math.max(m.w, m.h) >= .3, m.orig + ': lado mayor menor a 0,30 m'); afirmar(CATS.some(c => c.id == m.cat), m.orig + ': categoría'); });
-    ser(new Set(PT.map(m => m.orig)).size, PT.length, 'claves repetidas'); afirmar(!CAT.Dispositivos.some(d => /C[áa]mara/.test(d.n)), 'la Cámara IP ya no va en el menú');
+    ser(new Set(PT.map(m => m.orig)).size, PT.length, 'claves repetidas'); afirmar(CAT.Dispositivos.filter(d => /C[áa]mara/.test(d.n)).length == 1, 'la Cámara IP va una sola vez en el menú');
     const rec = { modelos: Object.fromEntries(PT.map((m, i) => ['m' + (i + 1), m])) }, r = ESQ.leer(JSON.stringify({ formato: 'topologias-de-red', version: 2, estado: fVacio().estado, recursos: rec }));
     afirmar(r.ok, (r.errores || []).join(' | ')); ser(r.avisos.length, 0, 'avisos: ' + r.avisos.join(' | ')); igual(r.recursos.modelos, rec.modelos, 'algún campo de un modelo se perdió o cambió al leerlo (R9)');
   });
